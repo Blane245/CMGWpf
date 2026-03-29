@@ -1,0 +1,154 @@
+﻿<UserControl x:Class="CMGWpf.Panels.Stochastic.StochasticPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
+             xmlns:services="clr-namespace:CMGWpf.Services"
+         xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        d:DataContext="{d:DesignInstance Type=viewmodel:GeneratorViewModel}"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CMGWpf.Panels.Stochastic"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="1200">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!-- The composition parameters -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Vertical">
+                <Label Content="Composition Parameters" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left"/>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Ensemble:"/>
+                    <ComboBox ItemsSource="{Binding Source={x:Static services:GlobalService.Instance}, Path=EnsembleNames}" SelectedValue="{Binding StochasticEnsembleName, Mode=TwoWay}" MinWidth="150" ToolTip="The name of the ensemble"/>
+                    <Label Content="{Binding StochasticGenerator.Ensemble.Description}" Width="200"/>
+                    <Label Content="Composition Length (sec):"/>
+                    <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="1" Value="{Binding StochasticGenerator.CompositionDuration}" ToolTip="The length of the composition in seconds"/>
+                    <Label Content="Number of Time Cells:"/>
+                    <xctk:IntegerUpDown Margin="5,0,0,0" Minimum="0" Maximum="1000" Increment="1" Value="{Binding StochasticGenerator.NumberOfTimeCells}" ToolTip="The number of equal length time cells in the composition"/>
+                    <Label Content="Events/Cell:"/>
+                    <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="0.01" Value="{Binding StochasticGenerator.Lambda}" ToolTip="The average number of events in each cell"/>
+                    <Label Content="Composition Seed:"/>
+                    <Button Content="New Seed" Background="Green" Foreground="White" Command="{Binding CompositionSeedCommand}" CommandParameter="{Binding StochasticGenerator}" ToolTip="Click to generatoe a new random seed"/>
+                    <TextBox TextWrapping="NoWrap" Text="{Binding StochasticGenerator.CompositionSeed}" MinWidth="100" ToolTip="See used to generate the composition. Blank will use a new seed each time the composition is generated." />
+                </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Reload and Build" HorizontalAlignment="Left" FontSize="16" FontWeight="Bold" />
+                <Button Content="Ensembles" Command="{Binding ReloadEnsembles}" CommandParameter="{Binding StochasticGenerator}" Margin="5" Background="Green" Foreground="White" ToolTip="Reload the list of ensembles after a modification to the database"/>
+                    <Button Content="Voices" Command="{Binding ReloadVoices}" CommandParameter="{Binding StochasticGenerator}" Margin="5" Background="Green" Foreground="White" ToolTip="Reload voices of an ensemble after they have been modified"/>
+                    <Button Content="Build Composition" Command="{Binding BuildComposition}" CommandParameter="{Binding StochasticGenerator}" Margin="5" Background="green" Foreground="White" ToolTip="Build the composition from using the composition parameters "/>
+            </StackPanel>
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5"/>
+            </StackPanel>
+        </Grid>
+        <!-- The dynamics parameters -->
+        <Grid Grid.Row="1">
+            <StackPanel Orientation="Vertical">
+                <Label Content="Dynamics Parameters" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left"/>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Sounds/sec:" VerticalAlignment="Center"/>
+                    <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.01" Value="{Binding StochasticGenerator.Delta}" ToolTip="How many sounds each instrument section can play in a second" VerticalAlignment="Center"/>
+                    <Label Content="Microtones?"/>
+                    <CheckBox Content="" IsChecked="{Binding StochasticGenerator.Microtones}" ToolTip="Whether to allow microtonal sounds" VerticalAlignment="center"/>
+                    <Label Content="Dynamics Seed:"/>
+                    <Button Content="New Seed" Background="Green" Foreground="White" Command="{Binding DynamicsSeedCommand}" CommandParameter="{Binding StochasticGenerator}" VerticalAlignment="Center" ToolTip="Generate a new seed for the dynamics parameters to use"/>
+                    <TextBox TextWrapping="NoWrap" Text="{Binding StochasticGenerator.DynamicsSeed}" MinWidth="100" VerticalAlignment="Center" ToolTip="The seed to use by dynamics algorithms. Blank will cause a new seed to be generatd each time the sounds are created for the composition." />
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Intensity"/>
+                            <Label Content="Option:"/>
+                            <ComboBox ItemsSource="{Binding IntensityOptionTypes}" SelectedItem="{Binding StochasticGenerator.IntensityOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="The level at which intensity transition occurs"/>
+                            <Label Content="Transition"/>
+                            <ComboBox ItemsSource="{Binding IntensityTransitionOptionTypes}" SelectedItem="{Binding StochasticGenerator.IntensityOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="How transitions are made"/>
+                            <Label Content="Cycle Time(sec)"/>
+                            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100" Increment="0.1" Value="{Binding StochasticGenerator.IntensityParameters.CycleTime}" ToolTip="The average time that intensity transitions occur."/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Pan"/>
+                            <Label Content="Option:"/>
+                            <ComboBox ItemsSource="{Binding PanOptionTypes}" SelectedItem="{Binding StochasticGenerator.PanOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="The level at which panning occurs"/>
+                            <Label Content="Method"/>
+                            <ComboBox ItemsSource="{Binding PanAlgorithmTypes}" SelectedItem="{Binding StochasticGenerator.PanAlgorithm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="How panning is done"/>
+                            <Label Content="Period(sec)"/>
+                            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100" Increment="1" Value="{Binding StochasticGenerator.PanParameters.CycleTime}" ToolTip="The period of the panning modulator"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5"/>
+            </StackPanel>
+        </Grid>
+        <!-- The Voices data area -->
+        <StackPanel Grid.Row="2" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Vertical">
+                    <Label Content="Voices" HorizontalAlignment="Center" FontSize="16" FontWeight="Bold" />
+                    <!-- the voice data table showing the headers and voice properties -->
+                    <DataGrid ItemsSource="{Binding StochasticGenerator.Voices}" AutoGenerateColumns="False" CanUserAddRows="False" Margin="5">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header="Mute" Binding="{Binding Muted, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged }" IsReadOnly="False" ToolTipService.ToolTip="Mute the voice in the composition"/>
+                            <DataGridTemplateColumn Header="Volume" ToolTipService.ToolTip="The volume of the voice [-10,+10] dB">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Slider  Minimum="-10" Maximum="10" Interval="1" TickFrequency="1" TickPlacement="TopLeft" IsSnapToTickEnabled="True" Value="{Binding Volume, Mode=TwoWay}" Margin="5" Width="100"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Velocity">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Slider Minimum="0" Maximum="127"  Value="{Binding Velocity, Mode=TwoWay}" Margin="5" Width="100"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Timbre" Binding="{Binding Timbre}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Register Lo" Binding="{Binding RegisterLo}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Register Hi" Binding="{Binding RegisterHi}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="SoundFont" Binding="{Binding SoundFontFileName}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Preset" Binding="{Binding PresetName}" IsReadOnly="True"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+            </StackPanel>
+        </StackPanel>
+        <!-- The Composition displaying only the unmuted voices -->
+        <StackPanel Grid.Row="3" Orientation="Vertical">
+            <Label Content="Composition" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Height="200">
+            <DataGrid x:Name="CompositionDataGrid" 
+                      ItemsSource="{Binding StochasticComposition}" 
+                      AutoGenerateColumns="False" 
+                      CanUserAddRows="False" 
+                      Margin="5">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Move">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Click="MoveRowUp_Click" Tag="{Binding}" Width="20" Height="20" Margin="2" Content="▲"/>
+                                    <Button Click="MoveRowDown_Click" Tag="{Binding}" Width="20" Height="20" Margin="2" Content="▼"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Time" Binding="{Binding Time, StringFormat=F2}" IsReadOnly="True"/>
+                    <!-- Dynamic voice columns will be added in code-behind -->
+                    <DataGridTextColumn Header="Sum" Binding="{Binding Sum}" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            </ScrollViewer>
+        </StackPanel>
+    </Grid>
+</UserControl>

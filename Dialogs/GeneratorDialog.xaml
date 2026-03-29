@@ -1,0 +1,93 @@
+﻿<Window x:Class="CMGWpf.Dialogs.GeneratorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        d:DataContext="{d:DesignInstance Type=viewmodel:GeneratorViewModel, IsDesignTimeCreatable=False}"
+        xmlns:local="clr-namespace:CMGWpf.Dialogs"
+        mc:Ignorable="d"
+        Title="Add/Edit Generator"
+        WindowStyle="None"
+        WindowState="Maximized"
+        Background="White"
+        ResizeMode="CanResize"
+        AllowsTransparency="False"
+        d:DesignHeight="450" d:DesignWidth="800"
+        >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" Background="Aquamarine"/>
+        <Grid Grid.Row="1" Background="Aquamarine">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40px"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Column="0"
+                Source="pack://application:,,,/Assets/CGM2.png" 
+                Stretch="Uniform"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                MaxWidth="20" 
+                MaxHeight="20" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Label Content="{Binding Mode}"/>
+                <Label Content="{Binding UIGenerator}"/>
+                <Label Content="Generator"/>
+                <Label Content="{Binding UIGenerator.Name}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Content="_" x:Name="BtnMinimize" Style="{StaticResource WindowButton}"
+                    Click="BtnMinimize_Click"
+                    />
+                <Button Content="⬜" x:Name="BtnMaximize"  Style="{StaticResource WindowButton}"
+                    Click="BtnMaximize_Click"
+                    />
+                <Button x:Name="ExitGenerator" Content="X" Command="{Binding GeneratorCancelCommand}"
+                />
+            </StackPanel>
+        </Grid>
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <Label Content="Name:"/>
+            <TextBox x:Name="GeneratorName" Text="{Binding NewGeneratorName}"/>
+            <Label Content="Start Time:"/>
+            <xctk:DoubleUpDown x:Name="StartTime" 
+                    FormatString="F2"
+                    Value="{Binding UIGenerator.StartTime, UpdateSourceTrigger=PropertyChanged}"
+                    Minimum="0" 
+                    Maximum="10000"
+                    Increment="0.01"
+                />
+            <Label Content="Stop Time:"/>
+            <xctk:DoubleUpDown x:Name="StopTime" 
+                    FormatString="F2"
+                    Value="{Binding UIGenerator.StopTime, UpdateSourceTrigger=PropertyChanged}"
+                    Minimum="0"
+                    Maximum="10000"
+                    Increment="0.01"
+                />
+        </StackPanel>
+        <!-- Generator-specific controls go here -->
+        <StackPanel Grid.Row="3" Orientation="Vertical">
+            <ContentControl x:Name="GeneratorSpecificPanel" Content="{Binding GeneratorPanel}" />
+            <Border BorderThickness="1" BorderBrush="Black"/>
+        </StackPanel>
+        <StackPanel Grid.Row="4" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="Submit" Content="Submit"                    
+                    Command="{Binding GeneratorSubmitCommand}"/>
+                <Button x:Name="CancelGenerator" Content="Cancel" 
+                    Command="{Binding GeneratorCancelCommand}"/>
+            </StackPanel>
+            <ListBox ItemsSource="{Binding Errors}" Foreground="Red" Background="White"/>
+        </StackPanel>
+    </Grid>
+</Window>

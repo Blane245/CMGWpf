@@ -1,0 +1,28 @@
+﻿<Window x:Class="CMGWpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CMGWpf"
+        xmlns:services="clr-namespace:CMGWpf.Services"
+        xmlns:layout="clr-namespace:CMGWpf.Layout"
+        mc:Ignorable="d"
+        WindowStyle="None"
+        WindowState="Maximized"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen"
+        d:DesignHeight="450" d:DesignWidth="800"
+    >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=MenuHeight}"/>
+            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=TimeLineHeight}"/>
+            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=BodyHeight}"/>
+            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=FooterHeight}"/>
+        </Grid.RowDefinitions>
+        <layout:Menu Grid.Row="0"/>
+        <layout:TimeLine Grid.Row="1"/>
+        <layout:Body Grid.Row="2"/>
+        <layout:Footer Grid.Row="3"/>
+    </Grid>
+</Window>

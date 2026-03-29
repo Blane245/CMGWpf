@@ -1,0 +1,134 @@
+﻿using CMGWpf.Model.Generators;
+using CMGWpf.PlayFunctions.Utilities;
+using CMGWpf.Types;
+using static CMGWpf.Types.PlayTypes;
+
+namespace CMGWpf.PlayFunctions.DSP
+{
+    public class SourcesFromAlgorithmic
+    {
+        public static string Get(Algorithmic? algorithmic, double[] stereoBuffer, List<SF_Preset> sF_Presets)
+        {
+            if (algorithmic == null)
+            {
+                return "Algorithmic generator is null.";
+            }
+            var name = algorithmic.Name;
+            var startTime = algorithmic.StartTime;
+            var stopTime = algorithmic.StopTime;
+            var soundFontName = algorithmic.SoundFontFileName;
+            var soundFont = algorithmic.SoundFont;
+            var preset = algorithmic.Preset;
+            var noteAlgorithm = algorithmic.NoteAlgorithm;
+            var attackAlgorithm = algorithmic.AttackAlgorithm;
+            var speedAlgorithm = algorithmic.SpeedAlgorithm;
+            var durationAlgorithm = algorithmic.DurationAlgorithm;
+            var panAlgorithm = algorithmic.PanAlgorithm;
+            var volumeAlgorithm = algorithmic.VolumeAlgorithm;
+            var parent = algorithmic.Parent;
+
+            double time = startTime;
+            if (noteAlgorithm == null) return $"Note attribute has not been specified for generator {name}";
+            if (attackAlgorithm == null) return $"Attack attribute has not been specified for generator {name}";
+            if (speedAlgorithm == null) return $"Speed attribute has not been specified for generator {name}";
+            if (durationAlgorithm == null) return $"Duration attribute has not been specified for generator {name}";
+            if (volumeAlgorithm == null) return $"Volume attribute has not been specified for generator {name}";
+            if (panAlgorithm == null) return $"Pan attribute has not been specified for generator {name}";
+            if (preset == null) return $"Preset has not been specified for generator {name}";
+
+            RandomAlgorithm.Initialize(noteAlgorithm);
+            RandomAlgorithm.Initialize(attackAlgorithm);
+            RandomAlgorithm.Initialize(speedAlgorithm);
+            RandomAlgorithm.Initialize(durationAlgorithm);
+            RandomAlgorithm.Initialize(volumeAlgorithm);
+            RandomAlgorithm.Initialize(panAlgorithm);
+            algorithmic.InitialSequence();
+
+            //TODO when sequencer is added time will be incremented differently and the current values will be used to determine which samples to play at each time step. For now it just gets the initial values of the generator and shows a message box with those values.
+            while (time < stopTime - 0.001)
+            {
+                CurrentValues currentValues = algorithmic.GetCurrentValues(time - startTime, 0);
+                DebugLog.Write($"At time {time}: Note={currentValues.Note}, Attack={currentValues.Attack}, Speed={currentValues.Speed}, Duration={currentValues.Duration}, Pan={currentValues.Pan}, Volume={currentValues.Volume}");
+                var hitBeat = currentValues.Beat;
+                var note = currentValues.Note;
+                var velocity = currentValues.Attack;
+                var speed = currentValues.Speed;
+                var durationPercent = currentValues.Duration;
+                var volumedB = currentValues.Volume;
+                var pan = currentValues.Pan;
+                volumedB += parent.Volume;
+                double interval = Math.Min(60 / speed, stopTime - time);
+                double noteDuration = (interval * durationPercent) / 100;
+                if (hitBeat)
+                {
+                    DebugLog.Write($"Hit beat at time {time}. Playing note {note} with velocity {velocity}, speed {speed}, interval {interval}, duration {noteDuration}, volume {volumedB}, pan {pan}");
+                    List<FinalVoice> voices = PresetUtilities.BuildVoicesForPresetAtKeyVel(preset, (int)note, (int)velocity);
+                    // Here is where the DSP of the samples would happen. In the prototype it just shows debug output with the sample name and the generators that would be applied to it.
+                    foreach (var voice in voices)
+                    {
+                        DebugLog.Write($"Building sample {voice!.SampleHeader!.Name}, start {voice.SampleHeader.Start}, end {voice.SampleHeader.End}, length {voice.SampleHeader.End - voice.SampleHeader.Start}, loop start {voice.SampleHeader.StartLoop}, loop end {voice.SampleHeader.EndLoop}, sample rate {voice.SampleHeader.SampleRate}, original pitch {voice.SampleHeader.OriginalPitch}, pitch correction {voice.SampleHeader.PitchCorrection} for Intrument {voice.InstrumentName} with generators:");
+                        DebugLog.Write($"");
+                        //foreach (var SFgen in voice.Generators)
+                        //{
+                        //    DebugLog($"  {SFgen.Key}: {SFgen.Value}");
+                        //}
+                        double[] instrumentSample = []; // This is where the processed sample data for the instrument would go after applying the generators and DSP. For now it is just an empty array.
+                        instrumentSample = InstrumentSample.Get(new InstrumentSampleParameters
+                        {
+                            Duration = noteDuration,
+                            Interval = interval,
+                            StartPitch = note,
+                            EndPitch = note,
+                            VolumeDb = volumedB,
+                            AttackEnabled = algorithmic.AttackEnabled,
+                            LoopEnabled = algorithmic.IsLooping,
+                            NoiseEnabled = algorithmic.NoiseEnabled,
+                            NoiseFrequency = algorithmic.NoiseFrequency,
+                            NoiseAmplitude = algorithmic.NoiseAmplitude,
+                            Tremolo = algorithmic.Tremolo,
+                            Vibrato = algorithmic.Vibrato,
+                            Voice = voice,
+                            SampleRate = PlayTypes.SampleRate,
+                            SoundFont = soundFont!
+                        });
+                        // apply pan and merge into audio buffer here
+                        double left = (1 - currentValues.Pan) / 2;
+                        double right = (1 + currentValues.Pan) / 2;
+                        int instrumentStartIndex = (int)(time * PlayTypes.SampleRate) * 2; // in stereobuffer pointer space
+                        DebugLog.Write($"Generated sample for note {note} with {instrumentSample.Length} samples at 44100Hz. Pan is (left, right)=({left},{right}). Merging at t={time}(sec), index={instrumentStartIndex}");
+                        for (int i = 0; i < instrumentSample.Length; i++)
+                        {
+                            int bufferIndex = instrumentStartIndex + 2 * i;
+                            if (bufferIndex + 1 < stereoBuffer.Length)
+                            {
+                                if (double.IsNaN(instrumentSample[i])) throw new Exception($"Instrument sample is not a number at location {i}, time={time}");
+                                stereoBuffer[bufferIndex] += instrumentSample[i] * left;
+                                stereoBuffer[bufferIndex + 1] += instrumentSample[i] * right;
+                            }
+                        }
+
+                        SoundRollBuilder.AddInstrument(new TimeMidiLine
+                        {
+                            Start = new TimeMidiPoint { Time = time, Midi = (int)note },
+                            End = new TimeMidiPoint { Time = time + noteDuration, Midi = (int)note }
+                        }, soundFontName, preset.Name);
+
+                    }
+                }
+                time += interval;
+            }
+            // TODO add the reverb and other global effects here in the future
+
+            // add the preset to the collection of presets that have been played so that it can be displayed in the UI with its assigned color
+            SF_Preset currentPreset = new()
+            {
+                SoundFontName = soundFontName,
+                PresetName = preset.Name
+            };
+            sF_Presets.Add(currentPreset);
+
+            return "";
+        }
+
+    }
+}

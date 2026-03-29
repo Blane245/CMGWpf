@@ -1,0 +1,71 @@
+﻿<UserControl x:Class="CMGWpf.Panels.Algorithmic.Attribute"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:local="clr-namespace:CMGWpf.Panels.Algorithmic"
+             xmlns:viewmodel="clr-namespace:CMGWpf.View"
+             xmlns:model="clr-namespace:CMGWpf.Model"
+             d:DataContext="{d:DesignInstance Type=viewmodel:GeneratorViewModel+AttributeDescriptor}"
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="800">
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type model:Constant}">
+            <local:ConstantPanel
+                ValueUnits="{Binding DataContext.ValueUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                AmplitudeUnits="{Binding DataContext.AmplitudeUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"     
+                Minimum="{Binding DataContext.Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Maximum="{Binding DataContext.Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Increment="{Binding DataContext.Increment, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ValueFormat="{Binding DataContext.ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                AmplitudeFormat="{Binding DataContext.AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type model:Wiener}">
+            <local:WienerPanel 
+                ValueUnits="{Binding DataContext.ValueUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"        
+                AmplitudeUnits="{Binding DataContext.AmplitudeUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"       
+                Minimum="{Binding DataContext.Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}"     
+                Maximum="{Binding DataContext.Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}"     
+                Increment="{Binding DataContext.Increment, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ValueFormat="{Binding DataContext.ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                AmplitudeFormat="{Binding DataContext.AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type model:Oscillator}">
+            <local:OscillatorPanel 
+                ValueUnits="{Binding DataContext.ValueUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                AmplitudeUnits="{Binding DataContext.AmplitudeUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Minimum="{Binding DataContext.Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Maximum="{Binding DataContext.Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Increment="{Binding DataContext.Increment, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ValueFormat="{Binding DataContext.ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                AmplitudeFormat="{Binding DataContext.AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type model:Markovian}">
+            <local:MarkovianPanel 
+                ValueUnits="{Binding DataContext.ValueUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                AmplitudeUnits="{Binding DataContext.AmplitudeUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"        
+                Minimum="{Binding DataContext.Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Maximum="{Binding DataContext.Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Increment="{Binding DataContext.Increment, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ValueFormat="{Binding DataContext.ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                AmplitudeFormat="{Binding DataContext.AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" SharedSizeGroup="AttributeNameColumn"/>
+            <ColumnDefinition Width="Auto" SharedSizeGroup="AlgorithmColumn"/>
+            <ColumnDefinition Width="*" SharedSizeGroup="ParameterGroup"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Column="0" Margin="5">
+            <Label Content="{Binding Name}" VerticalAlignment="Center"/>
+            <Label Content="{Binding Synonym}" VerticalAlignment="Center"/>
+        </StackPanel>
+        <ComboBox Grid.Column="1" VerticalAlignment="Center" Width="120" FontSize="12" 
+                  ItemsSource="{Binding DataContext.AlgorithmTypes, RelativeSource={RelativeSource AncestorType=UserControl, AncestorLevel=2}}" 
+                  SelectedItem="{Binding SelectedType, Mode=TwoWay,TargetNullValue={x:Null}}" SelectedIndex="1" />
+        <!-- The ContentControl will automatically select the appropriate DataTemplate based on the type of Algorithm -->
+        <ContentControl Grid.Column="2" Content="{Binding Algorithm}"/>
+    </Grid>
+</UserControl>

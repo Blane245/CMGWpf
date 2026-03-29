@@ -1,0 +1,22 @@
+implement stochastic simulation
+	change color of new seed button
+	do thorough testing of all parameters
+play
+	voice popup needs better alignment
+change status and errors to have error flag so 
+autoregressive model
+sequencer model
+fix algorithmic format
+put the DSP through its paces check all controls and algorithms.
+fix the stupid CMG logo
+add tool tips
+all windows are overlapping te taskbar
+algorithmic window is too small to fit all parameters. consider scrolling attribute area.
+width of track control icon are too large taking space away from track name
+CMG windows are overlapping task bar
+fix time interval highlighting and consider adding timeinterval to the xml
+implement ready play - track/genertor solo/mute, single generator and timeinterval filters
+implement play from generator menu and dialog
+finish preferences
+implement reporting
+write documentation

@@ -1,0 +1,62 @@
+﻿<Window x:Class="CMGWpf.PlayFunctions.VoiceDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CMGWpf.Dialogs"
+        xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        d:DataContext="{d:DesignInstance Type=viewmodel:FileViewModel}"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        WindowStyle="ToolWindow"
+        WindowState="Normal"
+        WindowStartupLocation="Manual"
+        ResizeMode="CanResize"
+        AllowsTransparency="False"
+        mc:Ignorable="d"
+        Closed="Window_Closed"
+        Title="Voices"
+        Icon="/Assets/CGM2.png"
+        >
+    <Window.Resources>
+        <ResourceDictionary Source="/Styles/PlayDialogStyles.xaml"/>
+    </Window.Resources>
+        <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <Grid Height="25" Background="#F0F0F0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Sound Font" Grid.Column="0" FontWeight="Bold" Margin="5" VerticalAlignment="Center"/>
+                <TextBlock Text="Preset Name" Grid.Column="1" FontWeight="Bold" Margin="5" VerticalAlignment="Center"/>
+                <TextBlock Text="Color" Grid.Column="2" FontWeight="Bold" Margin="5" VerticalAlignment="Center"/>
+            </Grid>
+            <ItemsControl ItemsSource="{Binding PresetColors}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Height="20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding SoundFontName}" Grid.Column="0"/>
+                            <TextBox Text="{Binding PresetName}" Grid.Column="1"/>
+                            <Rectangle Width="60" Height="16" Grid.Column="2" Margin="5">
+                                <Rectangle.Fill>
+                                    <SolidColorBrush Color="{Binding Color}"/>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

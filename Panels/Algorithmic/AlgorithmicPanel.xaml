@@ -1,0 +1,116 @@
+﻿<UserControl x:Class="CMGWpf.Panels.Algorithmic.AlgorithmicPanel"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+ xmlns:services="clr-namespace:CMGWpf.Services"
+ xmlns:viewmodel="clr-namespace:CMGWpf.View"
+ d:DataContext="{d:DesignInstance Type=viewmodel:GeneratorViewModel+AttributeDescriptor}"
+ xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+ xmlns:local="clr-namespace:CMGWpf.Panels.Algorithmic"
+ xmlns:model="clr-namespace:CMGWpf.Model"
+ mc:Ignorable="d" 
+ d:DesignHeight="600" d:DesignWidth="1500">
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <Label Content="SoundFont:"/>
+            <ComboBox ItemsSource="{Binding SoundFontFileNames}" SelectedValue="{Binding AlgorithmicSoundFontFileName, Mode=TwoWay}" />
+            <Label Content="Preset:"/>
+            <ComboBox ItemsSource="{Binding AlgorithmicPresetNames}" SelectedItem="{Binding AlgorithmicPresetName, Mode=TwoWay}" />
+            <Label Content="Looping?:"/>
+            <CheckBox Content="" IsChecked="{Binding AlgorithmicGenerator.IsLooping}" />
+            <Label Content="Attack?:"/>
+            <CheckBox Content=""  IsChecked="{Binding AlgorithmicGenerator.AttackEnabled}" />
+            <Label Content="Microtones?:"/>
+            <CheckBox Content=""  IsChecked="{Binding AlgorithmicGenerator.MicrotonesEnabled}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Label Content="Noise:"/>
+            <Label Content="Seed:"/>
+            <TextBox TextWrapping="NoWrap" Text="{Binding AlgorithmicGenerator.NoiseSeed}" />
+            <Button Content="New Seed" Command="{Binding NoiseSeedCommand}" CommandParameter="{Binding AlgorithmicGenerator}"/>
+            <Label Content="Level (+-10dB):"/>
+            <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="-10" Maximum="10" Increment="1" Value="{Binding AlgorithmicGenerator.NoiseAmplitude}"/>
+            <Label Content="Frequency(Hz):"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="1000" Increment="0.001" Value="{Binding AlgorithmicGenerator.NoiseFrequency}" />
+            <Label Content="Reverb:" FontStyle="Italic"/>
+            <Label Content="Duration (sec)"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.01" Value="{Binding AlgorithmicGenerator.ReverbDuration}"/>
+            <Label Content="Decay (sec)"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.01" Value="{Binding AlgorithmicGenerator.ReverbDecay}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <Label Content="Tremolo:" FontStyle="Italic"/>
+            <Label Content="Speed (Mhz)"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding AlgorithmicGenerator.Tremolo.Speed}"/>
+            <Label Content="Depth (dB)"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.1" Value="{Binding AlgorithmicGenerator.Tremolo.Depth}"/>
+            <Label Content="Modulator"/>
+            <ComboBox ItemsSource="{Binding ModulatorTypes}" SelectedItem="{Binding AlgorithmicGenerator.Tremolo.WaveForm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True"/>
+            <Label Content="Vibrato:" FontStyle="Italic"/>
+            <Label Content="Speed (Mhz)"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding AlgorithmicGenerator.Vibrato.Speed}"/>
+            <Label Content="Depth (dB)"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.1" Value="{Binding AlgorithmicGenerator.Vibrato.Depth}"/>
+            <Label Content="Modulator"/>
+            <ComboBox ItemsSource="{Binding ModulatorTypes}" SelectedItem="{Binding AlgorithmicGenerator.Vibrato.WaveForm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal">
+            <Label Content="Measure:" FontStyle="Italic"/>
+            <Label Content="Length (beats)"/>
+            <xctk:IntegerUpDown Minimum="2" Maximum="100" Increment="1" Value="{Binding AlgorithmicGenerator.MeasureLength}"/>
+            <Label Content="On Beats (beats)"/>
+            <xctk:IntegerUpDown Minimum="2" Maximum="{Binding AlgorithmicGenerator.MeasureLength}" Increment="1" Value="{Binding AlgorithmicGenerator.BeatCount}"/>
+            <Label Content="Beat Shift (beats)"/>
+            <xctk:IntegerUpDown Minimum="0" Maximum="{Binding AlgorithmicGenerator.MeasureLength}" Increment="1" Value="{Binding AlgorithmicGenerator.OffsetSequence}"/>
+            <Label Content="Octave:" FontStyle="Italic"/>
+            <Label Content="Note Count (1-12)"/>
+            <xctk:IntegerUpDown Minimum="1" Maximum="12" Increment="1" Value="{Binding AlgorithmicGenerator.NoteCount}"/>
+            <Label Content="Shift (tones)"/>
+            <xctk:IntegerUpDown Minimum="1" Maximum="11" Increment="1" Value="{Binding AlgorithmicGenerator.OffsetNotes}"/>
+        </StackPanel>
+
+        <Border Grid.Row="4" Height="1" Background="Black"/>
+
+        <ScrollViewer Grid.Row="5" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <StackPanel Grid.IsSharedSizeScope="True">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="AttributeNameColumn"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="AlgorithmColumn"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="Attribute"/>
+                    <Label Grid.Column="1" Content="Algorithm"/>
+                    <Label Grid.Column="2" Content="Parameters"/>
+                </Grid>
+                <Border BorderThickness="1" BorderBrush="LightGray"/>
+                <local:Attribute DataContext="{Binding NoteAttribute}"/>
+                <Border BorderThickness="1" BorderBrush="LightGray" />
+                <local:Attribute DataContext="{Binding AttackAttribute}"/>
+                <Border BorderThickness="1" BorderBrush="LightGray" />
+                <local:Attribute DataContext="{Binding SpeedAttribute}"/>
+                <Border BorderThickness="1" BorderBrush="LightGray" />
+                <local:Attribute DataContext="{Binding DurationAttribute}"/>
+                <Border BorderThickness="1" BorderBrush="LightGray" />
+                <local:Attribute DataContext="{Binding VolumeAttribute}"/>
+                <Border BorderThickness="1" BorderBrush="LightGray" />
+                <local:Attribute DataContext="{Binding PanAttribute}"/>
+            </StackPanel>
+        </ScrollViewer>
+        <TextBox Grid.Row="6" IsReadOnly="True" Foreground="Red" Background="LightYellow" Text="{Binding Errors}"/>
+    </Grid>
+</UserControl>
