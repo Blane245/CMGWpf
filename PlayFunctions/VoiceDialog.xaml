@@ -21,42 +21,22 @@
         <ResourceDictionary Source="/Styles/PlayDialogStyles.xaml"/>
     </Window.Resources>
         <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
-        <StackPanel>
-            <Grid Height="25" Background="#F0F0F0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="Sound Font" Grid.Column="0" FontWeight="Bold" Margin="5" VerticalAlignment="Center"/>
-                <TextBlock Text="Preset Name" Grid.Column="1" FontWeight="Bold" Margin="5" VerticalAlignment="Center"/>
-                <TextBlock Text="Color" Grid.Column="2" FontWeight="Bold" Margin="5" VerticalAlignment="Center"/>
-            </Grid>
-            <ItemsControl ItemsSource="{Binding PresetColors}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Height="20">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Text="{Binding SoundFontName}" Grid.Column="0"/>
-                            <TextBox Text="{Binding PresetName}" Grid.Column="1"/>
-                            <Rectangle Width="60" Height="16" Grid.Column="2" Margin="5">
-                                <Rectangle.Fill>
-                                    <SolidColorBrush Color="{Binding Color}"/>
-                                </Rectangle.Fill>
-                            </Rectangle>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
+            <DataGrid CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserSortColumns="False" ItemsSource="{Binding PresetColors}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="SoundFont" Binding="{Binding SoundFontName}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Preset" Binding="{Binding PresetName}" IsReadOnly="True"/>
+                    <DataGridTemplateColumn Header="Color" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Rectangle Width="60" Height="16">
+                                    <Rectangle.Fill>
+                                        <SolidColorBrush Color="{Binding Color}"/>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
     </ScrollViewer>
 </Window>

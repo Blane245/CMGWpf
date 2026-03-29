@@ -1,6 +1,7 @@
 ﻿
 using CMGWpf.Types;
 using CMGWpf.Utilities;
+using System.Globalization;
 using System.Xml;
 
 namespace CMGWpf.Model
@@ -59,13 +60,13 @@ namespace CMGWpf.Model
         {
             XmlElement timeLineElem = doc.CreateElement("timeLine");
             elem.AppendChild(timeLineElem);
-            timeLineElem.SetAttribute("startTime", StartTime.ToString());
+            timeLineElem.SetAttribute("startTime", StartTime.ToString(CultureInfo.InvariantCulture));
             timeLineElem.SetAttribute("currentZoomLevel", CurrentZoomLevel.ToString());
             timeLineElem.SetAttribute("mode", SnapMode.ToString());
             timeLineElem.SetAttribute("snap", Snap.ToString());
-            timeLineElem.SetAttribute("snapIncrement", SnapIncrement.ToString());
+            timeLineElem.SetAttribute("snapIncrement", SnapIncrement.ToString(CultureInfo.InvariantCulture));
             timeLineElem.SetAttribute("beatsPerMeasure", BeatsPerMeasure.ToString());
-            timeLineElem.SetAttribute("measureSize", MeasureSize.ToString());
+            timeLineElem.SetAttribute("measureSize", MeasureSize.ToString(CultureInfo.InvariantCulture));
         }
         public void LoadXml(XmlElement elem)
         {

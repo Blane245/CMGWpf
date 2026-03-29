@@ -6,13 +6,14 @@ namespace CMGWpf.Utilities
         public static bool GetAttributeBool(System.Xml.XmlElement elem, string name, bool def)
         {
             string? val = elem.GetAttribute(name);
-            if (val == null) return def;
-            return (val.Equals("true", StringComparison.CurrentCultureIgnoreCase));
+            bool success = bool.TryParse(val, out bool result);
+            if (success) return result;
+            return def;
         }
         public static string GetAttributeString(System.Xml.XmlElement elem, string name, string def)
         {
             string? val = elem.GetAttribute(name);
-            if (val == null) return def;
+            if (string.IsNullOrEmpty(val)) return def;
             return val;
         }
         public static int GetAttributeInt(System.Xml.XmlElement elem, string name, int def)

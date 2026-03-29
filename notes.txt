@@ -1,6 +1,6 @@
 implement stochastic simulation
-	change color of new seed button
 	do thorough testing of all parameters
+	playback is terminating at the generator stop time not as the clouds fade away
 play
 	voice popup needs better alignment
 change status and errors to have error flag so 
