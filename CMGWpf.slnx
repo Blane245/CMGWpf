@@ -1,4 +1,4 @@
-<Solution>
-  <Project Path="../CMGWpf.UnitTests/CMGWpf.UnitTests.csproj" Id="ed1797ce-82c2-4201-930c-2ecdef303903" />
-  <Project Path="CMGWpf.csproj" />
+﻿<Solution>
+  <Project Path="src\CMGWpf\CMGWpf.csproj" />
+  <Project Path="tests\CMGWpf.UnitTests\CMGWpf.UnitTests.csproj" />
 </Solution>
