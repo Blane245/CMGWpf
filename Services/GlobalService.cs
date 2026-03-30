@@ -95,8 +95,8 @@ namespace CMGWpf.Services
             set { ensembleNames = value; OnPropertyChanged(); }
         }
 
-        public string DbServer { get; set; } = "http://blane-latitude-7290";
-        //public string DbServer { get; set; } = "http://localhost";
+        //public string DbServer { get; set; } = "http://blane-latitude-7290";
+        public string DbServer { get; set; } = "http://localhost";
         //public string DbServer { get; set; } = "http://192.168.1.182"; // IPv4 address
         //public string DbServer { get; set; } = "http://10.17.1.23"; // Current network IP
         public string DbPort { get; set; } = "8081";

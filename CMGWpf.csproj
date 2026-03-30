@@ -13,6 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="CMGWpf.slnx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Assets\CGM2.png" />
   </ItemGroup>
 
