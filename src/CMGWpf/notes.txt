@@ -8,7 +8,6 @@ testing
 	do thorough testing of all generator parameters
 	put the DSP through its paces check all controls and algorithms.
 implementation
-	finish preferences
 	implement ready play - track/genertor solo/mute, single generator and timeinterval filters
 	implement play from generator menu and dialog
 	tools menu

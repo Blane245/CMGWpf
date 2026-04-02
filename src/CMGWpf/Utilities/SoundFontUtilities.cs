@@ -1,4 +1,5 @@
-﻿using CMGWpf.SoundFont_2;
+﻿using CMGWpf.Properties;
+using CMGWpf.SoundFont_2;
 using System.Collections.ObjectModel;
 using System.IO;
 
@@ -6,7 +7,7 @@ namespace CMGWpf.Utilities
 {
     public static class SoundFontUtilities
     {
-        public static string SoundFontLocation { get; set; } = "C:\\SoundFonts";
+        public static string SoundFontLocation { get; set; } = Settings.Default.CMGSoundFontLocation;
         public static ObservableCollection<string> List(string location)
         {
             ObservableCollection<string> files = [];

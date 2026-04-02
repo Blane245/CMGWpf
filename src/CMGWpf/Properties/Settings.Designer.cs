@@ -72,6 +72,91 @@ namespace CMGWpf.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("mpg")]
+        public string CMGRecordFormat
+        {
+            get
+            {
+                return ((string)(this["CMGRecordFormat"]));
+            }
+            set
+            {
+                this["CMGRecordFormat"] = value;
+            }
+        }
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Time")]
+        public string CMGTimeLineMode
+        {
+            get
+            {
+                return ((string)(this["CMGTimeLineMode"]));
+            }
+            set
+            {
+                this["CMGTimeLineMode"] = value;
+            }
+        }
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public string CMGMeasureLength
+        {
+            get
+            {
+                return ((string)(this["CMGMeasureLength"]));
+            }
+            set
+            {
+                this["CMGMeasureLength"] = value;
+            }
+        }
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public string CMGBeatsPerMeasure
+        {
+            get
+            {
+                return ((string)(this["CMGBeatsPerMeasure"]));
+            }
+            set
+            {
+                this["CMGBeatsPerMeasure"] = value;
+            }
+        }
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("true")]
+        public string CMGIsSnap
+        {
+            get
+            {
+                return ((string)(this["CMGIsSnap"]));
+            }
+            set
+            {
+                this["CMGIsSnap"] = value;
+            }
+        }
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public string CMGSnapIncrement
+        {
+            get
+            {
+                return ((string)(this["CMGSnapIncrement"]));
+            }
+            set
+            {
+                this["CMGSnapIncrement"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string CMGRecentFiles
         {

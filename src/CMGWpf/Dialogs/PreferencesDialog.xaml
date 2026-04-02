@@ -1,0 +1,68 @@
+﻿<Window x:Class="CMGWpf.Dialogs.PreferencesDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:CMGWpf.Dialogs"
+        xmlns:viewmodel="clr-namespace:CMGWpf.Services"
+        d:DataContext="{d:DesignInstance Type=viewmodel:GlobalService}"
+        mc:Ignorable="d"
+        Title="Edit Preferences"
+        WindowStyle="None"
+        Background="White"
+        WindowStartupLocation="CenterOwner"
+        mc:Ignorable="d"
+        Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="0" Background="Aquamarine" Orientation="Horizontal">
+            <Label Content="Edit Preferences" Foreground="Black" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <Button x:Name="CloseDialog" Width="20" HorizontalAlignment="Right" VerticalAlignment="Center" Content="X" Command="{Binding EditPreferencesCancelCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource WindowButton}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Soundfont Directory: "/>
+                <TextBlock Text="{Binding SoundFontFileLocation, Mode=TwoWay}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Record Format: "/>
+                <ComboBox ItemsSource="{Binding RecordFormats}" SelectedItem="{Binding GlobalService.RecordFormat, Mode=TwoWay}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Time Line Mode: "/>
+                <ComboBox ItemsSource="{Binding TimeLineModes}" SelectedItem="{Binding GlobalService.TimeLineMode, Mode=TwoWay}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Measure Length (sec): "/>
+                <xctk:DoubleUpDown Value="{Binding MeasureLength, Mode=TwoWay}" Minimum="0" Maximum="1000" Increment="1"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Beats per Measure: "/>
+                <xctk:IntegerUpDown Value="{Binding BeatsPerMeasure, Mode=TwoWay}" Minimum="1" Maximum="100" Increment="1"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Snap Mode: "/>
+                <CheckBox IsChecked="{Binding IsSnap, Mode=TwoWay}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Snap Increment: "/>
+                <Label Content="{Binding SnapIncrementUnits}"/>
+                <xctk:IntegerUpDown Value="{Binding SnapIncrement, Mode=TwoWay}" Minimum="1" Maximum="1000"/>
+            </StackPanel>
+
+                <Border BorderBrush="Black" BorderThickness="1"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left">
+            <Button x:Name="OK" Width="50" Content="OK" Command="{Binding EditPreferencesOkCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="0"/>
+            <Button x:Name="Cancel" Width="50" Content="Cancel" Command="{Binding EditPreferencesCancelCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="5,0,0,0"/>
+        </StackPanel>
+    </Grid>
+</Window>

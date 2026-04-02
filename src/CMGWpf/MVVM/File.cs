@@ -207,12 +207,12 @@ namespace CMGWpf.MVVM
 
             // display the preferences dialog
             //vm.NewComment = vm.File.Comment;
-            vm.ActiveDialog = new PreferencesDialog
+            PreferencesDialog dialog = new PreferencesDialog
             {
                 DataContext = vm,
                 Owner = Application.Current.MainWindow
             };
-            vm.ActiveDialog.ShowDialog();
+            dialog.ShowDialog();
         }
         public void AddTrack()
         {

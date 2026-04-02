@@ -6,7 +6,6 @@ using CMGWpf.PlayFunctions;
 using CMGWpf.Properties;
 using CMGWpf.Services;
 using CMGWpf.Types;
-using CMGWpf.Utilities;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using static CMGWpf.Types.PlayTypes;
@@ -27,14 +26,6 @@ namespace CMGWpf.View
                 string[] recentFilesArray = recentFilesString.Split('|');
                 RecentFiles = new ObservableCollection<string>(recentFilesArray);
             }
-            string soundFontFileLocation = Settings.Default.CMGSoundFontLocation;
-            if (!string.IsNullOrEmpty(soundFontFileLocation))
-            {
-                SoundFontFileNames = SoundFontUtilities.List(soundFontFileLocation);
-                Debug.WriteLine($"{SoundFontFileNames.Count} read from {soundFontFileLocation}");
-                StatusMessages.Add(new Message { Text = $"{SoundFontFileNames.Count} read from {soundFontFileLocation}", Error = false });
-            }
-            //TODO load other settings
 
             GlobalService.Instance.PropertyChanged += (s, e) =>
             {
@@ -356,10 +347,6 @@ namespace CMGWpf.View
         private RelayCommand<object>? _editCommentCancelCommand;
         public RelayCommand<object> EditCommentCancelCommand =>
             _editCommentCancelCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).EditCommentCancel());
-        private RelayCommand<object>? _editPreferencesCommand;
-        public RelayCommand<object> EditPreferencesCommand =>
-            _editPreferencesCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).EditPreferences());
-
         private RelayCommand<object>? _addTrackCommand;
         public RelayCommand<object> AddTrackCommand =>
             _addTrackCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).AddTrack());
