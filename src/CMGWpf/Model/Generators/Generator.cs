@@ -1,4 +1,5 @@
 ﻿using CMGWpf.SoundFont_2;
+using CMGWpf.Types;
 using CMGWpf.Utilities;
 using CMGWpf.View;
 using System.Collections.ObjectModel;
@@ -54,14 +55,14 @@ namespace CMGWpf.Model.Generators
         }
         public abstract Generator Clone(Track parent);
         public virtual bool Equals(Generator value) => base.Equals(value);
-        public abstract CurrentValues GetCurrentValues(double time, int beats);
+        public abstract CurrentValues GetCurrentValues(double time, double beats);
         public abstract void AppendXML(XmlDocument doc, XmlElement elem);
         public abstract void LoadXML(XmlElement generatorElem, Track parent);
-        public virtual ObservableCollection<string> Validate()
+        public virtual ObservableCollection<Message> Validate()
         {
-            ObservableCollection<string> errors = [];
-            if (string.IsNullOrEmpty(Name)) errors.Add("Name cannot be empty.");
-            if (StopTime <= StartTime) errors.Add("Stop time must be greater than start time.");
+            ObservableCollection<Message> errors = [];
+            if (string.IsNullOrEmpty(Name)) errors.Add(new Message() { Text = "Name cannot be empty.", Error = true });
+            if (StopTime <= StartTime) errors.Add(new Message() { Text = "Stop time must be greater than start time.", Error = true });
             return errors;
         }
         public override string ToString() => "None";
@@ -80,11 +81,11 @@ namespace CMGWpf.Model.Generators
         public override void LoadXML(XmlElement generatorElem, Track parent)
         {
         }
-        public new ObservableCollection<string> Validate()
+        public new ObservableCollection<Message> Validate()
         {
             return base.Validate();
         }
-        public override CurrentValues GetCurrentValues(double time, int beats)
+        public override CurrentValues GetCurrentValues(double time, double beats)
         {
             return new CurrentValues()
             {

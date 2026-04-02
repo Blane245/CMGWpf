@@ -1,5 +1,6 @@
 ﻿using CMGWpf.MVVM;
 using CMGWpf.Services;
+using CMGWpf.Types;
 using System.Collections.ObjectModel;
 using System.Windows;
 using Track = CMGWpf.Model.Track;
@@ -58,12 +59,12 @@ namespace CMGWpf.View
                 OnPropertyChanged();
             }
         }
-        public string Status
+        public ObservableCollection<Message> Status
         {
-            get => GlobalService.Instance.StatusMessage;
+            get => GlobalService.Instance.StatusMessages;
             set
             {
-                GlobalService.Instance.StatusMessage = value;
+                GlobalService.Instance.StatusMessages = value;
                 OnPropertyChanged();
             }
         }
@@ -91,7 +92,7 @@ namespace CMGWpf.View
 
         public void NotImplemented()
         {
-            Status = "Command not implemented";
+            Status = new ObservableCollection<Message> { new Message { Text = "Command not implemented", Error = true } };
         }
 
 

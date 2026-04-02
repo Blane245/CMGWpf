@@ -1,0 +1,12 @@
+﻿<UserControl x:Class="CMGWpf.Panels.CMGIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CMGWpf.Panels"
+             mc:Ignorable="d" 
+             d:DesignHeight="40" d:DesignWidth="40">
+    <Grid Background="Transparent">
+        <Image Source="/CMGWpf;component/Assets/cmg-256.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Width="20" Height="20" MaxWidth="20" MaxHeight="20" />
+    </Grid>
+</UserControl>

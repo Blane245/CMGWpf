@@ -1,4 +1,5 @@
-﻿using CMGWpf.Utilities;
+﻿using CMGWpf.Types;
+using CMGWpf.Utilities;
 using System.Collections.ObjectModel;
 using System.Xml;
 
@@ -41,7 +42,7 @@ namespace CMGWpf.Model.Generators
             Position = XMLFunctions.GetAttributeInt(elem, "position", 0);
             Mute = XMLFunctions.GetAttributeBool(elem, "mute", false);
         }
-        public new ObservableCollection<string> Validate()
+        public new ObservableCollection<Message> Validate()
         {
             return base.Validate();
         }

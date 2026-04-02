@@ -10,6 +10,7 @@ using Microsoft.Win32;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Threading;
+using System.Collections.ObjectModel;
 
 namespace CMGWpf.MVVM
 {
@@ -30,7 +31,7 @@ namespace CMGWpf.MVVM
                 MessageBoxResult result = MessageBox.Show("The current file has been modified and the changes will be lost. Do you want to proceed?", "File Dirty", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result != MessageBoxResult.Yes)
                 {
-                    vm.Status = "File is dirty. The current file is still active.";
+                    vm.StatusMessages = [new Message { Text = "File is dirty. The current file is still active.", Error = true }];
                     return;
                 }
             }
@@ -44,7 +45,7 @@ namespace CMGWpf.MVVM
             TimeLineViewModel.Instance.TimeLine = vm.File.TimeLine.Clone();
             vm.IsDirty = false;
             vm.FileName = string.Empty;
-            vm.Status = "New File created.";
+            vm.StatusMessages = [new Message { Text = "New File created.", Error = false }];
         }
         public void Save()
         {
@@ -53,12 +54,12 @@ namespace CMGWpf.MVVM
                 // copy the UIModel to the model and the UIModel in the TimeLineView to the model before saving the file
                 file.TimeLine = TimeLineViewModel.Instance.TimeLine;
                 //TODO the same will be done for the tracks when that viewmodel is developed
-                vm.Status = FileHandlers.Write(file, vm.FileName);
+                _ = FileHandlers.Write(file, vm.FileName);
                 vm.IsDirty = false;
-                vm.Status = $"File {vm.FileName} saved.";
+                vm.StatusMessages = [new Message { Text = $"File {vm.FileName} saved.", Error = false }];
                 vm.AddRecentFile(vm.FileName);
             }
-            else vm.Status = "No file has been specified. Use Save As...";
+            else vm.StatusMessages = [new Message { Text = "No file has been specified. Use Save As...", Error = true }];
         }
         public void SaveAs()
         {
@@ -75,9 +76,9 @@ namespace CMGWpf.MVVM
                 // clone the 
                 file.TimeLine = TimeLineViewModel.Instance.TimeLine;
                 //TODO the same will be done for the tracks when that viewmodel is developed
-                vm.Status = FileHandlers.Write(file, dlg.FileName);
+                _ = FileHandlers.Write(file, dlg.FileName);
                 vm.IsDirty = false;
-                vm.Status = $"New File {dlg.FileName} created.";
+                vm.StatusMessages = [new Message { Text = $"New File {dlg.FileName} created.", Error = false }];
                 vm.FileName = dlg.FileName;
                 vm.AddRecentFile(vm.FileName);
             }
@@ -87,12 +88,12 @@ namespace CMGWpf.MVVM
             if (vm.IsDirty)
             {
                 Debug.WriteLine("FileOpen: File is dirty.");
-                vm.Status = "File is dirty.";
+                vm.StatusMessages = [new Message { Text = "File is dirty.", Error = true }] ;
                 // ask the user if they want to save the file
                 MessageBoxResult result = MessageBox.Show("The current file has been modified and the changes will be lost. Do you want to proceed?", "File Dirty", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result != MessageBoxResult.Yes)
                 {
-                    vm.Status = "File is dirty. The current file is still active";
+                    vm.StatusMessages = [new Message { Text = "File is dirty. The current file is still active.", Error = true }];
                     return;
                 }
             }
@@ -108,9 +109,10 @@ namespace CMGWpf.MVVM
             {
                 file = new();
                 string fileName = dlg.FileName;
-                vm.Status = FileHandlers.Read(out file, fileName);
+                string status = FileHandlers.Read(out file, fileName);
                 vm.IsDirty = false;
-                if (vm.Status == string.Empty) vm.Status = $"File {fileName} opened.";
+                if (status == string.Empty) vm.StatusMessages = [new Message { Text = $"File {fileName} opened.", Error = false }];
+                else vm.StatusMessages = [new Message { Text = status, Error = true }];
                 vm.FileName = fileName;
                 vm.AddRecentFile(fileName);
                 vm.File = file;
@@ -123,21 +125,21 @@ namespace CMGWpf.MVVM
             if (vm.IsDirty)
             {
                 Debug.WriteLine("FileOpen: File is dirty.");
-                vm.Status = "File is dirty.";
+                vm.StatusMessages = [new Message { Text = "File is dirty.", Error = true }];
                 // ask the user if they want to save the file
                 MessageBoxResult result = MessageBox.Show("The current file has been modified and the changes will be lost. Do you want to proceed?", "File Dirty", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result != MessageBoxResult.Yes)
                 {
-                    vm.Status = "File is dirty. No changed has been made";
+                    vm.StatusMessages = [new Message { Text = "File is dirty. No changed has been made", Error = true }];
                     return;
                 }
             }
             file = new();
-            vm.Status = FileHandlers.Read(out file, fileName);
-            if (vm.Status == string.Empty)
+            string status = FileHandlers.Read(out file, fileName);
+            if (status == string.Empty)
             {
                 vm.IsDirty = false;
-                vm.Status = $"File {fileName} opened.";
+                vm.StatusMessages = [new Message { Text = $"File {fileName} opened.", Error = false }];
                 vm.FileName = fileName;
                 vm.File = file;
                 TimeLineViewModel.Instance.TimeLine = vm.File.TimeLine.Clone();
@@ -149,11 +151,11 @@ namespace CMGWpf.MVVM
             if (vm.IsDirty)
             {
                 Debug.WriteLine("Exit: File is dirty.");
-                vm.Status = "File is dirty.";
+                vm.StatusMessages = [new Message { Text = "File is dirty.", Error = true }];
                 MessageBoxResult result = MessageBox.Show("The current file has been modified and the changes will be lost. Do you want to exit?", "File Dirty", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result != MessageBoxResult.Yes)
                 {
-                    vm.Status = "File is dirty. CMG not Exited.";
+                    vm.StatusMessages = [new Message { Text = "File is dirty. CMG not Exited.", Error = false }];
                     return;
                 }
 
@@ -182,12 +184,12 @@ namespace CMGWpf.MVVM
                 Debug.WriteLine("Comment has changed.");
                 vm.File.Comment = vm.NewComment;
                 vm.IsDirty = true;
-                vm.Status = "Comment has changed.";
+                vm.StatusMessages = [new Message { Text = "Comment has changed.", Error = false }];
             }
             else
             {
                 Debug.WriteLine("Comment has not changed.");
-                vm.Status = "Comment has not changed.";
+                vm.StatusMessages = [new Message { Text = "Comment has not changed.", Error = false }];
             }
             vm.ActiveDialog?.Close();
         }
@@ -195,9 +197,22 @@ namespace CMGWpf.MVVM
         public void EditCommentCancel()
         {
             Debug.WriteLine("Cancel Comment command being executed.");
-            vm.Status = "Comment not changed";
+            vm.StatusMessages = [new Message { Text = "Comment not changed.", Error = false }];
             // restore the comment in the UIModel to the original comment in the model
             vm.ActiveDialog?.Close();
+        }
+        public void EditPreferences()
+        {
+            Debug.WriteLine("EditPreferences command being executed.");
+
+            // display the preferences dialog
+            //vm.NewComment = vm.File.Comment;
+            vm.ActiveDialog = new PreferencesDialog
+            {
+                DataContext = vm,
+                Owner = Application.Current.MainWindow
+            };
+            vm.ActiveDialog.ShowDialog();
         }
         public void AddTrack()
         {
@@ -207,7 +222,7 @@ namespace CMGWpf.MVVM
             List<Track> newTracks = [.. vm.File.Tracks];
             newTracks.Add(newTrack);
             vm.NotifyTracksChanged(newTracks);
-            vm.Status = $"new Track named T{uid} added.";
+            vm.StatusMessages = [new Message { Text = $"new Track named T{uid} added.", Error = false }];
             vm.IsDirty = true;
         }
         public void Play()
@@ -218,7 +233,7 @@ namespace CMGWpf.MVVM
             PlayTypes.ReadyPlayOutput ready = ReadyPlay.Check(null);
             if (ready.ErrorMessage != "")
             {
-                vm.Status = ready.ErrorMessage;
+                vm.StatusMessages = [new Message { Text = ready.ErrorMessage, Error = true }];
                 Debug.WriteLine($"Error: {ready.ErrorMessage}");
                 return;
             }
@@ -281,11 +296,11 @@ namespace CMGWpf.MVVM
                 vm.AudioOutput.Pause();
                 provider.Reset();
                 vm.CurrentPlayPosition = 0;
-                vm.Status = "Rewound to start.";
+                vm.StatusMessages = [new Message { Text = "Rewound to start.", Error = false }];
             }
             else
             {
-                vm.Status = "No audio loaded.";
+                vm.StatusMessages = [new Message { Text = "No audio loaded.", Error = true }];
             }
         }
         public void PlayPause()
@@ -294,7 +309,7 @@ namespace CMGWpf.MVVM
 
             if (vm.AudioOutput == null)
             {
-                vm.Status = "No audio loaded.";
+                vm.StatusMessages = [new Message { Text = "No audio loaded.", Error = true }];
                 return;
             }
 
@@ -302,13 +317,13 @@ namespace CMGWpf.MVVM
             {
                 vm.AudioOutput.Pause();
                 vm.IsPlaying = false;
-                vm.Status = "Playback paused.";
+                vm.StatusMessages = [new Message { Text = "Playback paused.", Error = false }];
             }
             else
             {
                 vm.AudioOutput.Play();
                 vm.IsPlaying = true;
-                vm.Status = "Playing...";
+                vm.StatusMessages = [new Message { Text = "Playing...", Error = false }];
             }
         }
         public void ShowVoices()

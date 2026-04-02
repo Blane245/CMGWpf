@@ -5,6 +5,7 @@ using CMGWpf.MVVM;
 using CMGWpf.PlayFunctions;
 using CMGWpf.Properties;
 using CMGWpf.Services;
+using CMGWpf.Types;
 using CMGWpf.Utilities;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -31,7 +32,7 @@ namespace CMGWpf.View
             {
                 SoundFontFileNames = SoundFontUtilities.List(soundFontFileLocation);
                 Debug.WriteLine($"{SoundFontFileNames.Count} read from {soundFontFileLocation}");
-                Status = $"{SoundFontFileNames.Count} read from {soundFontFileLocation}";
+                StatusMessages.Add(new Message { Text = $"{SoundFontFileNames.Count} read from {soundFontFileLocation}", Error = false });
             }
             //TODO load other settings
 
@@ -45,10 +46,10 @@ namespace CMGWpf.View
             };
         }
 
-        public string Status
+        public ObservableCollection<Message> StatusMessages
         {
-            get => GlobalService.Instance.StatusMessage;
-            set { GlobalService.Instance.StatusMessage = value; OnPropertyChanged(); }
+            get => GlobalService.Instance.StatusMessages;
+            set { GlobalService.Instance.StatusMessages = value; OnPropertyChanged(); }
         }
         public System.Windows.Window? ActiveDialog
         {
@@ -117,6 +118,12 @@ namespace CMGWpf.View
         {
             get => GlobalService.Instance.SoundFontFileNames;
             set { GlobalService.Instance.SoundFontFileNames = value; OnPropertyChanged(); }
+        }
+        private ObservableCollection<Message> messages = [];
+        public ObservableCollection<Message> Messages
+        {
+            get { return messages; }
+            set { messages = value; OnPropertyChanged(); }
         }
         #region Play Dialog Properties
         private ObservableCollection<Generator> playGenerators = [];
@@ -310,7 +317,7 @@ namespace CMGWpf.View
 
         private RelayCommand<object>? _notImplementedCommand;
         public RelayCommand<object> NotImplementedCommand =>
-            _notImplementedCommand ??= new RelayCommand<object>(execute => Status = "Command not implemented");
+            _notImplementedCommand ??= new RelayCommand<object>(execute => StatusMessages = new ObservableCollection<Message> { new Message { Text = "Command not implemented", Error = true } });
         private RelayCommand<object>? _fileNewCommand;
         public RelayCommand<object> FileNewCommand =>
             _fileNewCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).New());
@@ -349,6 +356,10 @@ namespace CMGWpf.View
         private RelayCommand<object>? _editCommentCancelCommand;
         public RelayCommand<object> EditCommentCancelCommand =>
             _editCommentCancelCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).EditCommentCancel());
+        private RelayCommand<object>? _editPreferencesCommand;
+        public RelayCommand<object> EditPreferencesCommand =>
+            _editPreferencesCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).EditPreferences());
+
         private RelayCommand<object>? _addTrackCommand;
         public RelayCommand<object> AddTrackCommand =>
             _addTrackCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).AddTrack());

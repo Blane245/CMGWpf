@@ -5,13 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CMGWpf.Layout"
              xmlns:services="clr-namespace:CMGWpf.Services" 
+             xmlns:panels="clr-namespace:CMGWpf.Panels"
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="800">
     <Grid Background="LightGray">
-        <TextBlock
-            Text="{Binding Source={x:Static services:GlobalService.Instance}, Path=StatusMessage}"
-            Margin="10"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Center"/>
+        <panels:MessageBox Source="{Binding DataContext.StatusMessages, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
     </Grid>
 </UserControl>

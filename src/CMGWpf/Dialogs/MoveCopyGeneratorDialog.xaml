@@ -12,22 +12,29 @@
         ResizeMode="CanResize"
         Title="MoveCopyGeneratorDialog" >
     <Grid>
-        <StackPanel Orientation="Vertical">
-            <Border Height="25" VerticalAlignment="Top" Background="LightBlue">
-                <StackPanel Orientation="Horizontal" Height="30">
-                    <Label Content="{Binding MoveCopyMode}" Foreground="Black" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0,0,0"/>
-                    <Label Content="Generator" Foreground="Black" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0"/>
-                    <Button x:Name="CloseDialog" Width="20" Height="15" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5" Content="X" FontSize="12" Command="{Binding GeneratorCancelCommand}"/>
-                </StackPanel>
-            </Border>
-            <StackPanel Orientation="Horizontal" Margin="5">
-                <Label Content="Select Track:" VerticalAlignment="Center"/>
-                <ComboBox ItemsSource="{Binding Tracks}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedTrack}" Width="150" Margin="5"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="5">
-                <Button x:Name="MoveCopyButton" Content="OK" Width="75" Margin="5" Command="{Binding MoveCopyCommand}"/>
-                <Button x:Name="CancelButton" Content="Cancel" Width="75" Margin="5" Command="{Binding GeneratorCancelCommand}"/>
-            </StackPanel>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0" Background="Aquamarine">
+                    <Label Content="{Binding MoveCopyMode}" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>
+            <Label Content="Generator" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>
         </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0" Background="Aquamarine">
+            <Button x:Name="CloseDialog" Width="20" HorizontalAlignment="Right" VerticalAlignment="Center" Content="X" Command="{Binding GeneratorCancelCommand}" Style="{StaticResource WindowButton}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal">
+                <Label Content="Move Track To:" VerticalAlignment="Center" Margin="0"/>
+                <ComboBox ItemsSource="{Binding Tracks}" SelectedItem="{Binding SelectedTrack}" Width="150"/>
+            </StackPanel>
+        <StackPanel  Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                <Button x:Name="MoveCopyButton" Content="OK" Width="50" Command="{Binding MoveCopyCommand}" Margin="0"/>
+                <Button x:Name="CancelButton" Content="Cancel" Width="50" Command="{Binding GeneratorCancelCommand}" Margin="5,0,0,0"/>
+            </StackPanel>
     </Grid>
 </Window>

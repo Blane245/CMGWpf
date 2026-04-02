@@ -47,13 +47,15 @@ namespace CMGWpf.Utilities
                 {
                     // get the distribution within a row
                     Debug.WriteLine($"buildcomposition: allocating {cellCount}, cells to row with {i} events");
-                    (int[] Nc, _) = BuildCellDistribution(cellCount, (double) cellCount / (double)nRows);
-                    Debug.WriteLine($"buildcomposition: frequency distribution for cell count, lambda ({cellCount},{(double)cellCount / (double)nRows})"); foreach (var item in Nc) { Debug.Write($"{item},"); }                    ;
+                    (int[] Nc, _) = BuildCellDistribution(cellCount, (double)cellCount / (double)nRows);
+                    Debug.WriteLine($"buildcomposition: frequency distribution for cell count, lambda ({cellCount},{(double)cellCount / (double)nRows})"); foreach (var item in Nc) { Debug.Write($"{item},"); }
+                    ;
 
                     // get a randomized list of rows to draw row from 
                     rowUrn = RandomizeIntegers(nRows, rN);
                     rowPick = 0;
-                    Debug.WriteLine($"New Row Urn:"); for (int iUrn = 0; iUrn < rowUrn.Length; iUrn++) { Debug.Write($"{rowUrn[iUrn]}, "); }; Debug.WriteLine("");
+                    Debug.WriteLine($"New Row Urn:"); for (int iUrn = 0; iUrn < rowUrn.Length; iUrn++) { Debug.Write($"{rowUrn[iUrn]}, "); }
+                    ; Debug.WriteLine("");
                     foreach (var (rowCount, frequency) in Nc.Select((v, i) => (v, i)))
                     {
                         if (frequency == 0) continue;
@@ -64,38 +66,43 @@ namespace CMGWpf.Utilities
                             //if (frequency == 0)                            {                                rowPick++;                            }
                             //else
                             //{
-                                Debug.WriteLine($"buildComposition: processing row {rowPick} of {rowCount} rows with event frequency {frequency}");
-                                // find a row that contains at least frequency cells available for assignment and but that list in an urn 
-                                int[] cellUrn = [];
-                                bool rowFound = false;
-                                int nRow = -1;
-                                while (!rowFound && rowPick < nRows)
+                            Debug.WriteLine($"buildComposition: processing row {rowPick} of {rowCount} rows with event frequency {frequency}");
+                            // find a row that contains at least frequency cells available for assignment and but that list in an urn 
+                            int[] cellUrn = [];
+                            bool rowFound = false;
+                            int nRow = -1;
+                            while (!rowFound && rowPick < nRows)
+                            {
+                                nRow = rowUrn[rowPick];
+                                int nCells = 0;
+                                cellUrn = [];
+                                foreach (var (value, iCell) in composition[nRow].Select((v, i) => (v, i)))
                                 {
-                                    nRow = rowUrn[rowPick];
-                                    int nCells = 0;
-                                    cellUrn = [];
-                                    foreach (var (value, iCell) in composition[nRow].Select((v, i) => (v, i)))
+                                    if (value < 0)
                                     {
-                                        if (value < 0)
-                                        {
-                                            nCells++;
-                                            cellUrn = [.. cellUrn, iCell];
-                                        }
+                                        nCells++;
+                                        cellUrn = [.. cellUrn, iCell];
                                     }
-                                    if (nCells >= frequency) rowFound = true;
-                                    else rowPick++;
                                 }
-                                if (rowPick < nRows)
+                                if (nCells >= frequency) rowFound = true;
+                                else rowPick++;
+                            }
+                            if (rowPick < nRows)
+                            {
+                                Debug.WriteLine($"buildcompopsition: found row {nRow} having {cellUrn.Length} available cells");
+                                // randomize the cellUrn so we can pick the first available cell randomly
+                                cellUrn = RandomizeIntegers(cellUrn, rN);
+                                // there are at least frequency available cells, so place them in random columns by drawing from the randonized cellUrn
+                                for (int k = 0; k < frequency; k++)
                                 {
-                                    Debug.WriteLine($"buildcompopsition: found row {nRow} having {cellUrn.Length} available cells");
-                                    // there are at least frequency available cells in the row. Pick a random column from the list of available ones and place 'frequency' events there.
-                                    int nColumn = cellUrn[(int)Math.Floor(rN.NextDouble() * cellUrn.Length)];
+                                    int nColumn = cellUrn[k];
                                     Debug.WriteLine($"Assigning {i} events to row, col ({nRow},{nColumn})");
                                     composition[nRow][nColumn] = i;
-                                    rowPick++;
-                                } // else no row was found with enough cells. We are overpopulated. Just ignore this condition for now.
-                                //if (rowPick >= nRows) throw new Exception($"Event density is too large for the ensemble and time cell counts.");
-                            //}
+                                }
+                                rowPick++;
+                            } // else no row was found with enough cells. We are overpopulated. Just ignore this condition for now.
+                              //if (rowPick >= nRows) throw new Exception($"Event density is too large for the ensemble and time cell counts.");
+                              //}
                         }
                     }
 
@@ -168,6 +175,18 @@ namespace CMGWpf.Utilities
                 (arr[i], arr[j]) = (arr[j], arr[i]);
             }
             return arr;
+        }
+
+        // randomize an existing array of integers
+        private static int[] RandomizeIntegers(int[] arr, Random rN)
+        {
+            int[] result = (int[])arr.Clone();
+            for (int i = result.Length - 1; i > 0; i--)
+            {
+                int j = (int)Math.Floor(rN.NextDouble() * (i + 1));
+                (result[i], result[j]) = (result[j], result[i]);
+            }
+            return result;
         }
 
     }

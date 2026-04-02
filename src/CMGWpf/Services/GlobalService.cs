@@ -1,4 +1,6 @@
+using CMGWpf.Model;
 using CMGWpf.Properties;
+using CMGWpf.Types;
 using CMGWpf.Utilities;
 using System.Collections.ObjectModel;
 using static CMGWpf.Model.Generators.StochasticTypes;
@@ -16,6 +18,7 @@ namespace CMGWpf.Services
                 {
                     _instance = new GlobalService();
                     _instance.LoadEnsembleNamesAsync();
+                    _instance.LoadNoteSequenceNamesAsync();
                 }
                 return _instance;
             }
@@ -30,19 +33,30 @@ namespace CMGWpf.Services
             }
             catch (Exception ex)
             {
-                StatusMessage = $"Error loading ensemble names: {ex.Message}";
+                StatusMessages = [new Message { Text = $"Error loading ensemble names: {ex.Message}", Error = true }];
+            }
+        }
+        private async void LoadNoteSequenceNamesAsync()
+        {
+            try
+            {
+                NoteSequenceNames = await NoteSequenceUtilities.GetNoteSequenceNamesAsync();
+            }
+            catch (Exception ex)
+            {
+                StatusMessages = [new Message { Text = $"Error loading note sequence names: {ex.Message}", Error = true }];
             }
         }
 
-        private string _statusMessage = string.Empty;
-        public string StatusMessage
+        private ObservableCollection<Message> _statusMessages = [];
+        public ObservableCollection<Message> StatusMessages
         {
-            get => _statusMessage;
+            get => _statusMessages;
             set
             {
-                if (_statusMessage != value)
+                if (_statusMessages != value)
                 {
-                    _statusMessage = value;
+                    _statusMessages = value;
                     OnPropertyChanged();
                 }
             }
@@ -94,12 +108,14 @@ namespace CMGWpf.Services
             get => ensembleNames;
             set { ensembleNames = value; OnPropertyChanged(); }
         }
+        private ObservableCollection<string> noteSequenceNames = [];
+        public ObservableCollection<string> NoteSequenceNames { get => noteSequenceNames; set { noteSequenceNames = value; OnPropertyChanged(); } }
 
         //public string DbServer { get; set; } = "http://blane-latitude-7290";
-        public string DbServer { get; set; } = "http://localhost";
+        public readonly string DbServer = "http://localhost";
         //public string DbServer { get; set; } = "http://192.168.1.182"; // IPv4 address
         //public string DbServer { get; set; } = "http://10.17.1.23"; // Current network IP
-        public string DbPort { get; set; } = "8081";
+        public readonly string DbPort = "8081";
 
     }
 }

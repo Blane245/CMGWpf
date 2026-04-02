@@ -7,6 +7,7 @@
         xmlns:local="clr-namespace:CMGWpf.PlayFunctions"
         xmlns:services="clr-namespace:CMGWpf.Services"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
         d:DataContext="{d:DesignInstance Type=viewmodel:FileViewModel}"
         WindowStyle="None"
         WindowState="Maximized"

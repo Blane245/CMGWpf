@@ -1,4 +1,6 @@
-﻿namespace CMGWpf.Types
+﻿using CMGWpf.Model;
+
+namespace CMGWpf.Types
 {
     /// <summary>
     /// Represents a container for database-related types and definitions.
@@ -35,11 +37,22 @@
             public DBRESPONSETYPE type { get; set; }
             public SequenceName[] value { get; set; }
         }
+        public record struct SequenceItem
+        {
+            public string id { get; set; }
+            public double value { get; set; }
+            public double beats { get; set; }
+        }
+        public record struct SequenceType
+        {
+            public string name { get; set; }
+            public string tags { get; set; }
+            public SequenceItem[] items { get; set; }
+        }
         public record struct DbNoteSequenceValueType
         {
             public DBRESPONSETYPE type { get; set; }
-            public string value { get; set; }
-            public string tags { get; set; }
+            public SequenceType value { get; set; }
         }
         public record struct EnsembleType
         {

@@ -51,6 +51,26 @@
                 ValueFormat="{Binding DataContext.ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 AmplitudeFormat="{Binding DataContext.AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type model:Autoregressive}">
+            <local:AutoregressivePanel 
+                ValueUnits="{Binding DataContext.ValueUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                AmplitudeUnits="{Binding DataContext.AmplitudeUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"        
+                Minimum="{Binding DataContext.Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Maximum="{Binding DataContext.Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Increment="{Binding DataContext.Increment, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ValueFormat="{Binding DataContext.ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                AmplitudeFormat="{Binding DataContext.AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type model:Sequence}">
+            <local:SequencePanel 
+                ValueUnits="{Binding DataContext.ValueUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                AmplitudeUnits="{Binding DataContext.AmplitudeUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"        
+                Minimum="{Binding DataContext.Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Maximum="{Binding DataContext.Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Increment="{Binding DataContext.Increment, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ValueFormat="{Binding DataContext.ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                AmplitudeFormat="{Binding DataContext.AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        </DataTemplate>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -63,7 +83,7 @@
             <Label Content="{Binding Synonym}" VerticalAlignment="Center"/>
         </StackPanel>
         <ComboBox Grid.Column="1" VerticalAlignment="Center" Width="120" FontSize="12" 
-                  ItemsSource="{Binding DataContext.AlgorithmTypes, RelativeSource={RelativeSource AncestorType=UserControl, AncestorLevel=2}}" 
+                  ItemsSource="{Binding AvailableAlgorithmTypes}" 
                   SelectedItem="{Binding SelectedType, Mode=TwoWay,TargetNullValue={x:Null}}" SelectedIndex="1" />
         <!-- The ContentControl will automatically select the appropriate DataTemplate based on the type of Algorithm -->
         <ContentControl Grid.Column="2" Content="{Binding Algorithm}"/>

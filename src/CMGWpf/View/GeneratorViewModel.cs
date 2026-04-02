@@ -1,4 +1,5 @@
 global using COMPOSITION = int[][];
+using CMGWpf.Dialogs;
 using CMGWpf.Model;
 using CMGWpf.Model.Generators;
 using CMGWpf.MVVM;
@@ -13,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using static CMGWpf.Model.Generators.StochasticTypes;
+using static CMGWpf.Types.DBTypes;
 
 namespace CMGWpf.View
 {
@@ -195,9 +197,22 @@ namespace CMGWpf.View
                 return brush;
             }
         }
-        private ObservableCollection<string> errors = [];
-        public ObservableCollection<string> Errors { get { return errors; } set { errors = value; OnPropertyChanged(); } }
-        public string Status { set { FileViewModel.Instance.Status = value; } }
+        private ObservableCollection<Message> messages = [];
+        public ObservableCollection<Message> Messages { get { return messages; } 
+            set
+            {
+                if (messages != value)
+                {
+                    foreach (var item in value)
+                    {
+                        if (item.Error) item.Brush = new SolidColorBrush(Colors.Red);
+                        else item.Brush = new SolidColorBrush(Colors.Black);
+                    }
+                    messages = value; OnPropertyChanged();
+                }
+            }
+        }
+        public ObservableCollection<Message> Status { set { FileViewModel.Instance.Messages = value; } }
 
         private object? generatorPanel;
         public object? GeneratorPanel
@@ -293,7 +308,7 @@ namespace CMGWpf.View
                     default:
                         break;
                 }
-                Status = $"generator action closed without updates";
+                Status = new ObservableCollection<Message> { new Message { Text = "Generator action closed without updates", Error = false } };
             });
         private RelayCommand<Model.Generators.Generator>? _generatorSubmitCommand;
         public RelayCommand<Model.Generators.Generator> GeneratorSubmitCommand =>
@@ -306,13 +321,12 @@ namespace CMGWpf.View
         #region Algorithmic Generator Specific Properties and Commands
         // the following is specific to the algorithmic generator as it has one soundfont and one list of presets. The stochastic generator will have multiple soundfonts and preset lists 
         public Algorithmic? AlgorithmicGenerator => UIgenerator as Algorithmic;
-        public static ObservableCollection<string> SoundFontFileNames => GlobalService.Instance.SoundFontFileNames;
-        public ObservableCollection<string> EnsembleNames { get => GlobalService.Instance.EnsembleNames; set { GlobalService.Instance.EnsembleNames = value; OnPropertyChanged(); } }
+        public ObservableCollection<string> SoundFontFileNames { get => GlobalService.Instance.SoundFontFileNames; set { GlobalService.Instance.SoundFontFileNames = value; OnPropertyChanged(); } }
 
         private string algorithmicSoundFontFileName = string.Empty;
         public string AlgorithmicSoundFontFileName
         {
-            // this 'get' checks to see of the algorithmic generatopr has a value for the soundfont file name, and if it does, it updates the local variable and the preset list for the dropdown. This is to ensure that if the user changes the soundfont file name in the algorithmic generator dialog, the changes are reflected in real time in the preset dropdown.
+            // this 'get' checks to see of the algorithmic generator has a value for the soundfont file name, and if it does, it updates the local variable and the preset list for the dropdown. This is to ensure that if the user changes the soundfont file name in the algorithmic generator dialog, the changes are reflected in real time in the preset dropdown.
             get
             {
                 if (AlgorithmicGenerator != null && AlgorithmicGenerator.SoundFontFileName != string.Empty)
@@ -330,7 +344,7 @@ namespace CMGWpf.View
                 SoundFont? SoundFont = SoundFontUtilities.GetSoundFont(value);
                 if (SoundFont == null)
                 {
-                    Errors.Clear(); Errors.Add($"Error loading SoundFont: {value}");
+                    Messages.Clear(); Messages.Add(new Message { Text = $"Error loading SoundFont: {value}", Error = true });
                     return;
                 }
                 algorithmicSoundFontFileName = value;
@@ -339,7 +353,7 @@ namespace CMGWpf.View
                 // update the algorithmic generator with the new soundFont
                 if (AlgorithmicGenerator == null)
                 {
-                    Errors.Clear(); Errors.Add($"Error: AlgorithmicGenerator is null.");
+                    Messages.Clear(); Messages.Add(new Message { Text = $"Error: AlgorithmicGenerator is null.", Error = true });
                     return;
                 }
                 AlgorithmicGenerator.SoundFont = SoundFont;
@@ -410,7 +424,7 @@ namespace CMGWpf.View
                     g.NoiseSeed = newSeed;
                     // Notify that the algorithm changed so UI updates
                     OnPropertyChanged(nameof(AlgorithmicGenerator));
-                    Errors.Clear(); Errors.Add("New Noise seed assigned.");
+                    Messages.Clear(); Messages.Add(new Message { Text = "New Noise seed assigned.", Error = false });
                 }
             });
 
@@ -424,7 +438,7 @@ namespace CMGWpf.View
                     markovian.Seed = newSeed;
                     // Notify that the algorithm changed so UI updates
                     OnPropertyChanged(nameof(AlgorithmicGenerator));
-                    Errors.Clear(); Errors.Add("New Markovian seed assigned.");
+                    Messages.Clear(); Messages.Add(new Message { Text = "New Markovian seed assigned.", Error = false });
                 }
             });
 
@@ -438,9 +452,46 @@ namespace CMGWpf.View
                     wiener.Seed = newSeed;
                     // Notify that the algorithm changed so UI updates
                     OnPropertyChanged(nameof(AlgorithmicGenerator));
-                    Errors.Clear(); Errors.Add("New Wierner seed assigned.");
+                    Messages.Clear(); Messages.Add(new Message { Text = "New Wiener seed assigned.", Error = false });
                 }
             });
+        private RelayCommand<Algorithm>? _autoregressiveSeedCommand;
+        public RelayCommand<Algorithm> AutoregressiveSeedCommand =>
+            _autoregressiveSeedCommand ??= new RelayCommand<Algorithm>(algorithm =>
+            {
+                if (algorithm is Autoregressive autoregressive)
+                {
+                    string newSeed = StringUtils.GenerateRandomString(10);
+                    autoregressive.Seed = newSeed;
+                    // Notify that the algorithm changed so UI updates
+                    OnPropertyChanged(nameof(AlgorithmicGenerator));
+                    Messages.Clear(); Messages.Add(new Message { Text = "New Autoregressive seed assigned.", Error = false });
+                }
+            });
+        // reload the list of all ensembles from the database and update the dropdown in the stochastic generator dialog. This is to ensure that if the user adds or removes ensembles from the database while the stochastic generator dialog is open, the dropdown for selecting ensembles is updated in real time to reflect those changes.
+        private RelayCommand<Algorithmic>? _reloadEnsembles;
+        public RelayCommand<Algorithmic> ReloadEnsembles =>
+            _reloadEnsembles ??= new RelayCommand<Algorithmic>(generator =>
+            {
+                if (generator is Algorithmic g)
+                {
+                    _ = ReloadEnsemblesAsync();
+                }
+            });
+
+        private async Task ReloadEnsemblesAsync()
+        {
+            try
+            {
+                ObservableCollection<Ensemble> ensembles = await EnsembleUtilities.GetEnsembleListAsync();
+                ObservableCollection<string> names = [.. ensembles.Select(ensemble => ensemble.Name)];
+                GlobalService.Instance.EnsembleNames = names;
+            }
+            catch (Exception ex)
+            {
+                Messages.Clear(); Messages.Add(new Message { Text = $"Error reloading ensembles: {ex.Message}", Error = true });
+            }
+        }
 
 
         public static ObservableCollection<MODULATORTYPE> ModulatorTypes => new(Enum.GetValues<MODULATORTYPE>());
@@ -646,6 +697,9 @@ namespace CMGWpf.View
         }
         #endregion
         #region Stochastic Generator Specific Properties and Commands
+        public ObservableCollection<string> EnsembleNames { get => GlobalService.Instance.EnsembleNames; set { GlobalService.Instance.EnsembleNames = value; OnPropertyChanged(); } }
+        public ObservableCollection<string> NoteSequenceNames { get => GlobalService.Instance.NoteSequenceNames; set { GlobalService.Instance.NoteSequenceNames = value; OnPropertyChanged(); } }
+
         public Stochastic? StochasticGenerator => UIgenerator as Stochastic;
         private string ensembleName = string.Empty;
         public string StochasticEnsembleName
@@ -688,14 +742,15 @@ namespace CMGWpf.View
 
                     OnPropertyChanged(nameof(StochasticGenerator));
                     OnPropertyChanged(nameof(stochasticComposition));
-                    Errors.Clear(); Errors.Add($"Ensemble {ensemble.Name} read with {voices.Count} voices.");
+                    Messages.Clear(); Messages.Add(new Message { Text = $"Ensemble {ensemble.Name} read with {voices.Count} voices.", Error = false });
                 }
             }
             catch (Exception ex)
             {
-                Errors.Clear(); Errors.Add($"Error loading ensemble: {ex.Message}");
+                Messages.Clear(); Messages.Add(new Message { Text = $"Error loading ensemble: {ex.Message}", Error = true });
             }
         }
+
 
         private void SubscribeToVoices()
         {
@@ -736,20 +791,52 @@ namespace CMGWpf.View
                     string newSeed = StringUtils.GenerateRandomString(10);
                     g.CompositionSeed = newSeed;
                     OnPropertyChanged(nameof(StochasticGenerator));
-                    Errors.Clear(); Errors.Add("New composition seed assigned.");
+                    Messages.Clear(); Messages.Add(new Message { Text = "New composition seed assigned.", Error = false });
                 }
             });
-        private RelayCommand<Stochastic>? _dynamicsSeedSeedCommand;
+        private RelayCommand<Stochastic>? _dynamicsSeedCommand;
         public RelayCommand<Stochastic> DynamicsSeedCommand =>
-            _dynamicsSeedSeedCommand ??= new RelayCommand<Stochastic>(generator =>
+            _dynamicsSeedCommand ??= new RelayCommand<Stochastic>(generator =>
             {
                 if (generator is Stochastic g)
                 {
                     string newSeed = StringUtils.GenerateRandomString(10);
                     g.DynamicsSeed = newSeed;
                     OnPropertyChanged(nameof(StochasticGenerator));
-                    Errors.Clear(); Errors.Add("New dynamics seed assigned.");
+                    Messages.Clear(); Messages.Add(new Message { Text = "New dynamics seed assigned.", Error = false });
                 }
+            });
+        private RelayCommand<object>? _reloadSequencesCommand;
+        public RelayCommand<object> ReloadSequencesCommand =>
+            _reloadSequencesCommand ??= new RelayCommand<object>(generator =>
+            {
+                _ = ReloadSequencesAsync();
+            });
+        private async Task ReloadSequencesAsync()
+        {
+       try
+            {
+                ObservableCollection<string> names = await NoteSequenceUtilities.GetNoteSequenceNamesAsync();
+                GlobalService.Instance.NoteSequenceNames = names;
+            }
+            catch (Exception ex)
+            {
+                Messages.Clear(); Messages.Add(new Message { Text = $"Error reloading note sequences: {ex.Message}", Error = true });
+            }
+        }
+        private RelayCommand<Sequence>? _viewSequenceCommand;
+        public RelayCommand<Sequence> ViewSequenceCommand =>
+            _viewSequenceCommand ??= new RelayCommand<Sequence>(sequence =>
+            {
+                Window dialog = new ViewSequence()
+                {
+                    DataContext = sequence,
+                    Owner= FileViewModel.Instance.ActiveDialog,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                };
+                //FileViewModel.Instance.ActiveDialog = activeDialog;
+                dialog.ShowDialog();
             });
         public static ObservableCollection<INTENSITYOPTION> IntensityOptionTypes => new(Enum.GetValues<INTENSITYOPTION>());
         public static ObservableCollection<INTENSITYTRANSITIONOPTION> IntensityTransitionOptionTypes => new(Enum.GetValues<INTENSITYTRANSITIONOPTION>());
@@ -798,31 +885,6 @@ namespace CMGWpf.View
                 OnPropertyChanged();
             }
         }
-        // reload the list of all ensembles from the database and update the dropdown in the stochastic generator dialog. This is to ensure that if the user adds or removes ensembles from the database while the stochastic generator dialog is open, the dropdown for selecting ensembles is updated in real time to reflect those changes.
-        private RelayCommand<Stochastic>? _reloadEnsembles;
-        public RelayCommand<Stochastic> ReloadEnsembles =>
-            _reloadEnsembles ??= new RelayCommand<Stochastic>(generator =>
-            {
-                if (generator is Stochastic g)
-                {
-                    _ = ReloadEnsemblesAsync();
-                }
-            });
-
-        private async Task ReloadEnsemblesAsync()
-        {
-            try
-            {
-                ObservableCollection<Ensemble> ensembles = await EnsembleUtilities.GetEnsembleListAsync();
-                ObservableCollection<string> names = [.. ensembles.Select(ensemble => ensemble.Name)];
-                GlobalService.Instance.EnsembleNames = names;
-            }
-            catch (Exception ex)
-            {
-                Errors.Clear(); Errors.Add($"Error reloading ensembles: {ex.Message}");
-            }
-        }
-
         // reload the voices for the currently selected ensemble from the database and update the stochastic generator with the new voices. This is to ensure that if the user changes the voices in an ensemble in the database while the stochastic generator dialog is open, the stochastic generator is updated in real time with the new voices for the currently selected ensemble. If a signaificant change has been made to the voices (like the number of them, then invalidate the composition since it may no longer be compatible with the new voices.
         private RelayCommand<Stochastic>? _reloadVoices;
         public RelayCommand<Stochastic> ReloadVoices =>
@@ -832,7 +894,7 @@ namespace CMGWpf.View
                 {
                     if (g.Ensemble.Name == string.Empty)
                     {
-                        Errors.Clear(); Errors.Add("Error: No ensemble selected.");
+                        Messages.Clear(); Messages.Add(new Message { Text = "Error: No ensemble selected.", Error = true });
                         return;
                     }
                     _ = ReloadVoicesAsync();
@@ -856,7 +918,7 @@ namespace CMGWpf.View
                     g.Composition = [];
                     stochasticComposition = [];
                     OnPropertyChanged(nameof(StochasticComposition));
-                    Errors.Clear(); Errors.Add("Composition has been invalidated due to the change in the number of voices in the ensemble.");
+                    Messages.Clear(); Messages.Add(new Message { Text = "Composition has been invalidated due to the change in the number of voices in the ensemble.", Error = false });
                 }
                 StochasticGenerator.Voices = voices;
 
@@ -867,7 +929,7 @@ namespace CMGWpf.View
             }
             catch (Exception ex)
             {
-                Errors.Clear(); Errors.Add($"Error reloading voices: {ex.Message}");
+                Messages.Clear(); Messages.Add(new Message { Text = $"Error reloading voices: {ex.Message}", Error = true });
             }
         }
 
@@ -880,31 +942,29 @@ namespace CMGWpf.View
                 if (generator is Stochastic g)
                 {
                     // confirm that everything needed to create a composition is provided
-                    errors.Clear();
+                    messages.Clear();
                     if (g.Ensemble.Name == string.Empty)
                     {
-                        errors.Add("Error: No ensemble selected.");
+                        messages.Add(new Message { Text = "Error: No ensemble selected.", Error = true });
                     }
                     if (g.Voices == null || g.Voices.Count == 0)
                     {
-                        errors.Add("Error: No voices in ensemble.");
+                        messages.Add(new Message { Text = "Error: No voices in ensemble.", Error = true });
                     }
                     if (g.CompositionDuration <= 0)
                     {
-                        errors.Add("Error: The composition length must be positive.");
-
+                        messages.Add(new Message { Text = "Error: The composition length must be positive.", Error = true });
                     }
                     if (g.NumberOfTimeCells <= 0)
                     {
-                        errors.Add("Error: The number of time cells must be positive.");
-
+                        messages.Add(new Message { Text = "Error: The number of time cells must be positive.", Error = true });
                     }
                     if (g.Lambda <= 0)
                     {
-                        errors.Add("Error: The number of events/row must be positive.");
+                        messages.Add(new Message { Text = "Error: The number of events/row must be positive.", Error = true });
                     }
-                    OnPropertyChanged(nameof(Errors));
-                    if (errors.Count > 0) return;
+                    OnPropertyChanged(nameof(Messages));
+                    if (messages.Count > 0) return;
 
                     Composition composition = StochasticUtilities.BuildComposition(g);
                     g.Composition = composition;
@@ -952,6 +1012,28 @@ namespace CMGWpf.View
             public string ValueFormat { get; set; } = "F3";
             public string AmplitudeFormat { get; set; } = "F3";
 
+            /// <summary>
+            /// Gets the list of algorithm types available for this attribute.
+            /// Sequence is only available for the Note attribute.
+            /// </summary>
+            public ObservableCollection<ALGORITHMTYPE> AvailableAlgorithmTypes
+            {
+                get
+                {
+                    // Sequence algorithm only makes sense for Note (pitch) attribute
+                    if (Name == "Note")
+                    {
+                        return AlgorithmTypes; // All algorithm types including Sequence
+                    }
+                    else
+                    {
+                        // For other attributes, exclude Sequence
+                        return new ObservableCollection<ALGORITHMTYPE>(
+                            AlgorithmTypes.Where(t => t != ALGORITHMTYPE.Sequence));
+                    }
+                }
+            }
+
             private Algorithm _algorithm = new Constant();
             public required Algorithm Algorithm
             {
@@ -984,13 +1066,14 @@ namespace CMGWpf.View
 
             private static ALGORITHMTYPE GetAlgorithmType(Algorithm algorithm)
             {
-                //TODO add autoregressive and sequencer types when implemented
                 return algorithm switch
                 {
                     Constant => ALGORITHMTYPE.Constant,
                     Oscillator => ALGORITHMTYPE.Oscillator,
                     Wiener => ALGORITHMTYPE.Wiener,
                     Markovian => ALGORITHMTYPE.Markovian,
+                    Autoregressive => ALGORITHMTYPE.Autoregressive,
+                    Sequence => ALGORITHMTYPE.Sequence,
                     _ => ALGORITHMTYPE.Constant
                 };
             }

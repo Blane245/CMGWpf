@@ -1,4 +1,5 @@
 ﻿global using Composition = int[][];
+using CMGWpf.Types;
 using CMGWpf.Utilities;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -493,26 +494,26 @@ namespace CMGWpf.Model.Generators
                 Pan = 0
             };
         }
-        public override ObservableCollection<string> Validate()
+        public override ObservableCollection<Message> Validate()
         {
 
-            ObservableCollection<string> errors = base.Validate();
+            ObservableCollection<Message> errors = base.Validate();
             if (CompositionDuration <= 0)
-                errors.Add("Composition duration must be positive.");
+                errors.Add(new Message() { Text = "Composition duration must be positive.", Error = true });
             if (NumberOfTimeCells <= 0)
-                errors.Add("Number of time cells must be positive.");
+                errors.Add(new Message() { Text = "Number of time cells must be positive.", Error = true });
             if (Lambda <= 0)
-                errors.Add("Events/Row must be positive.");
+                errors.Add(new Message() { Text = "Events/Row must be positive.", Error = true });
             if (Delta <= 0)
-                errors.Add("Sounds/sec must be positive.");
+                errors.Add(new Message() { Text = "Sounds/sec must be positive.", Error = true });
             if (Voices.Count == 0)
-                errors.Add("At least one voice is required.");
+                errors.Add(new Message() { Text = "At least one voice is required.", Error = true });
             if (PanOption != PANOPTION.none && PanAlgorithm != PANALGORITHM.none && PanParameters.CycleTime <= 0)
-                errors.Add("Pan cycle time must be positive.");
+                errors.Add(new Message() { Text = "Pan cycle time must be positive.", Error = true });
             if (IntensityOption != INTENSITYOPTION.none && IntensityTransitionOption != INTENSITYTRANSITIONOPTION.none && IntensityParameters.CycleTime <= 0)
-                errors.Add("Intensity cycle time must be positive.");
+                errors.Add(new Message() { Text = "Intensity cycle time must be positive.", Error = true });
             if (Composition.Length == 0)
-                errors.Add("Composition must be generated.");
+                errors.Add(new Message() { Text = "Composition must be generated.", Error = true });
             return errors;
         }
         public override string ToString() => "Stochastic";

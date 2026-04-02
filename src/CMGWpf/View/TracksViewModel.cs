@@ -74,12 +74,12 @@ namespace CMGWpf.View
                 OnPropertyChanged();
             }
         }
-        public string Status
+        public ObservableCollection<Message> Status
         {
-            get => GlobalService.Instance.StatusMessage;
+            get => GlobalService.Instance.StatusMessages;
             set
             {
-                GlobalService.Instance.StatusMessage = value;
+                GlobalService.Instance.StatusMessages = value;
                 OnPropertyChanged();
             }
         }
@@ -130,7 +130,7 @@ namespace CMGWpf.View
                 Generator copiedGenerator = generator.Clone(targetTrack);
                 copiedGenerator.Name = newGeneratorName;
                 targetTrack.Generators.Add(copiedGenerator);
-                Status = $"Generator '{generator.Name}' copied to track '{targetTrack.Name}' as '{newGeneratorName}'.";
+                Status = new ObservableCollection<Message> { new Message { Text = $"Generator '{generator.Name}' copied to track '{targetTrack.Name}' as '{newGeneratorName}'.", Error = false } };
             }
             else if (mode == MoveCopyMode.Move)
             {
@@ -139,11 +139,11 @@ namespace CMGWpf.View
                 // Update the parent reference and add to target track
                 generator.Parent = targetTrack;
                 targetTrack.Generators.Add(generator);
-                Status = $"Generator '{generator.Name}' moved from track '{sourceTrack.Name}' to track '{targetTrack.Name}'.";
+                Status = new ObservableCollection<Message> { new Message { Text = $"Generator '{generator.Name}' moved from track '{sourceTrack.Name}' to track '{targetTrack.Name}'.", Error = false } };
             }
             else
             {
-                Status = $"SYSTEM ERROR: Invalid move/copy mode '{mode}'.";
+                Status = new ObservableCollection<Message> { new Message { Text = $"SYSTEM ERROR: Invalid move/copy mode '{mode}'.", Error = true } };
                 return;
             }
 

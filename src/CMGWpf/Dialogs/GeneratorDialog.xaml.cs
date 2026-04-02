@@ -18,7 +18,7 @@ namespace CMGWpf.Dialogs
         {
             if (this.DataContext is GeneratorViewModel vm)
             {
-                vm.Errors = [];
+                vm.Messages = [];
             }
         }
 

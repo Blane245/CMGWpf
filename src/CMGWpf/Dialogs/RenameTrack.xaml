@@ -10,35 +10,31 @@
         Title="Rename Track"
         mc:Ignorable="d"
         WindowStyle="None"
-        WindowStartupLocation="CenterOwner"
-        Closing="Window_Closing">
+        Background="White"
+        >
     <Grid>
-        <StackPanel Orientation="Vertical">
-            <Border Height="20" VerticalAlignment="Top">
-                <Grid Background="LightBlue">
-                    <TextBlock 
-                    Text="Rename Track" 
-                    Foreground="Black" 
-                    FontSize="12" 
-                    FontWeight="Bold" 
-                    VerticalAlignment="Center" 
-                    HorizontalAlignment="Left" 
-                    Margin="5,0,0,0"/>
-                    <Button x:Name="CloseDialog" Width="20" Height="15" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,3,5,0" Content="X" FontSize="10"
-                    Command="{Binding RenameCancelCommand}"
-                    />
-                </Grid>
-            </Border>
-            <StackPanel Orientation="Horizontal" Margin="2">
-                <Label Content="Current Track Name:"/>
-                <Label Content="{Binding Track.Name}" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
-                <Label Content="New Track Name:"/>
-                <TextBox Text="{Binding NewTrackName, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="2">
-                <Button Grid.Column="0" Grid.Row="1" x:Name="OK" Width="40" Height="20" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10,0,0,10" Content="OK" Command="{Binding RenameOKCommand}"/>
-                <Button Grid.Column="0" Grid.Row="1"  x:Name="Cancel" Width="40" Height="20" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10,0,0,10"  Content="Cancel" Command="{Binding RenameCancelCommand}"/>
-            </StackPanel>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="0" Background="Aquamarine" Margin="0">
+            <Label Grid.Row="0" Grid.Column="0"  Content="Rename Track" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="1" Background="Aquamarine" Margin="0">
+            <Button Width="20" Height="15" HorizontalAlignment="Right" VerticalAlignment="Top" Content="X" Command="{Binding RenameCancelCommand}" Style="{StaticResource WindowButton}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0">
+            <Label Content="New Track Name:"/>
+            <TextBox Text="{Binding NewTrackName, UpdateSourceTrigger=PropertyChanged}" Width="150"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0" Orientation="Horizontal">
+            <Button Width="50" Content="OK" Command="{Binding RenameOKCommand}"/>
+            <Button Width="50" Content="Cancel" Command="{Binding RenameCancelCommand}"/>
         </StackPanel>
     </Grid>
 </Window>

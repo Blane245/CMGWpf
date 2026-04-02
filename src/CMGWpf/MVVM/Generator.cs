@@ -17,8 +17,8 @@ namespace CMGWpf.MVVM
         {
             if (generator == null) return;
             // perform validation and update generator properties
-            vm.Errors = generator.Validate();
-            if (vm.Errors.Count == 0) // the UI generator is error free, so add it to the parent track
+            vm.Messages = generator.Validate();
+            if (vm.Messages.Count == 0) // the UI generator is error free, so add it to the parent track
             {
                 // either add the generator or modify an existing generator based on the mode
                 if (vm.Mode == GeneratorEditMode.Modify)
@@ -27,12 +27,12 @@ namespace CMGWpf.MVVM
                     int index = generator.Parent.Generators.FindIndex((Generator g) => g.Name == generator.Name);
                     if (index < 0) // this should not happen, but if it does, add the generator to the track
                     {
-                        vm.Errors.Add($"SYSTEM ERROR: Generator '{generator.Name}' not found in track '{generator.Parent.Name}'.");
+                        vm.Messages.Add(new Message { Text = $"SYSTEM ERROR: Generator '{generator.Name}' not found in track '{generator.Parent.Name}'.", Error = true });
                     }
                     else
                     {
                         generator.Parent.Generators[index] = vm.UIGenerator;
-                        vm.Errors.Add($"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated successfully.");
+                        vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated successfully.", Error = false });
                         vm.IsDirty = true;
                     }
 
@@ -41,11 +41,11 @@ namespace CMGWpf.MVVM
                 {
                     generator.Parent.Generators.Add(vm.UIGenerator);
                     vm.IsDirty = true;
-                    vm.Errors.Add($"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated added.");
+                    vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated added.", Error = false });
                 }
                 else // this should not happen, but if it does, display an error
                 {
-                    vm.Errors.Add($"SYSTEM ERROR: Invalid generator edit mode '{vm.Mode}'.");
+                    vm.Messages.Add(new Message { Text = $"SYSTEM ERROR: Invalid generator edit mode '{vm.Mode}'.", Error = true });
                     return;
                 }
                 vm.ActiveDialog?.Close();
@@ -56,7 +56,7 @@ namespace CMGWpf.MVVM
             }
             else
             {
-                vm.NotifyGeneratorChanged(nameof(vm.Errors));
+                vm.NotifyGeneratorChanged(nameof(vm.Messages));
             }
         }
         public void Delete()
@@ -80,12 +80,12 @@ namespace CMGWpf.MVVM
                 parentTrack.Generators = newGenerators;
                 vm.IsDirty = true;
                 vm.NotifyTrackChanged();
-                vm.Status = $"Generator '{generator.Name}' deleted from track '{parentTrack.Name}'.";
+                vm.Status = [new Message { Text = $"Generator '{generator.Name}' deleted from track '{parentTrack.Name}'.", Error = false }];
             }
             else
             {
                 // User canceled deletion, exit the method
-                vm.Status = $"Deletion of generator '{generator.Name}' canceled.";
+                vm.Status = [new Message { Text = $"Deletion of generator '{generator.Name}' canceled.", Error = false }];
                 return;
             }
 
@@ -106,7 +106,7 @@ namespace CMGWpf.MVVM
             }
 
             vm.IsDirty = true;
-            vm.Status = $"Generator '{generator.Name}' is now {((generator.Mute) ? "muted" : "unmuted")}.";
+            vm.Status = [new Message { Text = $"Generator '{generator.Name}' is now {((generator.Mute) ? "muted" : "unmuted")}.", Error = false }];
             vm.NotifyGeneratorChanged();
             vm.NotifyTrackChanged();
         }
@@ -131,6 +131,7 @@ namespace CMGWpf.MVVM
             {
                 DataContext = vm,
                 Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             vm.ActiveDialog?.ShowDialog();
         }
@@ -164,7 +165,7 @@ namespace CMGWpf.MVVM
             Track? targetTrack = vm.SelectedTrack;
             if (targetTrack == null)
             {
-                vm.Status = "No target track selected.";
+                vm.Status = [new Message { Text = "No target track selected.", Error = true }];
                 return;
             }
 
@@ -182,7 +183,7 @@ namespace CMGWpf.MVVM
         }
         public void Play()
         {
-            vm.Status = $"Play command for generator '{generator.Name}' not implemented.";
+            vm.Status = [new Message { Text = $"Play command for generator '{generator.Name}' not implemented.", Error = true }];
         }
 
     }

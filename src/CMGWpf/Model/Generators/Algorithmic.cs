@@ -1,5 +1,6 @@
 ﻿using CMGWpf.PlayFunctions.Utilities;
 using CMGWpf.SoundFont_2;
+using CMGWpf.Types;
 using CMGWpf.Utilities;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -129,7 +130,7 @@ namespace CMGWpf.Model.Generators
             return pitch + midiFraction;
         }
         
-        public override CurrentValues GetCurrentValues(double time, int beats)
+        public override CurrentValues GetCurrentValues(double time, double beats)
         {
             int entry = currentRhythmEntry;
             currentRhythmEntry = (currentRhythmEntry + 1) % MeasureLength;
@@ -288,6 +289,7 @@ namespace CMGWpf.Model.Generators
                             ALGORITHMTYPE.Markovian => new Markovian(),
                             ALGORITHMTYPE.Wiener => new Wiener(),
                             ALGORITHMTYPE.Oscillator => new Oscillator(),
+                            ALGORITHMTYPE.Sequence => new Sequence(),
                             _ => new Constant(),
                         };
                         a.LoadXML(aElem);
@@ -323,27 +325,28 @@ namespace CMGWpf.Model.Generators
             }
         }
 
-        public override ObservableCollection<string> Validate()
+        public override ObservableCollection<Message> Validate()
         {
-            ObservableCollection<string> errors = base.Validate();
-            if (SoundFontFileName == null || SoundFontFileName.Length == 0) errors.Add("SoundFont file must not be empty.");
-            if (PresetName == null || PresetName.Length == 0) errors.Add("Preset name must not be empty.");
-            if (MeasureLength < 0) errors.Add("Measure length must be greater than 0.");
-            if (BeatCount < 0 || BeatCount > MeasureLength) errors.Add("Beat count must be greater than 0 and less than or equal to measure length.");
-            if (OffsetSequence < 0 || OffsetSequence >= MeasureLength) errors.Add("Offset sequence must be greater than or equal to 0 and less than measure length.");
-            if (NoteCount < 0 || NoteCount > 12) errors.Add("Note count must be greater than 0 and less than or equal to 12.");
-            if (NoiseFrequency < 0) errors.Add("Noise frequency must be greater than or equal to 0.");
-            if (NoiseAmplitude < 0) errors.Add("Noise amplitude must be greater than or equal to 0.");
+            ObservableCollection<Message> errors = base.Validate();
+            if (SoundFontFileName == null || SoundFontFileName.Length == 0) errors.Add(new Message() { Text = "SoundFont file must not be empty.", Error = true });
+            if (PresetName == null || PresetName.Length == 0) errors.Add(new Message() { Text = "Preset name must not be empty.", Error = true });
+            if (MeasureLength < 0) errors.Add(new Message() { Text = "Measure length must be greater than 0.", Error = true });
+            if (BeatCount < 0 || BeatCount > MeasureLength) errors.Add(new Message() { Text = "Beat count must be greater than 0 and less than or equal to measure length.", Error = true });
+            if (OffsetSequence < 0 || OffsetSequence >= MeasureLength) errors.Add(new Message() { Text = "Offset sequence must be greater than or equal to 0 and less than measure length.", Error = true });
+            if (NoteCount < 0 || NoteCount > 12) errors.Add(new Message() { Text = "Note count must be greater than 0 and less than or equal to 12.", Error = true });
+            if (NoiseFrequency < 0) errors.Add(new Message() { Text = "Noise frequency must be greater than or equal to 0.", Error = true });
+            if (NoiseAmplitude < 0) errors.Add(new Message() { Text = "Noise amplitude must be greater than or equal to 0.", Error = true });
             // validate the parameters of the algorithms and add any errors to the errors list
-            ObservableCollection<string> noteE = NoteAlgorithm.Validate();
-            ObservableCollection<string> attackE = AttackAlgorithm.Validate();
-            ObservableCollection<string> speedE = SpeedAlgorithm.Validate();
-            ObservableCollection<string> volumeE = VolumeAlgorithm.Validate();
-            ObservableCollection<string> panE = PanAlgorithm.Validate();
-            foreach (string error in noteE) errors.Add(error);
-            foreach (string error in speedE) errors.Add(error);
-            foreach (string error in volumeE) errors.Add(error);
-            foreach (string error in panE) errors.Add(error);
+            ObservableCollection<Message> noteE = NoteAlgorithm.Validate();
+            ObservableCollection<Message> attackE = AttackAlgorithm.Validate();
+            ObservableCollection<Message> speedE = SpeedAlgorithm.Validate();
+            ObservableCollection<Message> volumeE = VolumeAlgorithm.Validate();
+            ObservableCollection<Message> panE = PanAlgorithm.Validate();
+            foreach (Message error in noteE) errors.Add(error);
+            foreach (Message error in attackE) errors.Add(error);
+            foreach (Message error in speedE) errors.Add(error);
+            foreach (Message error in volumeE) errors.Add(error);
+            foreach (Message error in panE) errors.Add(error);
             return errors;
         }
         public override string ToString() => "Algorithmic";

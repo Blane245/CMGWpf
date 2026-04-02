@@ -7,6 +7,47 @@ using static CMGWpf.Types.DBTypes;
 
 namespace CMGWpf.Utilities
 {
+    /// <summary>
+    /// Custom converter to handle items field that comes as a JSON string instead of array
+    /// </summary>
+    public class SequenceItemArrayConverter : JsonConverter<SequenceItem[]>
+    {
+        public override SequenceItem[]? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.Null)
+            {
+                return null;
+            }
+
+            // If it's a string, parse it as JSON first (this is what the DB returns)
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                string? jsonString = reader.GetString();
+                if (string.IsNullOrEmpty(jsonString))
+                {
+                    return Array.Empty<SequenceItem>();
+                }
+
+                // Deserialize the string as JSON without custom converters to avoid infinite recursion
+                // This mimics the JavaScript client: JSON.parse(response.value.items)
+                return JsonSerializer.Deserialize<SequenceItem[]>(jsonString);
+            }
+
+            // If it's already an array, deserialize normally (fallback for properly formatted JSON)
+            if (reader.TokenType == JsonTokenType.StartArray)
+            {
+                return JsonSerializer.Deserialize<SequenceItem[]>(ref reader);
+            }
+
+            throw new JsonException($"Unexpected token type: {reader.TokenType}");
+        }
+
+        public override void Write(Utf8JsonWriter writer, SequenceItem[] value, JsonSerializerOptions options)
+        {
+            JsonSerializer.Serialize(writer, value, options);
+        }
+    }
+
     public class DbResult<T>
     {
         public bool IsSuccess { get; set; }
@@ -133,7 +174,7 @@ namespace CMGWpf.Utilities
             var options = new JsonSerializerOptions
             {
                 IncludeFields = true,
-                Converters = { new JsonStringEnumConverter() }
+                Converters = { new JsonStringEnumConverter(), new SequenceItemArrayConverter() }
             };
 
             var value = JsonSerializer.Deserialize<T>(json, options);

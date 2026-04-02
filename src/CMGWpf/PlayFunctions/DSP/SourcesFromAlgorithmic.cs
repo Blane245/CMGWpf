@@ -1,7 +1,10 @@
-﻿using CMGWpf.Model.Generators;
+﻿using CMGWpf.Model;
+using CMGWpf.Model.Generators;
 using CMGWpf.PlayFunctions.Utilities;
 using CMGWpf.Types;
+using static CMGWpf.Types.DBTypes;
 using static CMGWpf.Types.PlayTypes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CMGWpf.PlayFunctions.DSP
 {
@@ -44,78 +47,160 @@ namespace CMGWpf.PlayFunctions.DSP
             RandomAlgorithm.Initialize(panAlgorithm);
             algorithmic.InitialSequence();
 
-            //TODO when sequencer is added time will be incremented differently and the current values will be used to determine which samples to play at each time step. For now it just gets the initial values of the generator and shows a message box with those values.
-            while (time < stopTime - 0.001)
+            if (noteAlgorithm.GetType().Name != "Sequence")
             {
-                CurrentValues currentValues = algorithmic.GetCurrentValues(time - startTime, 0);
-                DebugLog.Write($"At time {time}: Note={currentValues.Note}, Attack={currentValues.Attack}, Speed={currentValues.Speed}, Duration={currentValues.Duration}, Pan={currentValues.Pan}, Volume={currentValues.Volume}");
-                var hitBeat = currentValues.Beat;
-                var note = currentValues.Note;
-                var velocity = currentValues.Attack;
-                var speed = currentValues.Speed;
-                var durationPercent = currentValues.Duration;
-                var volumedB = currentValues.Volume;
-                var pan = currentValues.Pan;
-                volumedB += parent.Volume;
-                double interval = Math.Min(60 / speed, stopTime - time);
-                double noteDuration = (interval * durationPercent) / 100;
-                if (hitBeat)
+                // loop through the time range and get the values from the algorithmic generator at each step, then generate the samples for each note and merge them into the audio buffer. The time step is determined by the speed value of the generator at each point in time, so that it can change over time according to the speed algorithm.
+                while (time < stopTime - 0.001)
                 {
-                    DebugLog.Write($"Hit beat at time {time}. Playing note {note} with velocity {velocity}, speed {speed}, interval {interval}, duration {noteDuration}, volume {volumedB}, pan {pan}");
-                    List<FinalVoice> voices = PresetUtilities.BuildVoicesForPresetAtKeyVel(preset, (int)note, (int)velocity);
-                    // Here is where the DSP of the samples would happen. In the prototype it just shows debug output with the sample name and the generators that would be applied to it.
-                    foreach (var voice in voices)
+                    CurrentValues currentValues = algorithmic.GetCurrentValues(time - startTime, 0);
+                    DebugLog.Write($"At time {time}: Note={currentValues.Note}, Attack={currentValues.Attack}, Speed={currentValues.Speed}, Duration={currentValues.Duration}, Pan={currentValues.Pan}, Volume={currentValues.Volume}");
+                    var hitBeat = currentValues.Beat;
+                    var note = currentValues.Note;
+                    var velocity = currentValues.Attack;
+                    var speed = currentValues.Speed;
+                    var durationPercent = currentValues.Duration;
+                    var volumedB = currentValues.Volume;
+                    var pan = currentValues.Pan;
+                    volumedB += parent.Volume;
+                    double interval = Math.Min(60 / speed, stopTime - time);
+                    double noteDuration = (interval * durationPercent) / 100;
+                    if (hitBeat)
                     {
-                        DebugLog.Write($"Building sample {voice!.SampleHeader!.Name}, start {voice.SampleHeader.Start}, end {voice.SampleHeader.End}, length {voice.SampleHeader.End - voice.SampleHeader.Start}, loop start {voice.SampleHeader.StartLoop}, loop end {voice.SampleHeader.EndLoop}, sample rate {voice.SampleHeader.SampleRate}, original pitch {voice.SampleHeader.OriginalPitch}, pitch correction {voice.SampleHeader.PitchCorrection} for Intrument {voice.InstrumentName} with generators:");
-                        DebugLog.Write($"");
-                        //foreach (var SFgen in voice.Generators)
-                        //{
-                        //    DebugLog($"  {SFgen.Key}: {SFgen.Value}");
-                        //}
-                        double[] instrumentSample = []; // This is where the processed sample data for the instrument would go after applying the generators and DSP. For now it is just an empty array.
-                        instrumentSample = InstrumentSample.Get(new InstrumentSampleParameters
+                        DebugLog.Write($"Hit beat at time {time}. Playing note {note} with velocity {velocity}, speed {speed}, interval {interval}, duration {noteDuration}, volume {volumedB}, pan {pan}");
+                        List<FinalVoice> voices = PresetUtilities.BuildVoicesForPresetAtKeyVel(preset, (int)note, (int)velocity);
+                        foreach (var voice in voices)
                         {
-                            Duration = noteDuration,
-                            Interval = interval,
-                            StartPitch = note,
-                            EndPitch = note,
-                            VolumeDb = volumedB,
-                            AttackEnabled = algorithmic.AttackEnabled,
-                            LoopEnabled = algorithmic.IsLooping,
-                            NoiseEnabled = algorithmic.NoiseEnabled,
-                            NoiseFrequency = algorithmic.NoiseFrequency,
-                            NoiseAmplitude = algorithmic.NoiseAmplitude,
-                            Tremolo = algorithmic.Tremolo,
-                            Vibrato = algorithmic.Vibrato,
-                            Voice = voice,
-                            SampleRate = PlayTypes.SampleRate,
-                            SoundFont = soundFont!
-                        });
-                        // apply pan and merge into audio buffer here
-                        double left = (1 - currentValues.Pan) / 2;
-                        double right = (1 + currentValues.Pan) / 2;
-                        int instrumentStartIndex = (int)(time * PlayTypes.SampleRate) * 2; // in stereobuffer pointer space
-                        DebugLog.Write($"Generated sample for note {note} with {instrumentSample.Length} samples at 44100Hz. Pan is (left, right)=({left},{right}). Merging at t={time}(sec), index={instrumentStartIndex}");
-                        for (int i = 0; i < instrumentSample.Length; i++)
-                        {
-                            int bufferIndex = instrumentStartIndex + 2 * i;
-                            if (bufferIndex + 1 < stereoBuffer.Length)
+                            DebugLog.Write($"Building sample {voice!.SampleHeader!.Name}, start {voice.SampleHeader.Start}, end {voice.SampleHeader.End}, length {voice.SampleHeader.End - voice.SampleHeader.Start}, loop start {voice.SampleHeader.StartLoop}, loop end {voice.SampleHeader.EndLoop}, sample rate {voice.SampleHeader.SampleRate}, original pitch {voice.SampleHeader.OriginalPitch}, pitch correction {voice.SampleHeader.PitchCorrection} for Intrument {voice.InstrumentName} with generators:");
+                            DebugLog.Write($"");
+                            //foreach (var SFgen in voice.Generators)
+                            //{
+                            //    DebugLog($"  {SFgen.Key}: {SFgen.Value}");
+                            //}
+                            
+                            double[] instrumentSample = InstrumentSample.Get(new InstrumentSampleParameters
                             {
-                                if (double.IsNaN(instrumentSample[i])) throw new Exception($"Instrument sample is not a number at location {i}, time={time}");
-                                stereoBuffer[bufferIndex] += instrumentSample[i] * left;
-                                stereoBuffer[bufferIndex + 1] += instrumentSample[i] * right;
+                                Duration = noteDuration,
+                                Interval = interval,
+                                StartPitch = note,
+                                EndPitch = note,
+                                VolumeDb = volumedB,
+                                AttackEnabled = algorithmic.AttackEnabled,
+                                LoopEnabled = algorithmic.IsLooping,
+                                NoiseEnabled = algorithmic.NoiseEnabled,
+                                NoiseFrequency = algorithmic.NoiseFrequency,
+                                NoiseAmplitude = algorithmic.NoiseAmplitude,
+                                Tremolo = algorithmic.Tremolo,
+                                Vibrato = algorithmic.Vibrato,
+                                Voice = voice,
+                                SampleRate = PlayTypes.SampleRate,
+                                SoundFont = soundFont!
+                            });
+                            // apply pan and merge into audio buffer here
+                            double left = (1 - currentValues.Pan) / 2;
+                            double right = (1 + currentValues.Pan) / 2;
+                            int instrumentStartIndex = (int)(time * PlayTypes.SampleRate) * 2; // in stereobuffer pointer space
+                            DebugLog.Write($"Generated sample for note {note} with {instrumentSample.Length} samples at 44100Hz. Pan is (left, right)=({left},{right}). Merging at t={time}(sec), index={instrumentStartIndex}");
+                            for (int i = 0; i < instrumentSample.Length; i++)
+                            {
+                                int bufferIndex = instrumentStartIndex + 2 * i;
+                                if (bufferIndex + 1 < stereoBuffer.Length)
+                                {
+                                    if (double.IsNaN(instrumentSample[i])) throw new Exception($"Instrument sample is not a number at location {i}, time={time}");
+                                    stereoBuffer[bufferIndex] += instrumentSample[i] * left;
+                                    stereoBuffer[bufferIndex + 1] += instrumentSample[i] * right;
+                                }
                             }
+
+                            SoundRollBuilder.AddInstrument(new TimeMidiLine
+                            {
+                                Start = new TimeMidiPoint { Time = time, Midi = (int)note },
+                                End = new TimeMidiPoint { Time = time + noteDuration, Midi = (int)note }
+                            }, soundFontName, preset.Name);
+
                         }
-
-                        SoundRollBuilder.AddInstrument(new TimeMidiLine
-                        {
-                            Start = new TimeMidiPoint { Time = time, Midi = (int)note },
-                            End = new TimeMidiPoint { Time = time + noteDuration, Midi = (int)note }
-                        }, soundFontName, preset.Name);
-
                     }
+                    time += interval;
                 }
-                time += interval;
+
+            } else
+            {
+                // note sequencing is driven by the note item sequence and the spped of each beat. The note item sequence is a list of note items, each with a time and a note value. The speed algorithm determines the speed of the generator at each point in time, which affects the interval between notes. The attack, duration, pan, and volume algorithms determine the corresponding values for each note at each point in time.
+                DebugLog.Write($"Sequence algorithm voice generation");
+                Sequence sequence = (noteAlgorithm as Sequence)!;
+                SequenceItem[] seqNoteP = [..sequence.Items];
+                double beats = 1;
+                double transpose = sequence.Transpose;
+                sequence.SetReflect();
+                sequence.SetReverse();
+                foreach (SequenceItem item in sequence.Items)
+                {
+                    double note = item.value + transpose;
+                    double beat = item.beats;
+                    CurrentValues currentValues = algorithmic.GetCurrentValues(time - startTime, beats);
+                    var hitBeat = currentValues.Beat;
+                    var velocity = currentValues.Attack;
+                    var speed = currentValues.Speed;
+                    var durationPercent = currentValues.Duration;
+                    var volumedB = currentValues.Volume;
+                    var pan = currentValues.Pan;
+                    volumedB += parent.Volume;
+                    double interval = Math.Min(60 / speed, stopTime - time);
+                    double duration = (interval * currentValues.Duration) / 100;
+                    if (item.value >= 0 && hitBeat) // not a rest or a skipped note
+                    {
+                        List<FinalVoice> voices = PresetUtilities.BuildVoicesForPresetAtKeyVel(preset, (int)note, (int)velocity);
+                        foreach (var voice in voices)
+                        {
+                            DebugLog.Write($"Building sample {voice!.SampleHeader!.Name}, start {voice.SampleHeader.Start}, end {voice.SampleHeader.End}, length {voice.SampleHeader.End - voice.SampleHeader.Start}, loop start {voice.SampleHeader.StartLoop}, loop end {voice.SampleHeader.EndLoop}, sample rate {voice.SampleHeader.SampleRate}, original pitch {voice.SampleHeader.OriginalPitch}, pitch correction {voice.SampleHeader.PitchCorrection} for Intrument {voice.InstrumentName} with generators:");
+                            DebugLog.Write($"");
+                            //foreach (var SFgen in voice.Generators)
+                            //{
+                            //    DebugLog($"  {SFgen.Key}: {SFgen.Value}");
+                            //}                        // not a rest
+                            double[] instrumentSample = InstrumentSample.Get(new InstrumentSampleParameters
+                            {
+                                Duration = duration,
+                                Interval = interval,
+                                StartPitch = note,
+                                EndPitch = note,
+                                VolumeDb = currentValues.Volume,
+                                AttackEnabled = algorithmic.AttackEnabled,
+                                LoopEnabled = algorithmic.IsLooping,
+                                NoiseEnabled = algorithmic.NoiseEnabled,
+                                NoiseFrequency = algorithmic.NoiseFrequency,
+                                NoiseAmplitude = algorithmic.NoiseAmplitude,
+                                Tremolo = algorithmic.Tremolo,
+                                Vibrato = algorithmic.Vibrato,
+                                Voice = voice,
+                                SampleRate = PlayTypes.SampleRate,
+                                SoundFont = soundFont!
+                            });
+                            // apply pan and merge into audio buffer here
+                            double left = (1 - currentValues.Pan) / 2;
+                            double right = (1 + currentValues.Pan) / 2;
+                            int instrumentStartIndex = (int)(time * PlayTypes.SampleRate) * 2; // in stereobuffer pointer space
+                            DebugLog.Write($"Generated sample for note {note} with {instrumentSample.Length} samples at 44100Hz. Pan is (left, right)=({left},{right}). Merging at t={time}(sec), index={instrumentStartIndex}");
+                            for (int i = 0; i < instrumentSample.Length; i++)
+                            {
+                                int bufferIndex = instrumentStartIndex + 2 * i;
+                                if (bufferIndex + 1 < stereoBuffer.Length)
+                                {
+                                    if (double.IsNaN(instrumentSample[i])) throw new Exception($"Instrument sample is not a number at location {i}, time={time}");
+                                    stereoBuffer[bufferIndex] += instrumentSample[i] * left;
+                                    stereoBuffer[bufferIndex + 1] += instrumentSample[i] * right;
+                                }
+                            }
+
+                            SoundRollBuilder.AddInstrument(new TimeMidiLine
+                            {
+                                Start = new TimeMidiPoint { Time = time, Midi = (int)note },
+                                End = new TimeMidiPoint { Time = time + duration, Midi = (int)note }
+                            }, soundFontName, preset.Name);
+                        }
+                    }
+                    time += interval;
+                    beats += beat;
+                }
             }
             // TODO add the reverb and other global effects here in the future
 

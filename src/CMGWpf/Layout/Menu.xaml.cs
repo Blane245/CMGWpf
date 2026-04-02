@@ -1,5 +1,7 @@
 ﻿using CMGWpf.Services;
+using CMGWpf.Types;
 using CMGWpf.View;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -30,11 +32,10 @@ namespace CMGWpf.Layout
         {
             if (FileViewModel.Instance.IsDirty)
             {
-                FileViewModel.Instance.Status = "File is dirty. CMG not Exited.";
+                FileViewModel.Instance.StatusMessages = [new Message { Text = "File is dirty. CMG not Exited.", Error = false }];
                 MessageBoxResult result = MessageBox.Show("The current file has been modified and the changes will be lost. Do you want to exit?", "File Dirty", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result != MessageBoxResult.Yes) { return; }
             }
-            else
                 Application.Current.Shutdown();
         }
 

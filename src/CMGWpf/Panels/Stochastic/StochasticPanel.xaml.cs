@@ -1,5 +1,6 @@
 ﻿using CMGWpf.Model;
 using CMGWpf.Services;
+using CMGWpf.Types;
 using CMGWpf.Utilities;
 using CMGWpf.View;
 using System.Collections.ObjectModel;
@@ -33,30 +34,30 @@ namespace CMGWpf.Panels.Stochastic
             {
                 newVm.PropertyChanged += ViewModel_PropertyChanged;
                 UpdateDynamicColumns(newVm);
-                newVm.Errors.Clear();
+                newVm.Messages.Clear();
             }
         }
 
         private async Task LoadEnsembleNamesAsync(GeneratorViewModel vm)
         {
-            vm.Errors = [];
+            vm.Messages = [];
             try
             {
-                vm.Errors.Add("Loading ensembles...");
+                vm.Messages.Add(new Message { Text = "Loading ensembles...", Error = false });
                 var ensembles = await EnsembleUtilities.GetEnsembleListAsync();
-                vm.Errors.Add($"Loaded {ensembles.Count} ensembles");
+                vm.Messages.Add(new Message { Text = $"Loaded {ensembles.Count} ensembles", Error = false });
             }
             catch (HttpRequestException ex)
             {
-                vm.Errors.Add($"HTTP Error: {ex.Message}");
+                vm.Messages.Add(new Message { Text = $"HTTP Error: {ex.Message}", Error = true }  );
             }
             catch (TaskCanceledException ex)
             {
-                vm.Errors.Add($"Request timeout error {ex.Message} - check if DB server is running at {GlobalService.Instance.DbServer}:{GlobalService.Instance.DbPort}");
+                vm.Messages.Add(new Message { Text = $"Request timeout error {ex.Message} - check if DB server is running at {GlobalService.Instance.DbServer}:{GlobalService.Instance.DbPort}", Error = true });
             }
             catch (Exception ex)
             {
-                vm.Errors.Add($"Error loading ensemble names: {ex.Message}");
+                vm.Messages.Add(new Message { Text = $"Error loading ensemble names: {ex.Message}", Error = true });
             }
         }
 

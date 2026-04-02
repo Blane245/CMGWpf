@@ -46,6 +46,7 @@
                 <MenuItem Header="_Edit" Background="Transparent">
                     <MenuItem Header="_Add Track..." Command="{Binding AddTrackCommand}"/>
                     <MenuItem Header="_Comment..." Command="{Binding EditCommentCommand}"/>
+                    <MenuItem Header="_Preferences..." Command="{Binding EditPReferencesCommand}"/>
                 </MenuItem>
                 <MenuItem Header="_Play" Background="Transparent">
                     <MenuItem Header="_Play..." Command="{Binding PlayCommand}"/>

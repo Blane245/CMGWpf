@@ -27,7 +27,7 @@ namespace CMGWpf.MVVM
                     if (trackVM.Track != vm.Track)
                         newTracks.Add(trackVM);
                 }
-                vm.Status = $"Deleted track: '{vm.Track.Name}'";
+                vm.Status = [new Message { Text = $"Deleted track: '{vm.Track.Name}'", Error = false }];
                 TracksViewModel.Instance.Tracks = newTracks;
                 TracksViewModel.Instance.NotifyTracksChanged(newTracks);
                 vm.IsDirty = true;
@@ -35,7 +35,7 @@ namespace CMGWpf.MVVM
             else
             {
                 // User canceled deletion, exit the method
-                vm.Status = $"Deletion of track '{vm.Track.Name}' canceled.";
+                vm.Status = new ObservableCollection<Message> { new Message { Text = $"Deletion of track '{vm.Track.Name}' canceled.", Error = false } };
                 return;
             }
 
@@ -74,14 +74,14 @@ namespace CMGWpf.MVVM
             //newTrack.Name = newName;
             vm.Track.Name = newName;
             vm.IsDirty = true;
-            vm.Status = $"Renamed track: '{oldName}' to '{newName}'";
+            vm.Status = new ObservableCollection<Message> { new Message { Text = $"Renamed track: '{oldName}' to '{newName}'", Error = false } };
             vm.NotifyTrackChanged(vm.Track);
             vm.ActiveDialog?.Close();
         }
         public void RenameCancel()
         {
             System.Diagnostics.Debug.WriteLine("Cancel Track Rename command being executed.");
-            vm.Status = "Track name not changed.";
+            vm.Status = new ObservableCollection<Message> { new Message { Text = "Track name not changed.", Error = false } };
             vm.ActiveDialog?.Close();
         }
 
@@ -91,7 +91,7 @@ namespace CMGWpf.MVVM
             System.Diagnostics.Debug.WriteLine($"Mute track {vm.Track.Name} command executed.");
             vm.Track.Mute = !vm.Track.Mute;
             vm.IsDirty = true;
-            vm.Status = $"Track '{vm.Track.Name}' is now {(vm.Track.Mute ? "muted" : "unmuted")}.";
+            vm.Status = new ObservableCollection<Message> { new Message { Text = $"Track '{vm.Track.Name}' is now {(vm.Track.Mute ? "muted" : "unmuted")}.", Error = false } };
             vm.NotifyTrackChanged(vm.Track);
         }
         public void Solo()
@@ -100,7 +100,7 @@ namespace CMGWpf.MVVM
             System.Diagnostics.Debug.WriteLine($"Solo track {vm.Track.Name} command executed.");
             vm.Track.Solo = !vm.Track.Solo;
             vm.IsDirty = true;
-            vm.Status = $"Track '{vm.Track.Name}' is now {(vm.Track.Solo ? "soloed" : "unsoloed")}.";
+            vm.Status = new ObservableCollection<Message> { new Message { Text = $"Track '{vm.Track.Name}' is now {(vm.Track.Solo ? "soloed" : "unsoloed")}.", Error = false } };
             vm.NotifyTrackChanged(vm.Track);
         }
         public void MoveUp() { 
@@ -123,7 +123,7 @@ namespace CMGWpf.MVVM
                 TracksViewModel.Instance.Tracks = newTracks;
                 TracksViewModel.Instance.NotifyTracksChanged(newTracks);
                 vm.IsDirty = true;
-                vm.Status = $"Moved track '{vm.Track.Name}' up.";
+                vm.Status = new ObservableCollection<Message> { new Message { Text = $"Moved track '{vm.Track.Name}' up.", Error = false } };
             }
         }
         public void MoveDown() { 
@@ -146,29 +146,9 @@ namespace CMGWpf.MVVM
                 TracksViewModel.Instance.Tracks = newTracks;
                 TracksViewModel.Instance.NotifyTracksChanged(newTracks);
                 vm.IsDirty = true;
-                vm.Status = $"Moved track '{vm.Track.Name}' down.";
+                vm.Status = new ObservableCollection<Message> { new Message { Text = $"Moved track '{vm.Track.Name}' down.", Error = false } };
             }
         }
-        //TODO handle add generator based on the menu item selected
-        //public void AddSilentGenerator()
-        //{
-        //    if (vm.Track == null) return;
-        //    System.Diagnostics.Debug.WriteLine($"Add Silent generator to track {vm.Track.Name} command executing.");
-        //    int uid = Uid.Get("generator", FileViewModel.Instance.File.Tracks);
-        //    Silent generator = new(uid, vm.Track);
-        //    GeneratorViewModel generatorViewModel = new(generator, vm);
-        //    generatorViewModel.UIGenerator = generator.Clone(vm.Track);
-        //    generatorViewModel.Mode = GeneratorEditMode.Add;
-        //    generatorViewModel.NewGeneratorName = generator.Name;
-        //    vm.ActiveDialog = new SilentGeneratorDialog
-        //    {
-        //        DataContext = generatorViewModel,
-        //        Owner = Application.Current.MainWindow,
-        //        WindowStartupLocation = WindowStartupLocation.CenterOwner,
-        //        SizeToContent = SizeToContent.WidthAndHeight,
-        //    };
-        //    vm.ActiveDialog.ShowDialog();
-        //}
         public void AddGenerator(GENERATORTYPE type)
         {
             if (vm.Track == null) return;

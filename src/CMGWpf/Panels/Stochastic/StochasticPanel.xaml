@@ -87,24 +87,24 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         </Grid>
         <!-- The Voices data area -->
         <StackPanel Grid.Row="2" Orientation="Vertical">
-            <StackPanel Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
                     <Label Content="Voices" HorizontalAlignment="Center" FontSize="16" FontWeight="Bold" />
                     <!-- the voice data table showing the headers and voice properties -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="200">
                     <DataGrid ItemsSource="{Binding StochasticGenerator.Voices}" AutoGenerateColumns="False" CanUserAddRows="False" Margin="5">
                         <DataGrid.Columns>
                             <DataGridCheckBoxColumn Header="Mute" Binding="{Binding Muted, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged }" IsReadOnly="False" ToolTipService.ToolTip="Mute the voice in the composition"/>
                             <DataGridTemplateColumn Header="Volume" ToolTipService.ToolTip="The volume of the voice [-10,+10] dB">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Slider  Minimum="-10" Maximum="10" Interval="1" TickFrequency="1" TickPlacement="TopLeft" IsSnapToTickEnabled="True" Value="{Binding Volume, Mode=TwoWay}" Margin="5" Width="100"/>
+                                        <Slider  Minimum="-10" Maximum="10" Interval="1" TickFrequency="1" TickPlacement="TopLeft" IsSnapToTickEnabled="True" Value="{Binding Volume, Mode=TwoWay}" Width="100"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Velocity">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Slider Minimum="0" Maximum="127"  Value="{Binding Velocity, Mode=TwoWay}" Margin="5" Width="100"/>
+                                        <Slider Minimum="0" Maximum="127"  Value="{Binding Velocity, Mode=TwoWay}" Width="100"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -118,15 +118,13 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                             <DataGridTextColumn Header="Preset" Binding="{Binding PresetName}" IsReadOnly="True"/>
                         </DataGrid.Columns>
                     </DataGrid>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel Orientation="Vertical">
+                </ScrollViewer>
             </StackPanel>
         </StackPanel>
         <!-- The Composition displaying only the unmuted voices -->
         <StackPanel Grid.Row="3" Orientation="Vertical">
             <Label Content="Composition" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Height="200">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Height="400">
             <DataGrid x:Name="CompositionDataGrid" 
                       ItemsSource="{Binding StochasticComposition}" 
                       AutoGenerateColumns="False" 

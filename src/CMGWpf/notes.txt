@@ -1,0 +1,19 @@
+bugs
+	playback is terminating at the generator stop time not as the clouds fade away
+	play muted voices are appearing in the voices legend. are they being played?
+	width of track control icon are too large taking space away from track name
+	CMG windows are overlapping task bar
+	fix time interval highlighting
+testing
+	do thorough testing of all generator parameters
+	put the DSP through its paces check all controls and algorithms.
+implementation
+	finish preferences
+	implement ready play - track/genertor solo/mute, single generator and timeinterval filters
+	implement play from generator menu and dialog
+	tools menu
+	track tools menu
+	add tool tips
+	consider adding timeinterval to the xml
+	implement reporting
+	write documentation

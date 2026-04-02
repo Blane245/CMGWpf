@@ -1,9 +1,15 @@
 ﻿using CMGWpf.Model.Generators;
+using CMGWpf.Types;
 using CMGWpf.Utilities;
+using Microsoft.Xaml.Behaviors.Core;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 using System.Xml;
+using System.Xml.Linq;
+using static CMGWpf.Types.DBTypes;
 
 namespace CMGWpf.Model
 {
@@ -13,12 +19,20 @@ namespace CMGWpf.Model
         Oscillator,
         Markovian,
         Wiener,
+        Autoregressive,
+        Sequence
     }
     public enum MARKOVSTATE
     {
         SAME,
         UP,
         DOWN,
+    }
+    public enum SEQUENCEATTRIBUTE
+    {
+        attack,
+        duration,
+        volue
     }
     public static class AlgorithmFactory
     {
@@ -30,6 +44,8 @@ namespace CMGWpf.Model
                 ALGORITHMTYPE.Oscillator => new Oscillator(),
                 ALGORITHMTYPE.Markovian => new Markovian(),
                 ALGORITHMTYPE.Wiener => new Wiener(),
+                ALGORITHMTYPE.Autoregressive => new Autoregressive(),
+                ALGORITHMTYPE.Sequence => new Sequence(),
                 _ => throw new ArgumentException("Unknown generator type", nameof(type)),
             };
         }
@@ -46,9 +62,9 @@ namespace CMGWpf.Model
         public abstract double GetCurrentValue(double time);
         public abstract void AppendXML(XmlDocument doc, XmlElement elem);
         public abstract void LoadXML(XmlElement algorithmElem);
-        public ObservableCollection<string> Validate()
+        public virtual ObservableCollection<Message> Validate()
         {
-            ObservableCollection<string> errors = [];
+            ObservableCollection<Message> errors = [];
             return errors;
         }
         public override string ToString() => "No Algorithm";
@@ -71,7 +87,7 @@ namespace CMGWpf.Model
         }
         public Constant(double? value) : this()
         {
-                Value = value ?? 0;
+            Value = value ?? 0;
         }
         public override Constant Clone()
         {
@@ -92,7 +108,7 @@ namespace CMGWpf.Model
         {
             Value = XMLFunctions.GetAttributeDouble(elem, "value", 0);
         }
-        public new ObservableCollection<string> Validate() => [];
+        public override ObservableCollection<Message> Validate() => [];
         public override double GetCurrentValue(double _time) => Value;
         public override string ToString() => "Constant";
     }
@@ -215,20 +231,20 @@ namespace CMGWpf.Model
             Phase = XMLFunctions.GetAttributeDouble(elem, "phase", 0);
         }
 
-        public new ObservableCollection<string> Validate()
+        public override ObservableCollection<Message> Validate()
         {
-            ObservableCollection<string> errors = [];
-            if (Frequency < 0 || Frequency > 10000) errors.Add("Frequency must be between 0 and 10000.");
-            if (Amplitude < 0 || Amplitude > 1000) errors.Add("Amplitude must be between 0 and 1000.");
-            if (Phase < 0 || Phase > 360) errors.Add("Phase must be between 0 and 360.");
+            ObservableCollection<Message> errors = [];
+            if (Frequency < 0 || Frequency > 10000) errors.Add(new Message() { Text = "Frequency must be between 0 and 10000.", Error = true });
+            if (Amplitude < 0 || Amplitude > 1000) errors.Add(new Message() { Text = "Amplitude must be between 0 and 1000.", Error = true });
+            if (Phase < 0 || Phase > 360) errors.Add(new Message() { Text = "Phase must be between 0 and 360.", Error = true });
             return errors;
         }
         public override double GetCurrentValue(double time)
         {
             return Modulator switch
             {
-                MODULATORTYPE.NoModulator => ModulatorFunctions.NoModulator(time, Center, Frequency/1000, Amplitude, Phase),
-                MODULATORTYPE.Sine => ModulatorFunctions.Sine(time, Center, Frequency/1000, Amplitude, Phase),
+                MODULATORTYPE.NoModulator => ModulatorFunctions.NoModulator(time, Center, Frequency / 1000, Amplitude, Phase),
+                MODULATORTYPE.Sine => ModulatorFunctions.Sine(time, Center, Frequency / 1000, Amplitude, Phase),
                 MODULATORTYPE.Square => ModulatorFunctions.Square(time, Center, Frequency / 1000, Amplitude, Phase),
                 MODULATORTYPE.Triangle => ModulatorFunctions.Triangle(time, Center, Frequency / 1000, Amplitude, Phase),
                 MODULATORTYPE.AscendingSawTooth => ModulatorFunctions.AscendingSawTooth(time, Center, Frequency / 1000, Amplitude, Phase),
@@ -272,57 +288,13 @@ namespace CMGWpf.Model
         private MARKOVSTATE CurrentState { get; set; } = MARKOVSTATE.SAME;
         private double CurrentValue { get; set; } = 0;
         private double _start = 0;
-        public double Start
-        {
-            get => _start;
-            set
-            {
-                if (_start != value)
-                {
-                    _start = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Start { get => _start; set { if (_start != value) { _start = value; OnPropertyChanged(); } } }
         private double lo = 0;
-        public double Lo
-        {
-            get { return lo; }
-            set
-            {
-                if (lo != value)
-                {
-                    lo = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Lo { get { return lo; } set { if (lo != value) { lo = value; OnPropertyChanged(); } } }
         private double hi = 0;
-        public double Hi
-        {
-            get { return hi; }
-            set
-            {
-                if (hi != value)
-                {
-                    hi = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Hi { get { return hi; } set { if (hi != value) { hi = value; OnPropertyChanged(); } } }
         private double step = 0;
-        public double Step
-        {
-            get { return step; }
-            set
-            {
-                if (step != value)
-                {
-                    step = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Step { get { return step; } set { if (step != value) { step = value; OnPropertyChanged(); } } }
         // TransitionProbabilities is a 3x3 matrix representing the transition probabilities between the states: SAME, UP, and DOWN.
         private double[,] TransitionProbabilities = new double[3, 3]
         {
@@ -337,9 +309,7 @@ namespace CMGWpf.Model
                 new("Down",[ "1", "0", "0" ])
             ];
         public ObservableCollection<TransitionRow> TransitionRows { get { return transitionRows; } set { transitionRows = value; } }
-        public Markovian()
-        {
-        }
+        public Markovian() { }
         public override Markovian Clone()
         {
             Markovian n = new()
@@ -431,20 +401,20 @@ namespace CMGWpf.Model
                 new TransitionRow("Down", [TransitionProbabilities[2, 0].ToString(), TransitionProbabilities[2, 1].ToString(), TransitionProbabilities[2, 2].ToString()])
             ];
         }
-        public new ObservableCollection<string> Validate()
+        public override ObservableCollection<Message> Validate()
         {
-            ObservableCollection<string> errors = [];
+            ObservableCollection<Message> errors = [];
             if (Lo > Hi)
             {
-                errors.Add("Markovian Lo must be less than or equal to Hi.");
+                errors.Add(new Message() { Text = "Markovian Lo must be less than or equal to Hi.", Error = true });
             }
             if (Step < 0)
             {
-                errors.Add("Markovian Step must be nonnegative.");
+                errors.Add(new Message() { Text = "Markovian Step must be nonnegative.", Error = true });
             }
             if (Start < Lo || Start > Hi)
             {
-                errors.Add("Start must be between Lo and Hi, inclusive.");
+                errors.Add(new Message() { Text = "Start must be between Lo and Hi, inclusive.", Error = true });
             }
             // loop through all of the transition rows to check if they can be parsed as double, update the transitionprobabilities if so, otherwise add an error message
             for (int i = 0; i < 3; i++)
@@ -455,7 +425,7 @@ namespace CMGWpf.Model
                     string cell = row[j];
                     if (!double.TryParse(cell, out double value) || value < 0 || value > 1)
                     {
-                        errors.Add($"Markovian Transition probabilities for {((MARKOVSTATE)i).ToString()} to {((MARKOVSTATE)j).ToString()} must be a number and be between 0 and 1.");
+                        errors.Add(new Message() { Text = $"Markovian Transition probabilities for {((MARKOVSTATE)i).ToString()} to {((MARKOVSTATE)j).ToString()} must be a number and be between 0 and 1.", Error = true });
                     }
                     else
                     {
@@ -465,15 +435,15 @@ namespace CMGWpf.Model
             }
             if (Math.Abs(TransitionProbabilities[0, 0] + TransitionProbabilities[0, 1] + TransitionProbabilities[0, 2] - 1) > 0.001)
             {
-                errors.Add("Markovian Transition probabilities for SAME must sum to 1.");
+                errors.Add(new Message() { Text = "Markovian Transition probabilities for SAME must sum to 1.", Error = true });
             }
             if (Math.Abs(TransitionProbabilities[1, 0] + TransitionProbabilities[1, 1] + TransitionProbabilities[1, 2] - 1) > 0.001)
             {
-                errors.Add("Markovian Transition probabilities for UP must sum to 1.");
+                errors.Add(new Message() { Text = "Markovian Transition probabilities for UP must sum to 1.", Error = true });
             }
             if (Math.Abs(TransitionProbabilities[2, 0] + TransitionProbabilities[2, 1] + TransitionProbabilities[2, 2] - 1) > 0.001)
             {
-                errors.Add("Markovian Transition probabilities for DOWN must sum to 1.");
+                errors.Add(new Message() { Text = "Markovian Transition probabilities for DOWN must sum to 1.", Error = true });
             }
             return errors;
         }
@@ -613,7 +583,7 @@ namespace CMGWpf.Model
             Wiener n = new()
             {
                 Seed = this.Seed,
-                Random = new Random(this.Seed.GetHashCode()),
+                Random = (Seed == string.Empty) ? new Random() : new Random(Seed.GetHashCode()),
                 Initial = this.Initial,
                 Trend = this.Trend,
                 Dispersion = this.Dispersion,
@@ -652,13 +622,13 @@ namespace CMGWpf.Model
             Lo = XMLFunctions.GetAttributeDouble(elem, "lo", 0);
             Hi = XMLFunctions.GetAttributeDouble(elem, "hi", 0);
         }
-        public new ObservableCollection<string> Validate()
+        public override ObservableCollection<Message> Validate()
         {
-            ObservableCollection<string> errors = [];
-            if (Lo > Hi) errors.Add("Wiener Lo must be less than or equal to Hi.");
-            if (Initial < Lo || Initial > Hi) errors.Add("Wiener Initial must be between Lo and Hi.");
-            if (Trend < 0) errors.Add("Wiener Trend must be nonnegative.");
-            if (Dispersion < 0) errors.Add("Wiener Dispersion must be nonnegative.");
+            ObservableCollection<Message> errors = [];
+            if (Lo > Hi) errors.Add(new Message() { Text = "Wiener Lo must be less than or equal to Hi.", Error = true });
+            if (Initial < Lo || Initial > Hi) errors.Add(new Message() { Text = "Wiener Initial must be between Lo and Hi.", Error = true });
+            if (Trend < 0) errors.Add(new Message() { Text = "Wiener Trend must be nonnegative.", Error = true });
+            if (Dispersion < 0) errors.Add(new Message() { Text = "Wiener Dispersion must be nonnegative.", Error = true });
             return errors;
         }
 
@@ -719,5 +689,193 @@ namespace CMGWpf.Model
 
         public override string ToString() => "Tremolo";
     }
+    public class Autoregressive() : Algorithm
+    {
+        private string _seed = "";
+        public string Seed { get => _seed; set { if (_seed != value) { _seed = value; OnPropertyChanged(); Random = (_seed == string.Empty) ? new Random() : new Random(_seed.GetHashCode()); OnPropertyChanged(nameof(Random)); } } }
+        public Random Random { get; set; } = new();
+        private double _initial = 0;
+        public double Initial { get => _initial; set { if (_initial != value) { _initial = value; OnPropertyChanged(); } } }
+        private double _alpha = 0;
+        public double Alpha { get => _alpha; set { if (_alpha != value) { _alpha = value; OnPropertyChanged(); } } }
+        private double _sigma = 0;
+        public double Sigma { get => _sigma; set { if (_sigma != value) { _sigma = value; OnPropertyChanged(); } } }
+        private double _lo = 0;
+        public double Lo { get => _lo; set { if (_lo != value) { _lo = value; OnPropertyChanged(); } } }
+        private double _hi = 0;
+        public double Hi { get => _hi; set { if (_hi != value) { _hi = value; OnPropertyChanged(); } } }
+        private double _currentValue = 0;
+        public override Autoregressive Clone()
+        {
+            Autoregressive n = (Autoregressive)this.MemberwiseClone();
+            n.Random = (Seed == string.Empty) ? new Random() : new Random(Seed.GetHashCode());
+            return n;
+        }
+        public bool Equals(Algorithm value)
+        {
+            return value.GetType() == GetType() &&
+                value is Autoregressive g &&
+                Initial == g.Initial &&
+                Seed == g.Seed &&
+                Alpha == g.Alpha &&
+                Sigma == g.Sigma &&
+                Lo == g.Lo &&
+                Hi == g.Hi;
+        }
+        public override void AppendXML(XmlDocument doc, XmlElement elem)
+        {
+            elem.SetAttribute("seed", Seed);
+            elem.SetAttribute("alpha", Alpha.ToString(CultureInfo.InvariantCulture));
+            elem.SetAttribute("sigma", Sigma.ToString(CultureInfo.InvariantCulture));
+            elem.SetAttribute("lo", Lo.ToString(CultureInfo.InvariantCulture));
+            elem.SetAttribute("hi", Hi.ToString(CultureInfo.InvariantCulture));
+        }
+        public override void LoadXML(XmlElement elem)
+        {
+            Seed = XMLFunctions.GetAttributeString(elem, "seed", string.Empty);
+            Random = (Seed == string.Empty) ? new Random() : new Random(Seed.GetHashCode());
+            Alpha = XMLFunctions.GetAttributeDouble(elem, "alpha", 0);
+            Sigma = XMLFunctions.GetAttributeDouble(elem, "sigma", 0);
+            Lo = XMLFunctions.GetAttributeDouble(elem, "lo", 0);
+            Hi = XMLFunctions.GetAttributeDouble(elem, "hi", 0);
+        }
+        public override ObservableCollection<Message> Validate()
+        {
+            ObservableCollection<Message> errors = [];
+            if (Lo > Hi) errors.Add(new Message() { Text = "Autoregressive Lo must be less than or equal to Hi.", Error = true });
+            if (Initial < Lo || Initial > Hi) errors.Add(new Message() { Text = "Autoregressive Initial must be between Lo and Hi.", Error = true });
+            if (Alpha < 0) errors.Add(new Message() { Text = "Autoregressive Alpha must be positive.", Error = true });
+            if (Sigma < 0) errors.Add(new Message() { Text = "Autoregressive Sigma must be positive.", Error = true });
+            return errors;
+        }
+        public override double GetCurrentValue(double time)
+        {
+            if (time == 0) { _currentValue = Initial; return _currentValue; }
+            double epsilon = Sigma * (Random.NextDouble() - 0.5);
+            double newValue = Math.Clamp((_currentValue - Initial) * Alpha + epsilon + Initial, Lo, Hi);
+            _currentValue = newValue;
+            return newValue;
+        }
+        public override string ToString() => "Autoregressive";
+    }
+    public class Sequence : Algorithm
+    {
+        private string _name = "";
+        // when the sequence name changes , we need to load the sequence items from the CMG DB based on the new name. This is done in the setter of the Name property.
+        private async void LoadSequenceItems(string name)
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
+                Sequence sequence = await NoteSequenceUtilities.GetNoteSequenceAsync(name);
+                _items = [.. sequence.Items];
+            }
+            else
+            {
+                _items = [];
+            }
+            OnPropertyChanged(nameof(Items));
+        }
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value; LoadSequenceItems(_name); OnPropertyChanged();
+                }
+            }
+        }
+        private double _transpose = 0;
+        public double Transpose { get => _transpose; set { if (_transpose != value) { _transpose = value; OnPropertyChanged(); } } }
+        private ObservableCollection<SequenceItem> _items = [];
+        public ObservableCollection<SequenceItem> Items { get => _items; set { if (_items != value) { _items = value; OnPropertyChanged(); } } }
+        private bool _reverseSequence = false;
+        public bool ReverseSequence { get => _reverseSequence; set { if (_reverseSequence != value) { _reverseSequence = value; OnPropertyChanged(); } } }
+        private bool _reflectSequence = false;
+        public bool ReflectSequence { get => _reflectSequence; set { if (_reflectSequence != value) { _reflectSequence = value; OnPropertyChanged(); } } }
+        private double _reflectPitch = 0;
+        public double ReflectPitch { get => _reflectPitch; set { if (_reflectPitch != value) { _reflectPitch = value; OnPropertyChanged(); } } }
 
+        public Sequence() { }
+        public override Sequence Clone()
+        {
+            Sequence n = (Sequence)this.MemberwiseClone();
+            n.Items = [.. this.Items];
+            return n;
+        }
+        public bool Equals(Algorithm value)
+        {
+            return value.GetType() == GetType() &&
+                value is Sequence g &&
+                Name == g.Name &&
+                Transpose == g.Transpose &&
+                ReverseSequence == g.ReverseSequence &&
+                ReflectSequence == g.ReflectSequence &&
+                ReflectPitch == g.ReflectPitch &&
+                Items.SequenceEqual(g.Items);
+        }
+        public override void AppendXML(XmlDocument doc, XmlElement elem)
+        {
+            elem.SetAttribute("name", Name);
+            elem.SetAttribute("transpose", Transpose.ToString());
+            elem.SetAttribute("reverseSequence", ReverseSequence.ToString());
+            elem.SetAttribute("reflectSequence", ReflectSequence.ToString());
+            elem.SetAttribute("reflectPitch", ReflectPitch.ToString());
+        }
+        public override void LoadXML(XmlElement elem)
+        {
+            Name = XMLFunctions.GetAttributeString(elem, "name", "");
+            Transpose = XMLFunctions.GetAttributeDouble(elem, "transpose", 0);
+            ReverseSequence = XMLFunctions.GetAttributeBool(elem, "reverseSequence", false);
+            ReflectSequence = XMLFunctions.GetAttributeBool(elem, "reflectSequence", false);
+            ReflectPitch = XMLFunctions.GetAttributeDouble(elem, "reflectPitch", 0);
+            // load the sequence from the CMG DB based on the name
+            Items = NoteSequenceUtilities.GetNoteSequenceAsync(Name).Result.Items;
+        }
+        public override ObservableCollection<Message> Validate()
+        {
+            ObservableCollection<Message> errors = [];
+            if (string.IsNullOrEmpty(Name)) errors.Add(new Message() { Text = "Sequence Name cannot be empty.", Error = true });
+            if (Items == null || Items.Count == 0) errors.Add(new Message() { Text = "Sequence must have at least one item.", Error = true });
+            return errors;
+        }
+        public void SetReverse()
+        {
+            if (this.ReflectSequence)
+            {
+                Items = [.. Items.Reverse()];
+            }
+        }
+        public void SetReflect()
+        {
+            if (this.ReflectSequence)
+            {
+                Items = [.. Items.Select(item => new SequenceItem {
+                    value = 2 * ReflectPitch - item.value,
+                beats = item.beats,
+                id = item.id})];
+            }
+        }
+        private int beatsToIndex(double beat, SequenceItem[] items)
+        {
+            if (items.Length == 0) return 0;
+            double beatSum = 0;
+            for (int i = 0; i < items.Length; i++)
+            {
+                if (items[i].beats + beatSum >= beat - 1) return i;
+                beatSum += items[i].beats;
+                if (i == items.Length - 1) return i;
+            }
+            return -1;
+        }
+        public override double GetCurrentValue(double time)
+        {
+            int itemIndex = beatsToIndex(time, [.. Items]);
+            double value = itemIndex < 0 ? 0 : Items[itemIndex].value;
+            return value + Transpose;
+        }
+        public override string ToString() => "Sequence";
+
+    }
 }
