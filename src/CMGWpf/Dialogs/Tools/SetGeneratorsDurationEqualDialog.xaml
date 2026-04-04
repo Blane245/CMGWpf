@@ -1,0 +1,32 @@
+﻿<Window x:Class="CMGWpf.Dialogs.Tools.SetGeneratorsDurationEqualDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CMGWpf.Dialogs.Tools"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        d:DataContext="{d:DesignInstance Type=viewmodel:ToolsViewModel}"
+        mc:Ignorable="d"
+        WindowStyle="ToolWindow"
+        Background="White"
+        WindowStartupLocation="CenterOwner"
+        Title="Set Generators Duration Equal" MinHeight="100" MinWidth="400">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Primary Generator: "/>
+                <ComboBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding PrimaryGeneratorName, Mode=TwoWay}"/>
+                <Label Content="Secondary Generators: "/>
+                <ListBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding SecondaryGeneratorNames}" SelectionMode="Multiple"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Maintain Start or Stop Time? "/>
+                <ComboBox ItemsSource="{Binding MaintainAlignTimeOptions}" SelectedItem="{Binding AlignTimeOption}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Set Equal" Command="{Binding SetGeneratorsDurationEqualCommand}"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

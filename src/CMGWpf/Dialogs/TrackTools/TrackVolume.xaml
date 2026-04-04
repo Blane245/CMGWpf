@@ -1,0 +1,32 @@
+﻿<Window x:Class="CMGWpf.Dialogs.TrackTools.TrackVolume"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CMGWpf.Dialogs.TrackTools"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:view="clr-namespace:CMGWpf.View"
+             xmlns:services="clr-namespace:CMGWpf.Services"
+             d:DataContext="{d:DesignInstance Type=view:TrackViewModel}"
+             mc:Ignorable="d" 
+        WindowStyle="ToolWindow"
+        WindowStartupLocation="CenterOwner"
+        Width="350" Height="100"
+        Title="Adjust Track Volume"
+        Icon="/Assets/cmg-256.png"
+        >
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="New Track Volume for Track '"/>
+                <Label Content="{Binding Track.Name}"/>
+                <Label Content="' [-10,+10]dB: "/>
+                <xctk:IntegerUpDown Value="{Binding NewVolume, Mode=TwoWay}" Minimum="-10" Maximum="10"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="OK" Command="{Binding VolumeOKCommand}"/>
+            </StackPanel>
+        </StackPanel>
+
+    </Grid>
+</Window>

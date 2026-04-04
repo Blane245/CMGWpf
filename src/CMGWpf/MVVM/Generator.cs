@@ -1,6 +1,7 @@
 ﻿using CMGWpf.Dialogs;
 using CMGWpf.Model;
 using CMGWpf.Model.Generators;
+using CMGWpf.PlayFunctions;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
 using CMGWpf.View;
@@ -159,7 +160,7 @@ namespace CMGWpf.MVVM
             };
             vm.ActiveDialog.ShowDialog();
         }
-        public void MoveCopyAction ()
+        public void MoveCopyAction()
         {
             if (generator == null) return;
             Track? targetTrack = vm.SelectedTrack;
@@ -170,24 +171,24 @@ namespace CMGWpf.MVVM
             }
 
             Track sourceTrack = generator.Parent;
-            string newGeneratorName = "G"+Uid.Get("generator", FileViewModel.Instance.File.Tracks).ToString();
+            string newGeneratorName = "G" + Uid.Get("generator", FileViewModel.Instance.File.Tracks).ToString();
 
             // Use TracksViewModel to handle the operation - it will handle status, dialog closing, and refresh
             TracksViewModel.Instance.MoveOrCopyGenerator(
-                generator, 
-                sourceTrack, 
-                targetTrack, 
-                vm.MoveCopyMode, 
+                generator,
+                sourceTrack,
+                targetTrack,
+                vm.MoveCopyMode,
                 newGeneratorName
             );
         }
+        // This command causes the PlayEngine to startup with the current generator
         public void Play()
         {
-            vm.Status = [new Message { Text = $"Play command for generator '{generator.Name}' not implemented.", Error = true }];
+            PlayEngine.StartUp(generator);
         }
-
-    }
         #endregion
+    }
 }
 
     

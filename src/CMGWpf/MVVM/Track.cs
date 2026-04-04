@@ -1,4 +1,6 @@
 ﻿using CMGWpf.Dialogs;
+using CMGWpf.Dialogs.TrackTools;
+using CMGWpf.Model;
 using CMGWpf.Model.Generators;
 using CMGWpf.Types;
 using CMGWpf.View;
@@ -178,8 +180,69 @@ namespace CMGWpf.MVVM
             vm.ActiveDialog = activeDialog;
             vm.ActiveDialog.ShowDialog();
         }
-
-        //TODO handle track tools menu item selection
+        private static TrackShift? _trackShift = null;
+        private static TrackVolume? _trackVolume = null;
+        public void Shift()
+        {
+            if (vm.Track == null) return;
+            _trackShift = new() { 
+                Owner = Application.Current.MainWindow,
+                DataContext = vm
+            };
+            _trackShift.Show();
+        }
+        public void ShiftOK()
+        {
+            if (vm.Track == null) return;
+            // check that the shift amount will not cause any of the track's generator to have a start time less that 0
+            Generator? g = vm.Track.Generators.Find((g) => g.StartTime + vm.ShiftAmount < 0);
+            if (g != null)
+            {
+                _ = MessageBox.Show($"The shift amount will move the start time of at least one generator, '{g.Name}', before zero.", "Track Shift Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            Track newTrack = vm.Track.Clone();
+            foreach (var generator in newTrack.Generators)
+            {
+                generator.StartTime += vm.ShiftAmount;
+                generator.StopTime += vm.ShiftAmount;
+            }
+            vm.NotifyTrackChanged(newTrack);
+            _trackShift?.Close();
+            _trackShift = null;
+        }
+        public void Duplicate()
+        {
+            if (vm.Track == null) return;
+            MessageBoxResult response = MessageBox.Show($"Press OK to confirm duplication of track '{vm.Track.Name}' or Cancel to abort duplication.", "Track Duplication", MessageBoxButton.OKCancel);
+            if (response == MessageBoxResult.Cancel) return;
+            // duplicate the track by finding a new track uid, cloning the current one, and then adding the new track to the file
+            int uid = Utilities.Uid.Get("Track", FileViewModel.Instance.File.Tracks);
+            Track newTrack = vm.Track.Clone();
+            newTrack.Name = "T"+uid.ToString();
+            CMGFile newFile = FileViewModel.Instance.File.Clone();
+            newFile.Tracks.Add(newTrack);
+            FileViewModel.Instance.File = newFile; // should trigger a property change and update display
+        }
+        public void Volume()
+        {
+            if (vm.Track == null) return;
+            _trackVolume = new() 
+            { 
+                Owner = Application.Current.MainWindow,
+                DataContext = vm
+            };
+            _trackVolume.Show();
+        }
+        public void VolumeOK()
+        {
+            if (vm.Track == null) return;
+            Track newTrack = vm.Track.Clone();
+            newTrack.Volume = vm.NewVolume;
+            vm.NotifyTrackChanged(newTrack);
+            _trackVolume?.Close();
+            _trackVolume = null;
+        }
         #endregion
     }
 }

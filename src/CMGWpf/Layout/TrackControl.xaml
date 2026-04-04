@@ -82,9 +82,9 @@
             Margin="0,0,0,0"
         >
             <MenuItem Header="{materialIcons:MaterialIconExt Kind=Toolbox, HorizontalAlignment=Center, IconSize=18}" HorizontalAlignment="Center" BorderBrush="Transparent">
-                <MenuItem Header="Duplicate" Command="{Binding NotImplementedCommand}"/>
-                <MenuItem Header="Shift" Command="{Binding NotImplementedCommand}"/>
-                <MenuItem Header="Volume" Command="{Binding NotImplementedCommand}"/>
+                <MenuItem Header="Duplicate" Command="{Binding DuplicateCommand}"/>
+                <MenuItem Header="Shift" Command="{Binding ShiftCommand}"/>
+                <MenuItem Header="Volume" Command="{Binding VolumeCommand}"/>
             </MenuItem>
         </Menu>
         <Button x:Name="ModeDown" Grid.Row="2" Grid.Column="2" Command="{Binding MoveDownCommand}">

@@ -46,7 +46,7 @@ namespace CMGWpf.Model.Generators
         {
             return base.Validate();
         }
-        public override CurrentValues GetCurrentValues(double time, int beat)
+        public override CurrentValues GetCurrentValues(double time, double beat)
         {
             return new CurrentValues()
             {

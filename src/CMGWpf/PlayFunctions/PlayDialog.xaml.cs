@@ -38,7 +38,7 @@ namespace CMGWpf.PlayFunctions
         {
             double displayWidth = SizeService.Instance.DisplayWidth.Value;
             double displayHeight = SizeService.Instance.BodyHeight.Value;
-            double totalDuration = FileViewModel.Instance.PlayDuration;
+            double totalDuration = PlayViewModel.Instance.PlayDuration;
 
             // Calculate base canvas width, then add viewport width so we can scroll until content reaches left edge
             double baseWidth = SoundRollBuilder.CalculateCanvasWidth(totalDuration, displayWidth);
@@ -48,15 +48,15 @@ namespace CMGWpf.PlayFunctions
             ScrollRollCanvas.Height = SoundRollBuilder.CalculateCanvasHeight(displayHeight);
             double canvasTime = 60 * baseWidth / displayWidth; // Use base width for time calculation
             SoundRollBuilder.BuildGrid(ScrollRollCanvas, canvasTime);
-            FileViewModel.Instance.ScrollRollWidth = baseWidth; // Store base width, not total width
+            PlayViewModel.Instance.ScrollRollWidth = baseWidth; // Store base width, not total width
             //Debug.WriteLine($"PlayDialog_Loaded. Base Width: {baseWidth}, Canvas Width: {ScrollRollCanvas.Width}, ScrollRollHeight: {ScrollRollCanvas.Height}");
             SoundRollBuilder.BuildFixedGrid(SoundRollFixedCanvas, ScrollRollCanvas.Height);
-            SoundRollBuilder.AddInstrumentsToCanvas(ScrollRollCanvas, FileViewModel.Instance.PresetColors);
+            SoundRollBuilder.AddInstrumentsToCanvas(ScrollRollCanvas, PlayViewModel.Instance.PresetColors);
 
             // Subscribe to scroll position changes
             FileViewModel.Instance.PropertyChanged += (s, args) =>
             {
-                if (args.PropertyName == nameof(FileViewModel.Instance.CurrentPlayPosition))
+                if (args.PropertyName == nameof(PlayViewModel.Instance.CurrentPlayPosition))
                 {
                     UpdateScrollPosition();
                 }
@@ -65,7 +65,7 @@ namespace CMGWpf.PlayFunctions
 
         private void UpdateScrollPosition()
         {
-            double playPosition = FileViewModel.Instance.CurrentPlayPosition;
+            double playPosition = PlayViewModel.Instance.CurrentPlayPosition;
 
             // Calculate scroll offset using the same pixel-per-second ratio used to draw the content
             double scrollOffset = SoundRollBuilder.TimeToX(playPosition);

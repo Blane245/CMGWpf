@@ -8,11 +8,29 @@ testing
 	do thorough testing of all generator parameters
 	put the DSP through its paces check all controls and algorithms.
 implementation
-	implement ready play - track/genertor solo/mute, single generator and timeinterval filters
-	implement play from generator menu and dialog
-	tools menu
-	track tools menu
 	add tool tips
-	consider adding timeinterval to the xml
+	convert to normal windows in show mode allowing multiple genrators open at a time. will nee to consider impact of functions that affect generators outside of the editor. 
+	void DataWindow_Closing(object sender, CancelEventArgs e)
+        {
+            MessageBox.Show("Closing called");
+
+            // If data is dirty, notify user and ask for a response
+            if (this.isDataDirty)
+            {
+                string msg = "Data is dirty. Close without saving?";
+                MessageBoxResult result = 
+                  MessageBox.Show(
+                    msg, 
+                    "Data App", 
+                    MessageBoxButton.YesNo, 
+                    MessageBoxImage.Warning);
+                if (result == MessageBoxResult.No)
+                {
+                    // If user doesn't want to close, cancel closure
+                    e.Cancel = true;
+                }
+            }
+        }
+	add timeinterval to the xml
 	implement reporting
 	write documentation

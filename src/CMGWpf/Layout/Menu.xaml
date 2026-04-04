@@ -10,7 +10,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="25" d:DesignWidth="800"
              >
-        <Grid Background="Aquamarine" MouseDown="Grid_MouseDown">
+    <Grid MouseDown="Grid_MouseDown">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="40px"/>
             <ColumnDefinition Width="200px"/>
@@ -19,7 +19,7 @@
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0">
             <Image 
-                Source="pack://application:,,,/Assets/CGM2.png" 
+                Source="pack://application:,,,/Assets/cmg-256.png" 
                 Stretch="Uniform"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
@@ -27,8 +27,8 @@
                 MaxHeight="20" />
         </StackPanel>
         <StackPanel Grid.Column="1">
-            <Menu Background="Transparent">
-                <MenuItem Header="_File" Background="Transparent">
+            <Menu>
+                <MenuItem Header="_File">
                     <MenuItem Header="_New..." Command="{Binding FileNewCommand}"/>
                     <MenuItem Header="_Open..." Command="{Binding FileOpenCommand}"/>
                     <MenuItem Header="_Save" Command="{Binding FileSaveCommand}"/>
@@ -43,14 +43,23 @@
                     <Separator/>
                     <MenuItem Header="E_xit" Command="{Binding ExitFileCommand}"/>
                 </MenuItem>
-                <MenuItem Header="_Edit" Background="Transparent">
+                <MenuItem Header="_Edit">
                     <MenuItem Header="_Add Track..." Command="{Binding AddTrackCommand}"/>
                     <MenuItem Header="_Comment..." Command="{Binding EditCommentCommand}"/>
-                    <MenuItem Header="_Preferences..." Command="{Binding EditPReferencesCommand}"/>
+                    <MenuItem Header="_Preferences..." Command="{Binding GlobalServices.EditPreferencesCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
                 </MenuItem>
-                <MenuItem Header="_Play" Background="Transparent">
-                    <MenuItem Header="_Play..." Command="{Binding PlayCommand}"/>
-                    <MenuItem Header="_Report..." Command="{Binding RecordCommand}"/>
+                <MenuItem Header="_Tools">
+                    <MenuItem Header="Midi/Frequency Converter..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MidiFrequencyConverterCommand}"/>
+                    <MenuItem Header="Start CMG Database Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StartCMGDBEditorCommand}"/>
+                    <MenuItem Header="Measure Duration Calculator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MeasureDurationCalculatorCommand}"/>
+                    <MenuItem Header="Oscillator Frequency Calculator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=OscillatorFrequencyCalculatorCommand}"/>
+                    <MenuItem Header="Set Generators Duration Equal..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=SetGeneratorsDurationEqualCommand}"/>
+                    <MenuItem Header="Stagger Generators Start Time..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StaggerGeneratorsStartTimeCommand}"/>
+                    <MenuItem Header="Align Generator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=AlignGeneratorsCommand}"/>
+                </MenuItem>
+                <MenuItem Header="_Play">
+                    <MenuItem Header="_Play..." Command="{Binding PlayViewModel.PlayCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    <MenuItem Header="_Report..." Command="{Binding PlayViewModel.RecordCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
                 </MenuItem>
             </Menu>
         </StackPanel>

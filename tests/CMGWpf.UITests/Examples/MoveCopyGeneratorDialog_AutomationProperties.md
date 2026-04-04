@@ -31,11 +31,11 @@ Here's how to modify `src\CMGWpf\Dialogs\MoveCopyGeneratorDialog.xaml`:
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0" Background="Aquamarine">
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0">
             <Label Content="{Binding MoveCopyMode}" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>
             <Label Content="Generator" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>
         </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0" Background="Aquamarine">
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0">
             <Button x:Name="CloseDialog" 
                     Width="20" 
                     HorizontalAlignment="Right" 

@@ -1,0 +1,33 @@
+﻿<Window x:Class="CMGWpf.Dialogs.Tools.MeasureDurationCalculatorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CMGWpf.Dialogs.Tools"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        d:DataContext="{d:DesignInstance Type=viewmodel:ToolsViewModel}"
+        mc:Ignorable="d"
+        WindowStyle="ToolWindow"
+        Background="White"
+        WindowStartupLocation="CenterOwner"
+        Title="Measure Duration Calculator" Height="80" Width="700"
+        >
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <Label Content="Number of Beats [1,100]: "/>
+            <xctk:DoubleUpDown Value="{Binding BeatCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="100" Increment="1" Width="70"/>
+            <Label Content="Beats/Minute [1,1000]: "/>
+            <xctk:DoubleUpDown Value="{Binding MeasureBPM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="1000" Increment="0.01" Width="100"/>
+            <Label Content="Measure Duration (sec): "/>
+            <Label Content="{Binding MeasureDuration}"/>
+        </StackPanel>
+    </Grid>
+</Window>

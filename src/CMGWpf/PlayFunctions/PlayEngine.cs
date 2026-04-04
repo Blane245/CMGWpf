@@ -1,40 +1,103 @@
 ﻿using CMGWpf.Model;
 using CMGWpf.Model.Generators;
-using CMGWpf.View;
-using CMGWpf.PlayFunctions.Utilities;
-using static CMGWpf.Types.PlayTypes;
 using CMGWpf.PlayFunctions.DSP;
+using CMGWpf.PlayFunctions.Utilities;
 using CMGWpf.Types;
+using CMGWpf.View;
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Threading;
+using static CMGWpf.Types.PlayTypes;
 
 namespace CMGWpf.PlayFunctions
 {
     //this will start the integration of the soundfont BuildVoicesForPresetAtKeyVel routine which is the first step in getting instrument smaples for DSP. It will be used in the PlayEngine and will be called when a note is played to determine which samples to use for that note. 
     public static class PlayEngine
     {
+        public static void StartUp (Generator? generator)
+        {
+            Debug.WriteLine("Play command being executed.");
+            // Check ReadyPlay and start the play dialog if the file is ready to play
+
+            PlayTypes.ReadyPlayOutput ready = ReadyPlay.Check(generator);
+            if (ready.ErrorMessage != "")
+            {
+                FileViewModel.Instance.StatusMessages = [new Message { Text = ready.ErrorMessage, Error = true }];
+                Debug.WriteLine($"Error: {ready.ErrorMessage}");
+                return;
+            }
+            PlayDialog playDialog = new()
+            {
+                DataContext = FileViewModel.Instance,
+                Owner = Application.Current.MainWindow
+            };
+
+            // Set the PlayDialog as the active dialog
+            FileViewModel.Instance.ActiveDialog = playDialog;
+
+            PlayViewModel.Instance.PlayGenerators = ready.Generators;
+            PlayViewModel.Instance.PlayDuration = ready.Duration;
+
+            // Generate the audio buffer
+            float[] floatBuffer = Go();
+            PlayViewModel.Instance.AudioBuffer = floatBuffer;
+
+            // Initialize NAudio if we have audio data
+            if (PlayViewModel.Instance.AudioBuffer.Length > 0)
+            {
+                InitializePositionTimer();
+                InitializeSignalLevelTimer();
+                var provider = new AudioBufferProvider(
+                    PlayViewModel.Instance.AudioBuffer,
+                    SampleRate);
+                PlayViewModel.Instance.AudioProvider = provider;
+
+                // Use WaveOut - AudioBufferProvider implements IWaveProvider directly
+                PlayViewModel.Instance.AudioOutput = new NAudio.Wave.WaveOut();
+                PlayViewModel.Instance.AudioOutput.Init(provider);
+
+                // Set up playback stopped event
+                PlayViewModel.Instance.AudioOutput.PlaybackStopped += (s, e) =>
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        PlayViewModel.Instance.IsPlaying = false;
+                    });
+                };
+            }
+
+            playDialog.ShowDialog();
+
+            // Clean up when dialog closes
+            positionTimer?.Stop();
+            PlayViewModel.Instance.AudioOutput?.Stop();
+            PlayViewModel.Instance.AudioOutput?.Dispose();
+            PlayViewModel.Instance.AudioOutput = null;
+
+        }
         public static float[] Go()
         {
-            string error = "";
-            int totalSamples = (int)Math.Ceiling(FileViewModel.Instance.PlayDuration) * PlayTypes.SampleRate;
+            int totalSamples = (int)Math.Ceiling(PlayViewModel.Instance.PlayDuration) * PlayTypes.SampleRate;
             double[] stereoBuffer = new double[totalSamples * 2]; // the sample buffer for the entire composition with interlaced stereo
-            List<SF_Preset> sF_Presets = FileViewModel.Instance.SF_Presets; // this will be populated with the sounfont/preset unique list for later assigning colors 
-            foreach (Generator gen in FileViewModel.Instance.PlayGenerators)
+            List<SF_Preset> sF_Presets = PlayViewModel.Instance.SF_Presets; // this will be populated with the sounfont/preset unique list for later assigning colors 
+            foreach (Generator gen in PlayViewModel.Instance.PlayGenerators)
             {
                 switch (gen)
                 {
                     case Silent:
                         break;
                     case Algorithmic:
-                        error = SourcesFromAlgorithmic.Get(gen as Algorithmic, stereoBuffer, sF_Presets);
+                        _ = SourcesFromAlgorithmic.Get(gen as Algorithmic, stereoBuffer, sF_Presets);
                         break;
                     case Stochastic:
-                        error = SourcesFromStochastic.Get(gen as Stochastic, stereoBuffer, sF_Presets);
+                        _ = SourcesFromStochastic.Get(gen as Stochastic, stereoBuffer, sF_Presets);
                         break;
                 }
 
             }
 
             // build the color palette for the presets that are to be played based on the sF_Presets collection that was populated while processing the generators. This will be used to assign colors to the notes in the UI so that the user can see which notes correspond to which presets. For now it just shows debug output with the preset names and their assigned colors.
-            FileViewModel.Instance.PresetColors = SoundRollBuilder.DefineVoicePalette(sF_Presets);
+            PlayViewModel.Instance.PresetColors = SoundRollBuilder.DefineVoicePalette(sF_Presets);
             // normalize the stereo buffer to prevent clipping
             float[] floatBuffer = NormalizeBuffer(stereoBuffer);
             return floatBuffer;
@@ -80,7 +143,44 @@ namespace CMGWpf.PlayFunctions
             DebugLog.Write($"Final audio buffer normalized, average={average}, max={max}, rms={rms}");
             return floatBuffer;
         }
+        #region Play Timers
+        public static DispatcherTimer? positionTimer;
+        public static void InitializePositionTimer()
+        {
+            positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(10) };
+            positionTimer.Tick += (s, e) =>
+            {
+                if (PlayViewModel.Instance.AudioProvider is AudioBufferProvider provider)
+                {
+                    // Use UpdatePositionFromTimer to avoid triggering seek when timer updates position
+                    PlayViewModel.Instance.UpdatePositionFromTimer(provider.CurrentPosition);
+                }
+            };
+            positionTimer.Start();
+            Debug.WriteLine($"Position timer started at {DateTime.Now}");
+        }
+        public static DispatcherTimer? signalTimer;
+        public static void InitializeSignalLevelTimer()
+        {
+            signalTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000) };
+            signalTimer.Tick += (s, e) =>
+            {
+                // Read that last second of audio data to calculate the signal level for each channel and update the UI
+                // the max
+                if (PlayViewModel.Instance.AudioProvider is AudioBufferProvider provider)
+                {
+                    // update the signal levels in the UI
+                    double volumeLevel = Math.Pow(10.0, (PlayViewModel.Instance.AudioVolume - 10) / 20.0);
+                    double[] signalLevels = provider.GetRecentSignalLevels(volumeLevel);
+                    double[] peakLevels = provider.GetRecentPeakLevels(volumeLevel);
+                    PlayViewModel.Instance.SignalLevels = signalLevels;
+                    PlayViewModel.Instance.MaxSignalLevels = peakLevels;
+                }
+            };
+            signalTimer.Start();
+            Debug.WriteLine($"Signal Timer timer started at {DateTime.Now}");
+        }
+            #endregion
+
     }
-
-
 }

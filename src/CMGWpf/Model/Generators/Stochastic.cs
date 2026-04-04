@@ -482,7 +482,7 @@ namespace CMGWpf.Model.Generators
         }
 
         // CMG does not use CurrentValues from the Stocastic class. Rather, values calculations are done in the GetSourcesFrom Stochastic routine. 
-        public override CurrentValues GetCurrentValues(double time, int beats)
+        public override CurrentValues GetCurrentValues(double time, double beats)
         {
             return new CurrentValues
             {

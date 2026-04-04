@@ -284,7 +284,7 @@ namespace CMGWpf.View
 
         private RelayCommand<Model.Generators.Generator>? _playCommand;
         public RelayCommand<Model.Generators.Generator> PlayCommand =>
-            _playCommand ??= new RelayCommand<Model.Generators.Generator>(execute => new GeneratorCommands(this, UIGenerator).Play());
+            _playCommand ??= new RelayCommand<Model.Generators.Generator> (execute => new GeneratorCommands(this, UIGenerator).Play());
 
         private RelayCommand<Model.Generators.Generator>? _deleteCommand;
         public RelayCommand<Model.Generators.Generator> DeleteCommand =>
@@ -309,6 +309,12 @@ namespace CMGWpf.View
                         break;
                 }
                 Status = new ObservableCollection<Message> { new Message { Text = "Generator action closed without updates", Error = false } };
+            });
+        private RelayCommand<Model.Generators.Generator>? _generatorPlayCommand;
+        public RelayCommand<Model.Generators.Generator> GeneratorPlayCommand =>
+            _generatorPlayCommand ??= new RelayCommand<Model.Generators.Generator>(generator =>
+            {
+                PlayFunctions.PlayEngine.StartUp(generator);
             });
         private RelayCommand<Model.Generators.Generator>? _generatorSubmitCommand;
         public RelayCommand<Model.Generators.Generator> GeneratorSubmitCommand =>

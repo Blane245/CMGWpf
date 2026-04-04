@@ -7,13 +7,13 @@
         xmlns:local="clr-namespace:CMGWpf.Dialogs"
         xmlns:viewmodel="clr-namespace:CMGWpf.Services"
         d:DataContext="{d:DesignInstance Type=viewmodel:GlobalService}"
-        mc:Ignorable="d"
         Title="Edit Preferences"
         WindowStyle="None"
         Background="White"
         WindowStartupLocation="CenterOwner"
+        Height="450" Width="800"
         mc:Ignorable="d"
-        Height="450" Width="800">
+        >
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -23,7 +23,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Margin="0" Background="Aquamarine" Orientation="Horizontal">
+        <StackPanel Grid.Row="0" Margin="0" Orientation="Horizontal">
             <Label Content="Edit Preferences" Foreground="Black" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Center"/>
             <Button x:Name="CloseDialog" Width="20" HorizontalAlignment="Right" VerticalAlignment="Center" Content="X" Command="{Binding EditPreferencesCancelCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource WindowButton}"/>
         </StackPanel>
@@ -34,11 +34,11 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Record Format: "/>
-                <ComboBox ItemsSource="{Binding RecordFormats}" SelectedItem="{Binding GlobalService.RecordFormat, Mode=TwoWay}"/>
+                <ComboBox ItemsSource="{Binding RecordFormats}" SelectedItem="{Binding RecordFormat, Mode=TwoWay}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Time Line Mode: "/>
-                <ComboBox ItemsSource="{Binding TimeLineModes}" SelectedItem="{Binding GlobalService.TimeLineMode, Mode=TwoWay}"/>
+                <ComboBox ItemsSource="{Binding TimeLineModes}" SelectedItem="{Binding TimeLineMode, Mode=TwoWay}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Measure Length (sec): "/>

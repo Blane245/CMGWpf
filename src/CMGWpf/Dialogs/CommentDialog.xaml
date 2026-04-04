@@ -22,10 +22,10 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0" Background="Aquamarine">
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0">
            <Label Content="Edit File Comment" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>
         </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0" Background="Aquamarine">
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0">
             <Button x:Name="CloseDialog" Width="20" HorizontalAlignment="Right" VerticalAlignment="Center" Content="X" Command="{Binding EditCommentCancelCommand}" Style="{StaticResource WindowButton}"/>
             </StackPanel>
         <TextBox Grid.Row="1" Grid.ColumnSpan="2" Height="350" Width="700" Margin="5,0,0,0"

@@ -12,7 +12,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="800">
 
-    <Grid Background="Aquamarine">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{Binding Source={x:Static services:SizeService.Instance}, Path=ControlWidth}"/>
             <ColumnDefinition Width="{Binding Source={x:Static services:SizeService.Instance}, Path=DisplayWidth}"/>

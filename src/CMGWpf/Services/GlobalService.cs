@@ -26,7 +26,8 @@ namespace CMGWpf.Services
                 return _instance;
             }
         }
-        public ObservableCollection<Message> StatusMessages { get => FileViewModel.Instance.StatusMessages; set { FileViewModel.Instance.StatusMessages = value; } }
+        private ObservableCollection<Message> statusMessges = [];
+        public ObservableCollection<Message> StatusMessages { get => statusMessges; set { statusMessges = value; OnPropertyChanged(); } }
         #region Preferences
         private string soundFontFileLocation = Settings.Default.CMGSoundFontLocation;
         public string SoundFontFileLocation { get { return soundFontFileLocation; }
@@ -235,7 +236,7 @@ namespace CMGWpf.Services
         {
             get { return $"CMG {Settings.Default.Version} - ({FileName}){(IsDirty ? "*" : "")}"; }
         }
-        public System.Windows.Window? ActiveDialog { get; set; }
+        public Window? ActiveDialog { get; set; }
 
         private ObservableCollection<string> soundFontFileNames = SoundFontUtilities.List(Settings.Default.CMGSoundFontLocation);
         public ObservableCollection<string> SoundFontFileNames

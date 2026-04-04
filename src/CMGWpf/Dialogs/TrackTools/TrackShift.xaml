@@ -1,0 +1,30 @@
+﻿<Window x:Class="CMGWpf.Dialogs.TrackTools.TrackShift"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CMGWpf.Dialogs.TrackTools"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:view="clr-namespace:CMGWpf.View"
+             xmlns:services="clr-namespace:CMGWpf.Services"
+             d:DataContext="{d:DesignInstance Type=view:TrackViewModel}"
+             mc:Ignorable="d" 
+        Title="Shift Track in Time"
+        Icon="/Assets/cmg-256.png"
+        WindowStyle="ToolWindow"
+        WindowStartupLocation="CenterOwner"
+        Width="350" Height="100"
+        >
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Shift Amount for Track'"/>
+                <Label Content="{Binding Track.Name}"/><Label Content="' (sec): "/>
+                <xctk:DoubleUpDown Value="{Binding ShiftAmount}" Increment="0.01" MinWidth="100"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Shift" Command="{Binding ShiftOKCommand}"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

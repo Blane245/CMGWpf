@@ -15,6 +15,7 @@ namespace CMGWpf.View
         public TrackViewModel(Track track)
         {
             this.track = track;
+            _newVolume = track.Volume;
         }
 
         #region View Properties
@@ -75,6 +76,10 @@ namespace CMGWpf.View
             get { return newTrackName; }
             set { newTrackName = value; }
         }
+        private double _shiftAmount = 0;
+        public double ShiftAmount { get => _shiftAmount; set { _shiftAmount = Math.Round(value,2); OnPropertyChanged(); } }
+        private int _newVolume = 0;
+        public int NewVolume { get => _newVolume; set { _newVolume = value; OnPropertyChanged(); } }
         public void NotifyTrackChanged(Track newTrack)
         {
             Track = newTrack;
@@ -86,16 +91,6 @@ namespace CMGWpf.View
 
         #endregion
         #region Track Control Commands
-        private RelayCommand<object>? _notImplementedCommand;
-        public RelayCommand<object> NotImplementedCommand =>
-            _notImplementedCommand ??= new RelayCommand<object>(execute => NotImplemented());
-
-        public void NotImplemented()
-        {
-            Status = new ObservableCollection<Message> { new Message { Text = "Command not implemented", Error = true } };
-        }
-
-
         private RelayCommand<Track>? _deleteCommand;
         public RelayCommand<Track> DeleteCommand =>
             _deleteCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).Delete());
@@ -130,6 +125,21 @@ namespace CMGWpf.View
         private RelayCommand<Track>? _addStochasticCommand;
         public RelayCommand<Track> AddStochasticCommand =>
             _addStochasticCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).AddGenerator(Model.Generators.GENERATORTYPE.Stochastic));
+        private RelayCommand<Track>? _duplicateCommand;
+        public RelayCommand<Track> DuplicateCommand =>
+            _duplicateCommand ??= new RelayCommand<Track>(track => new TrackCommands(this).Duplicate());
+        private RelayCommand<Track>? _shiftCommand;
+        public RelayCommand<Track> ShiftCommand =>
+            _shiftCommand ??= new RelayCommand<Track>(track => new TrackCommands(this).Shift());
+        private RelayCommand<Track>? _shiftOKCommand;
+        public RelayCommand<Track> ShiftOKCommand =>
+            _shiftOKCommand ??= new RelayCommand<Track>(track => new TrackCommands(this).ShiftOK());
+        private RelayCommand<Track>? _volumeCommand;
+        public RelayCommand<Track> VolumeCommand =>
+            _volumeCommand ??= new RelayCommand<Track>(track => new TrackCommands(this).Volume());
+        private RelayCommand<Track>? _volumeOKCommand;
+        public RelayCommand<Track> VolumeOKCommand =>
+            _volumeOKCommand ??= new RelayCommand<Track>(track => new TrackCommands(this).VolumeOK());
         #endregion
     }
 }

@@ -22,10 +22,10 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0" Background="Aquamarine" Margin="0">
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0">
             <Label Grid.Row="0" Grid.Column="0"  Content="Rename Track" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>
         </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="1" Background="Aquamarine" Margin="0">
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0">
             <Button Width="20" Height="15" HorizontalAlignment="Right" VerticalAlignment="Top" Content="X" Command="{Binding RenameCancelCommand}" Style="{StaticResource WindowButton}"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0">

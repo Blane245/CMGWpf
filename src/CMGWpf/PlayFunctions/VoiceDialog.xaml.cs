@@ -56,7 +56,7 @@ namespace CMGWpf.PlayFunctions
         private void Window_Closed(object sender, EventArgs e)
         {
             Debug.WriteLine("[VoiceDialog] Window_Closed event fired");
-            (DataContext as FileViewModel)!.ShowVoices = false;
+            (DataContext as PlayViewModel)!.ShowVoices = false;
         }
     }
 }
