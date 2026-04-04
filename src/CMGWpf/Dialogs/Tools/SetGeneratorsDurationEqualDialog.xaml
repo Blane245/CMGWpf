@@ -16,13 +16,13 @@
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
                 <Label Content="Primary Generator: "/>
-                <ComboBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding PrimaryGeneratorName, Mode=TwoWay}"/>
+                <ComboBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding PrimaryGeneratorName, Mode=TwoWay}" ToolTip="Select the generator that will be used to determine the duration to be used."/>
                 <Label Content="Secondary Generators: "/>
-                <ListBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding SecondaryGeneratorNames}" SelectionMode="Multiple"/>
+                <ListBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding SecondaryGeneratorNames}" SelectionMode="Multiple" ToolTip="Select the generators whose durations will be set equal to the primary genrator."/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Maintain Start or Stop Time? "/>
-                <ComboBox ItemsSource="{Binding MaintainAlignTimeOptions}" SelectedItem="{Binding AlignTimeOption}"/>
+                <ComboBox ItemsSource="{Binding MaintainAlignTimeOptions}" SelectedItem="{Binding AlignTimeOption}" ToolTip="Select which time will be kept the same for duration calculations."/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Button Content="Set Equal" Command="{Binding SetGeneratorsDurationEqualCommand}"/>

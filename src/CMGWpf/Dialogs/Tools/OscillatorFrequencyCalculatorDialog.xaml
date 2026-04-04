@@ -23,11 +23,12 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <Label Content="Amplitude (attribute units): "/>
-            <xctk:DoubleUpDown Value="{Binding Amplitude, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="100" Increment="0.01" Width="70"/>
+            <xctk:DoubleUpDown Value="{Binding Amplitude, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="100" Increment="0.01" Width="70" ToolTip="The amplitude of the attribute."/>
             <Label Content="Beats/Minute [1,1000]: "/>
-            <xctk:DoubleUpDown Value="{Binding BPM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="1000" Increment="0.01" Width="100"/>
+            <xctk:DoubleUpDown Value="{Binding BPM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="1000" Increment="0.01" Width="100" ToolTip="The beats per minute, usualy taken from the speed attribute. "/>
             <Label Content="Frequency to hit all values (mHz): "/>
             <Label Content="{Binding OscillatorFrequency}" Width="100"/>
         </StackPanel>
+        <Label Grid.Row="1" Content="Usually used for notes. This calculates the frequency of the oscillator needed to hit every note in the amplitude range." FontStyle="Italic"/>
     </Grid>
 </Window>

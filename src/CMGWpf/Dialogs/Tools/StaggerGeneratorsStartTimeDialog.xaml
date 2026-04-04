@@ -4,9 +4,30 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs.Tools"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        d:DataContext="{d:DesignInstance Type=viewmodel:ToolsViewModel}"
         mc:Ignorable="d"
-        Title="StaggerGeneratorsStartTimeDialog" Height="450" Width="800">
+        WindowStyle="ToolWindow"
+        Background="White"
+        WindowStartupLocation="CenterOwner"
+        Title="Stagger Generators Start Times" MinHeight="100" MinWidth="400">
     <Grid>
-        
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Primary Generator: "/>
+                <ComboBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding PrimaryGeneratorName, Mode=TwoWay}" ToolTip="Select the generator that will be used to stagger the secondary generators."/>
+                <Label Content="Secondary Generators: "/>
+                <ListBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding SecondaryGeneratorNames}" SelectionMode="Multiple"  ToolTip="Select the generators whose start times will be stagger from the primary genrator. Note: they are done in order that they appears in the selection list."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Stagger Amount (sec): "/>
+                <xctk:DoubleUpDown Value="{Binding StaggerAmount, Mode=TwoWay}" Increment="0.01" ToolTip="Enter the number of seconds to stagger each secondary generator."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Set Equal" Command="{Binding StaggerGeneratorsStartTimeCommand}"/>
+            </StackPanel>
+        </StackPanel>
+
     </Grid>
 </Window>

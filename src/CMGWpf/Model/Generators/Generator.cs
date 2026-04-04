@@ -1,5 +1,4 @@
-﻿using CMGWpf.SoundFont_2;
-using CMGWpf.Types;
+﻿using CMGWpf.Types;
 using CMGWpf.Utilities;
 using CMGWpf.View;
 using System.Collections.ObjectModel;

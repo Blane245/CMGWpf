@@ -4,9 +4,29 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs.Tools"
+        xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        d:DataContext="{d:DesignInstance Type=viewmodel:ToolsViewModel}"
         mc:Ignorable="d"
-        Title="AlignGeneratorsDialog" Height="450" Width="800">
+        WindowStyle="ToolWindow"
+        Background="White"
+        WindowStartupLocation="CenterOwner"
+        Title="Align Generators Maintaining Durations" MinHeight="100" MinWidth="400">
     <Grid>
-        
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Primary Generator: "/>
+                <ComboBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding PrimaryGeneratorName, Mode=TwoWay}" ToolTip="Select the generator that will be used to align others"/>
+                <Label Content="Secondary Generators: "/>
+                <ListBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding SecondaryGeneratorNames}" SelectionMode="Multiple" ToolTip="Select the generators that will be aligned with the primary generator"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Align Time? "/>
+                <ComboBox ItemsSource="{Binding MaintainAlignTimeOptions}" SelectedItem="{Binding AlignTimeOption}" ToolTip="Select either the start or stop time for alignment."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Set Equal" Command="{Binding AlignGeneratorsCommand}"/>
+            </StackPanel>
+        </StackPanel>
+
     </Grid>
 </Window>

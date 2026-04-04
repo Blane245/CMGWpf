@@ -226,6 +226,10 @@ namespace CMGWpf.MVVM
         {
             PlayFunctions.PlayEngine.StartUp(generator);
         }
+        public void Report()
+        {
+            // TODO
+        }
         #endregion
     }
 }

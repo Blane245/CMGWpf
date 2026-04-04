@@ -28,12 +28,13 @@
         </StackPanel>
         <StackPanel Grid.Column="1">
             <Menu>
-                <MenuItem Header="_File">
-                    <MenuItem Header="_New..." Command="{Binding FileNewCommand}"/>
-                    <MenuItem Header="_Open..." Command="{Binding FileOpenCommand}"/>
-                    <MenuItem Header="_Save" Command="{Binding FileSaveCommand}"/>
-                    <MenuItem Header="Save _As..." Command="{Binding FileSaveAsCommand}"/>
-                    <MenuItem Header="_Recent" ItemsSource="{Binding RecentFiles}">
+                <MenuItem Header="_File" ToolTip="Perform a CMG file operation.">
+                    <MenuItem Header="_New..." Command="{Binding FileNewCommand}" InputGestureText="Ctrl+N" ToolTip="Create a blank CMG file."/>
+                    <MenuItem Header="_Open..." Command="{Binding FileOpenCommand}" InputGestureText="Ctrl+O" ToolTip="Open an existing CMG file."/>
+                    <MenuItem Header="_Save" Command="{Binding FileSaveCommand}" InputGestureText="Ctrl+S" ToolTip="Save the currently open CMG file."/>
+                    <MenuItem Header="Save _As..." Command="{Binding FileSaveAsCommand}" InputGestureText="Ctrl+A" ToolTip="Save the currently opened CMG file and another CMG file."/>
+                    <MenuItem Header="_Recent" ItemsSource="{Binding RecentFiles}" InputGestureText="Ctrl+R" ToolTip="Open a recently edited CMG file.">
+                        <!-- TODO Add Ctrl+n to the input gesture text for each item in the list, from 0 to 9-->
                         <MenuItem.ItemTemplate>
                             <DataTemplate>
                                 <MenuItem Header="{Binding}" Command="{Binding DataContext.FileOpenRecentCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
@@ -43,23 +44,50 @@
                     <Separator/>
                     <MenuItem Header="E_xit" Command="{Binding ExitFileCommand}"/>
                 </MenuItem>
-                <MenuItem Header="_Edit">
-                    <MenuItem Header="_Add Track..." Command="{Binding AddTrackCommand}"/>
-                    <MenuItem Header="_Comment..." Command="{Binding EditCommentCommand}"/>
-                    <MenuItem Header="_Preferences..." Command="{Binding GlobalServices.EditPreferencesCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                <MenuItem Header="_Edit" ToolTip="Perform a application or file level edit operation.">
+                    <MenuItem Header="_Add Track" Command="{Binding AddTrackCommand}" InputGestureText="Ctrl+T" ToolTip="Add a new track to the CMG file."/>
+                    <MenuItem Header="_Comment..." Command="{Binding EditCommentCommand}" ToolTip="Edit a CMG file comment." InputGestureText="Ctrl+Shift+C"/>
+                    <MenuItem Header="_Preferences..." Command="{Binding GlobalServices.EditPreferencesCommand, RelativeSource={RelativeSource AncestorType=Window}}" ToolTip="Edit CMG preferences." InputGestureText="Ctrl+P"/>
                 </MenuItem>
-                <MenuItem Header="_Tools">
-                    <MenuItem Header="Midi/Frequency Converter..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MidiFrequencyConverterCommand}"/>
-                    <MenuItem Header="Start CMG Database Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StartCMGDBEditorCommand}"/>
-                    <MenuItem Header="Measure Duration Calculator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MeasureDurationCalculatorCommand}"/>
-                    <MenuItem Header="Oscillator Frequency Calculator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=OscillatorFrequencyCalculatorCommand}"/>
-                    <MenuItem Header="Set Generators Duration Equal..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=SetGeneratorsDurationEqualCommand}"/>
-                    <MenuItem Header="Stagger Generators Start Time..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StaggerGeneratorsStartTimeCommand}"/>
-                    <MenuItem Header="Align Generator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=AlignGeneratorsCommand}"/>
+                <MenuItem Header="_Tools" ToolTip="Access CMG tools.">
+                    <MenuItem Header="_Midi/Frequency Converter..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MidiFrequencyConverterCommand}"
+                              ToolTip="Convert between midi number and audio frequency."
+                              InputGestureText="Ctrl+M"
+                              />
+                    <MenuItem Header="Start CMG _Database Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StartCMGDBEditorCommand}"
+                              ToolTip="Start the CMG Database Editor."
+                        InputGestureText="Ctrl+D"                              
+                              />
+                    <MenuItem Header="_Measure Duration Calculator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MeasureDurationCalculatorCommand}"
+                              ToolTip="Determine the number of seconds in a measure at a certain BPM."
+                              InputGestureText="Ctrl+M"
+                              />
+                    <MenuItem Header="Oscillator _Frequency Calculator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=OscillatorFrequencyCalculatorCommand}"
+                              ToolTip="Determine the oscillator frequency needed to hit values of an attribute with a certian amplitude."
+                              InputGestureText="Ctrl+F"
+                              />
+                    <MenuItem Header="Set Generators Duration _Equal..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=SetGeneratorsDurationEqualCommand}"
+                              ToolTip="Set a collection of genrators to have the same duration."
+                              InputGestureText="Ctrl+E"
+                              />
+                    <MenuItem Header="S_tagger Generators Start Time..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StaggerGeneratorsStartTimeCommand}"
+                              ToolTip="Stagger a collection of generators' start times."
+                              InputGestureText="Ctrl+T"
+                              />
+                    <MenuItem Header="_Align Generator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=AlignGeneratorsCommand}"
+                              ToolTip="Align a collection of genrators start or stop times"
+                              InputGestureText="Ctrl+A"
+                              />
                 </MenuItem>
                 <MenuItem Header="_Play">
-                    <MenuItem Header="_Play..." Command="{Binding PlayViewModel.PlayCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                    <MenuItem Header="_Report..." Command="{Binding PlayViewModel.RecordCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    <MenuItem Header="_Play..." Command="{Binding PlayViewModel.PlayCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                              ToolTip="Play the audio and view the scroll rool of the active generators."
+                              InputGestureText="Ctrl+Shift+P"
+                              />
+                    <MenuItem Header="_Report..." Command="{Binding PlayViewModel.ReportCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                              ToolTip="Generate an HTML report of the CMG file contents."
+                              InputGestureText="Ctrl+Shift+R"
+                              />
                 </MenuItem>
             </Menu>
         </StackPanel>

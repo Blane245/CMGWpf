@@ -23,9 +23,9 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <Label Content="Number of Beats [1,100]: "/>
-            <xctk:DoubleUpDown Value="{Binding BeatCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="100" Increment="1" Width="70"/>
+            <xctk:DoubleUpDown Value="{Binding BeatCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="100" Increment="1" Width="70" ToolTip="The number of beats in a measure"/>
             <Label Content="Beats/Minute [1,1000]: "/>
-            <xctk:DoubleUpDown Value="{Binding MeasureBPM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="1000" Increment="0.01" Width="100"/>
+            <xctk:DoubleUpDown Value="{Binding MeasureBPM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="1000" Increment="0.01" Width="100" ToolTip="The beats per minute"/>
             <Label Content="Measure Duration (sec): "/>
             <Label Content="{Binding MeasureDuration}"/>
         </StackPanel>

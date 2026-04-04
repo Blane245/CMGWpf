@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:CMGWpf"
         xmlns:services="clr-namespace:CMGWpf.Services"
         xmlns:layout="clr-namespace:CMGWpf.Layout"
+        xmlns:viewmodel="clr-namespace:CMGWpf.View"
         mc:Ignorable="d"
         WindowStyle="None"
         WindowState="Maximized"
@@ -13,6 +14,27 @@
         WindowStartupLocation="CenterScreen"
         d:DesignHeight="450" d:DesignWidth="800"
     >
+    <Window.InputBindings>
+        <!-- File Menu Shortcuts -->
+        <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding FileNewCommand}"/>
+        <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding FileOpenCommand}"/>
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding FileSaveCommand}"/>
+        <KeyBinding Key="A" Modifiers="Ctrl+Shift" Command="{Binding FileSaveAsCommand}"/>
+
+        <!-- Edit Menu Shortcuts -->
+        <KeyBinding Key="T" Modifiers="Ctrl" Command="{Binding AddTrackCommand}"/>
+        <KeyBinding Key="C" Modifiers="Ctrl+Shift" Command="{Binding EditCommentCommand}"/>
+        <KeyBinding Key="P" Modifiers="Ctrl" Command="{Binding EditPreferencesCommand}"/>
+
+        <!-- Tools Menu Shortcuts -->
+        <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MidiFrequencyConverterCommand}"/>
+        <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StartCMGDBEditorCommand}"/>
+        <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=OscillatorFrequencyCalculatorCommand}"/>
+        <KeyBinding Key="E" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=SetGeneratorsDurationEqualCommand}"/>
+        <!-- Play Menu Shortcuts -->
+        <KeyBinding Key="P" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:PlayViewModel.Instance}, Path=PlayCommand}"/>
+        <KeyBinding Key="R" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:PlayViewModel.Instance}, Path=RecordCommand}"/>
+    </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=MenuHeight}"/>

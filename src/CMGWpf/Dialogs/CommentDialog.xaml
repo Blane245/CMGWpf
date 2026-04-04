@@ -32,7 +32,8 @@
                  Text="{Binding NewComment}" 
                  AcceptsReturn="True"
                  TextWrapping="Wrap"
-                 VerticalScrollBarVisibility="Auto"/>
+                 VerticalScrollBarVisibility="Auto"
+                 ToolTip="Edit the comment for the CMG file."/>
         <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
             <Button x:Name="OK" Width="50" Content="OK" Command="{Binding EditCommentOkCommand}" Margin="0"/>
             <Button x:Name="Cancel" Width="50" Content="Cancel" Command="{Binding EditCommentCancelCommand}" Margin="5,0,0,0"/>

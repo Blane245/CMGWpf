@@ -8,8 +8,7 @@ testing
 	do thorough testing of all generator parameters
 	put the DSP through its paces check all controls and algorithms.
 implementation
-	add tool tips
-	convert to normal windows in show mode allowing multiple genrators open at a time. will nee to consider impact of functions that affect generators outside of the editor. 
+    redesign of user interaction with app
 	void DataWindow_Closing(object sender, CancelEventArgs e)
         {
             MessageBox.Show("Closing called");
@@ -32,5 +31,7 @@ implementation
             }
         }
 	add timeinterval to the xml
+    add input gestures to recent files
 	implement reporting
+    implement audio recording (and scroll roll movie recording)
 	write documentation

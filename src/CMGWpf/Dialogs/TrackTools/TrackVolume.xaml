@@ -21,7 +21,7 @@
                 <Label Content="New Track Volume for Track '"/>
                 <Label Content="{Binding Track.Name}"/>
                 <Label Content="' [-10,+10]dB: "/>
-                <xctk:IntegerUpDown Value="{Binding NewVolume, Mode=TwoWay}" Minimum="-10" Maximum="10"/>
+                <xctk:IntegerUpDown Value="{Binding NewVolume, Mode=TwoWay}" Minimum="-10" Maximum="10" ToolTip="Enter the volume of the track. This will change the volume of all generators in the track."/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Button Content="OK" Command="{Binding VolumeOKCommand}"/>

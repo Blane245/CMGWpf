@@ -47,12 +47,12 @@
             </StackPanel>
         </Grid>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <Label Content="Name:"/>
-            <TextBox x:Name="GeneratorName" Text="{Binding NewGeneratorName}"/>
-            <Label Content="Start Time:"/>
-            <xctk:DoubleUpDown x:Name="StartTime" FormatString="F2" Value="{Binding UIGenerator.StartTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="10000" Increment="0.01"/>
-            <Label Content="Stop Time:"/>
-            <xctk:DoubleUpDown x:Name="StopTime" FormatString="F2" Value="{Binding UIGenerator.StopTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="10000" Increment="0.01"/>
+            <Label Content="Name: "/>
+            <TextBox x:Name="GeneratorName" Text="{Binding NewGeneratorName}" ToolTip="Enter a new unique name for the generator."/>
+            <Label Content="Start Time (sec): "/>
+            <xctk:DoubleUpDown x:Name="StartTime" FormatString="F2" Value="{Binding UIGenerator.StartTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the start time of the generator. TBD A change to this will cause the stop time to change maintaing the generator's duration."/>
+            <Label Content="Stop Time (sec): "/>
+                <xctk:DoubleUpDown x:Name="StopTime" FormatString="F2" Value="{Binding UIGenerator.StopTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the stop time of the generator."/>
         </StackPanel>
         <!-- Generator-specific controls go here -->
         <StackPanel Grid.Row="2" Orientation="Vertical" Margin="0">

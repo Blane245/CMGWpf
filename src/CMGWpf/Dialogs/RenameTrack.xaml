@@ -30,7 +30,7 @@
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0">
             <Label Content="New Track Name:"/>
-            <TextBox Text="{Binding NewTrackName, UpdateSourceTrigger=PropertyChanged}" Width="150"/>
+            <TextBox Text="{Binding NewTrackName, UpdateSourceTrigger=PropertyChanged}" Width="150" ToolTip="Enter a new unique name for the track."/>
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0" Orientation="Horizontal">
             <Button Width="50" Content="OK" Command="{Binding RenameOKCommand}"/>

@@ -24,11 +24,11 @@
         <StackPanel Grid.Row="0" Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
                 <Label Content="Midi [0,127]"/>
-                <xctk:DoubleUpDown Value="{Binding Midi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="127" Increment="0.01" Width="70"/>
+                <xctk:DoubleUpDown Value="{Binding Midi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="127" Increment="0.01" Width="70" ToolTip="Enter a value and the frequency of the midi number will be calculated."/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Frequency [1,20,000 Hz]"/>
-            <xctk:DoubleUpDown Value="{Binding Frequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="20000" Increment="0.01" Width="100"/>
+                <xctk:DoubleUpDown Value="{Binding Frequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="20000" Increment="0.01" Width="100" ToolTip="Enter a value and the midi number of the frequency will be calculated"/>
             </StackPanel>
         </StackPanel>
 

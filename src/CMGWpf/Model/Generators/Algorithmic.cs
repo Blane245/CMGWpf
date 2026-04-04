@@ -1,12 +1,8 @@
-﻿using CMGWpf.PlayFunctions.Utilities;
-using CMGWpf.SoundFont_2;
+﻿using CMGWpf.SoundFont_2;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Windows.Controls;
 using System.Xml;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CMGWpf.Model.Generators
 {

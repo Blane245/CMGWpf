@@ -20,7 +20,7 @@
             <StackPanel Orientation="Horizontal">
                 <Label Content="Shift Amount for Track'"/>
                 <Label Content="{Binding Track.Name}"/><Label Content="' (sec): "/>
-                <xctk:DoubleUpDown Value="{Binding ShiftAmount}" Increment="0.01" MinWidth="100"/>
+                <xctk:DoubleUpDown Value="{Binding ShiftAmount}" Increment="0.01" MinWidth="100" ToolTip="Enter the number of seconds to shift the track's generators"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Button Content="Shift" Command="{Binding ShiftOKCommand}"/>

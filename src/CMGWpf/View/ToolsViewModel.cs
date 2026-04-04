@@ -99,7 +99,7 @@ namespace CMGWpf.View
         private string _maintainTimeOption = "Start Time";
         public string MaintainTimeOption { get => _maintainTimeOption; set { _maintainTimeOption = value; OnPropertyChanged(); } }
         private double _staggerAmount = 0;
-        public double StaggerAmount { get => _staggerAmount; set { _staggerAmount = value; OnPropertyChanged(); } }
+        public double StaggerAmount { get => _staggerAmount; set { _staggerAmount = Math.Round(value,2); OnPropertyChanged(); } }
         private string _primaryGeneratorName = "";
         public string PrimaryGeneratorName { get => _primaryGeneratorName; set { _primaryGeneratorName = value; OnPropertyChanged(); } }
         private ObservableCollection<string> _secondaryGeneratorNames = [];

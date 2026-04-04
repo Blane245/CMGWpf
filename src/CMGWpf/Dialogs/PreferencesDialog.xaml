@@ -11,7 +11,7 @@
         WindowStyle="None"
         Background="White"
         WindowStartupLocation="CenterOwner"
-        Height="450" Width="800"
+        Height="200" Width="300"
         mc:Ignorable="d"
         >
     <Grid>
@@ -30,35 +30,34 @@
         <StackPanel Grid.Row="1" Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
                 <Label Content="Soundfont Directory: "/>
-                <TextBlock Text="{Binding SoundFontFileLocation, Mode=TwoWay}"/>
+                <TextBlock Text="{Binding SoundFontFileLocation, Mode=TwoWay}" ToolTip="Enter the local computer file syste path to the folder that contains soundfont files."/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Record Format: "/>
-                <ComboBox ItemsSource="{Binding RecordFormats}" SelectedItem="{Binding RecordFormat, Mode=TwoWay}"/>
+                <ComboBox ItemsSource="{Binding RecordFormats}" SelectedItem="{Binding RecordFormat, Mode=TwoWay}" ToolTip="Select the desired audio recoring format."/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Time Line Mode: "/>
-                <ComboBox ItemsSource="{Binding TimeLineModes}" SelectedItem="{Binding TimeLineMode, Mode=TwoWay}"/>
+                <ComboBox ItemsSource="{Binding TimeLineModes}" SelectedItem="{Binding TimeLineMode, Mode=TwoWay}" ToolTip="Currently not implemented."/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Measure Length (sec): "/>
-                <xctk:DoubleUpDown Value="{Binding MeasureLength, Mode=TwoWay}" Minimum="0" Maximum="1000" Increment="1"/>
+                <xctk:DoubleUpDown Value="{Binding MeasureLength, Mode=TwoWay}" Minimum="0" Maximum="1000" Increment="1" ToolTip="Currently not implemented."/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Beats per Measure: "/>
-                <xctk:IntegerUpDown Value="{Binding BeatsPerMeasure, Mode=TwoWay}" Minimum="1" Maximum="100" Increment="1"/>
+                <xctk:IntegerUpDown Value="{Binding BeatsPerMeasure, Mode=TwoWay}" Minimum="1" Maximum="100" Increment="1" ToolTip="Currently not implemented"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Snap Mode: "/>
-                <CheckBox IsChecked="{Binding IsSnap, Mode=TwoWay}"/>
+                <CheckBox IsChecked="{Binding IsSnap, Mode=TwoWay}" ToolTip="Currently not implemented"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Snap Increment: "/>
                 <Label Content="{Binding SnapIncrementUnits}"/>
-                <xctk:IntegerUpDown Value="{Binding SnapIncrement, Mode=TwoWay}" Minimum="1" Maximum="1000"/>
+                <xctk:IntegerUpDown Value="{Binding SnapIncrement, Mode=TwoWay}" Minimum="1" Maximum="1000" ToolTip="Currently not implemented"/>
             </StackPanel>
-
-                <Border BorderBrush="Black" BorderThickness="1"/>
+            <Border BorderBrush="Black" BorderThickness="1"/>
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left">
             <Button x:Name="OK" Width="50" Content="OK" Command="{Binding EditPreferencesOkCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="0"/>
