@@ -22,6 +22,7 @@ namespace CMGWpf.Services
                     _instance = new GlobalService();
                     _instance.LoadEnsembleNamesAsync();
                     _instance.LoadNoteSequenceNamesAsync();
+                    _instance.SoundFontFileLocation = Settings.Default.CMGSoundFontLocation;
                 }
                 return _instance;
             }
@@ -30,25 +31,27 @@ namespace CMGWpf.Services
         public ObservableCollection<Message> StatusMessages { get => statusMessges; set { statusMessges = value; OnPropertyChanged(); } }
         #region Preferences
         private string soundFontFileLocation = Settings.Default.CMGSoundFontLocation;
-        public string SoundFontFileLocation { get { return soundFontFileLocation; }
-            set {
-                if (SoundFontFileLocation != value)
+        public string SoundFontFileLocation
+        {
+            get { return soundFontFileLocation; }
+            set
+            {
+                ObservableCollection<string> list = SoundFontUtilities.List(soundFontFileLocation);
+                if (list.Count > 0)
                 {
-                    ObservableCollection<string> list = SoundFontUtilities.List(soundFontFileLocation);
-                    if (list.Count > 0)
-                    {
-                        soundFontFileLocation = value;
-                        StatusMessages.Add(new Message { Text = $"{list.Count} read from {soundFontFileLocation}", Error = false });
-                        soundFontFileNames = list;
-                        OnPropertyChanged();
-                        OnPropertyChanged(nameof(SoundFontFileNames));
-                    } else {
-                        _ = MessageBox.Show($"There Are No Soundfont Files at Location '{value}'", "Soundfont Load Error", MessageBoxButton.OK);
-                    }
+                    soundFontFileLocation = value;
+                    StatusMessages.Add(new Message { Text = $"{list.Count} read from {soundFontFileLocation}", Error = false });
+                    soundFontFileNames = list;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(SoundFontFileNames));
+                }
+                else
+                {
+                    _ = MessageBox.Show($"There Are No Soundfont Files at Location '{value}'", "Soundfont Load Error", MessageBoxButton.OK);
                 }
             }
         }
-        public readonly static ObservableCollection<string> RecordFormats = ["mp3", "wav"];
+        public ObservableCollection<string> RecordFormats { get; } = ["mp3", "wav"];
         private string recordFormat = Settings.Default.CMGRecordFormat;
         public string RecordFormat
         {
@@ -62,7 +65,7 @@ namespace CMGWpf.Services
                 }
             }
         }
-        public readonly static ObservableCollection<string> TimeLineModes = ["Time", "Measure"];
+        public ObservableCollection<string> TimeLineModes { get; } = ["Time", "Measure"];
         private string timeLineMode = Settings.Default.CMGTimeLineMode;
         public string TimeLineMode
         {
@@ -145,12 +148,14 @@ namespace CMGWpf.Services
                 Debug.WriteLine("EditPreferences command being executed.");
 
                 // display the preferences dialog
-                PreferencesDialog dialog = new PreferencesDialog
+                PreferencesDialog activeDialog = new()
                 {
                     DataContext = this,
-                    Owner = Application.Current.MainWindow
+                    Owner = Application.Current.MainWindow,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 };
-                dialog.ShowDialog();
+                StatusMessages.Clear();
+                activeDialog.ShowDialog();
             });
         // user has completed preference edits. All fields have been validated. Update the settings with the new preferences and close the dialog
         private RelayCommand<Window>? _editPreferencesOkCommand;
@@ -166,13 +171,7 @@ namespace CMGWpf.Services
                 Settings.Default.CMGSnapIncrement = SnapIncrement.ToString();
                 Settings.Default.CMGSoundFontLocation = SoundFontFileLocation;
                 Settings.Default.CMGTimeLineMode = TimeLineMode;
-                window.Close();
-            });
-        // user has canceled preference edits. Close the dialog
-        private RelayCommand<Window>? _editPreferencesCancelCommand;
-        public RelayCommand<Window> EditPreferencesCancelCommand =>
-            _editPreferencesCancelCommand ??= new RelayCommand<Window>(window =>
-            {
+                StatusMessages = [new Message() { Text = "Preferences Updated", Error = false }];
                 window.Close();
             });
         #endregion
@@ -236,7 +235,10 @@ namespace CMGWpf.Services
         {
             get { return $"CMG {Settings.Default.Version} - ({FileName}){(IsDirty ? "*" : "")}"; }
         }
-        public Window? ActiveDialog { get; set; }
+        public string PlayTitle
+        {
+            get { return $"CMG {Settings.Default.Version} Play/Scroll Roll - ({FileName}){(IsDirty ? "*" : "")}"; }
+        }
 
         private ObservableCollection<string> soundFontFileNames = SoundFontUtilities.List(Settings.Default.CMGSoundFontLocation);
         public ObservableCollection<string> SoundFontFileNames

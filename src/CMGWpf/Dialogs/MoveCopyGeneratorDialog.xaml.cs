@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using CMGWpf.View;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CMGWpf.Dialogs
 {
@@ -20,6 +11,18 @@ namespace CMGWpf.Dialogs
         public MoveCopyGeneratorDialog()
         {
             InitializeComponent();
+            this.Closing += MoveCopyGeneratorDialog_Closing;
+        }
+
+        private void MoveCopyGeneratorDialog_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (DataContext is GeneratorViewModel vm) vm.ActiveGeneratorDialog = null;
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is GeneratorViewModel vm) vm.ActiveGeneratorDialog = null;
+            Close();
         }
     }
 }

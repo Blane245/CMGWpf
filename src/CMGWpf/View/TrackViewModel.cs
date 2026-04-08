@@ -1,4 +1,6 @@
-﻿using CMGWpf.MVVM;
+﻿using CMGWpf.Dialogs;
+using CMGWpf.Dialogs.TrackTools;
+using CMGWpf.MVVM;
 using CMGWpf.Services;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;
@@ -10,7 +12,7 @@ namespace CMGWpf.View
     public class TrackViewModel : ViewModelBase
     {
         private Track track;
-        private ObservableCollection<GeneratorViewModel>? cachedGenerators;
+        public ObservableCollection<GeneratorViewModel>? CachedGenerators;
 
         public TrackViewModel(Track track)
         {
@@ -28,29 +30,35 @@ namespace CMGWpf.View
         {
             get
             {
-                if (cachedGenerators == null)
+                if (CachedGenerators == null)
                 {
-                    cachedGenerators = new ObservableCollection<GeneratorViewModel>();
+                    CachedGenerators = new ObservableCollection<GeneratorViewModel>();
                     foreach (var generator in track.Generators)
                     {
                         var generatorVM = new GeneratorViewModel(generator, this);
                         generatorVM.InitializeSubscriptions();
-                        cachedGenerators.Add(generatorVM);
+                        CachedGenerators.Add(generatorVM);
                     }
                 }
-                return cachedGenerators;
+                return CachedGenerators;
             }
         }
-
-        public Window? ActiveDialog
+        public ObservableCollection<Message> StatusMessages
         {
-            get => GlobalService.Instance.ActiveDialog;
-            set
-            {
-                GlobalService.Instance.ActiveDialog = value;
-                OnPropertyChanged();
-            }
+            get => GlobalService.Instance.StatusMessages;
+            set { GlobalService.Instance.StatusMessages = value; OnPropertyChanged(); }
         }
+        private RenameTrack? activeRenameDialog = null; // only one rename dialog per track can be opened
+        public RenameTrack? ActiveRenameDialog { get => activeRenameDialog; set { activeRenameDialog = value; OnPropertyChanged(); } }
+        public string RenameWindowTitle { get => $"Rename Track {Track.Name}"; }
+        public string ShiftWindowTitle { get => $"Shift Track {Track.Name}"; }
+        public string VolumeWindowTitle { get => $"Adjust Volume For Track {Track.Name}"; }
+
+        private TrackShift? activeShiftDialog = null; // only one shift dialog per track can be opened
+        public TrackShift? ActiveShiftDialog { get => activeShiftDialog; set { activeShiftDialog = value; OnPropertyChanged(); } }
+
+        private TrackVolume? activeVolumeDialog = null; // only one volume dialog per track can be opened
+        public TrackVolume? ActiveVolumeDialog { get => activeVolumeDialog; set { activeVolumeDialog = value; OnPropertyChanged(); } }
         public bool IsDirty
         {
             get => GlobalService.Instance.IsDirty;
@@ -84,7 +92,7 @@ namespace CMGWpf.View
         {
             Track = newTrack;
             // Clear the cached generators so they get recreated with the updated track
-            cachedGenerators = null;
+            CachedGenerators = null;
             OnPropertyChanged(nameof(Generators));
         }
 
@@ -100,9 +108,6 @@ namespace CMGWpf.View
         private RelayCommand<Track>? _renameOKCommand;
         public RelayCommand<Track> RenameOKCommand =>
             _renameOKCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).RenameOK());
-        private RelayCommand<Track>? _renameCancelCommand;
-        public RelayCommand<Track> RenameCancelCommand =>
-            _renameCancelCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).RenameCancel());
         private RelayCommand<Track>? _muteCommand;
         public RelayCommand<Track> MuteCommand =>
             _muteCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).Mute());

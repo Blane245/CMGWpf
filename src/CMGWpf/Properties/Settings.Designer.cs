@@ -72,7 +72,7 @@ namespace CMGWpf.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("mpg")]
+        [global::System.Configuration.DefaultSettingValueAttribute("mp3")]
         public string CMGRecordFormat
         {
             get
@@ -183,6 +183,82 @@ namespace CMGWpf.Properties {
                 this["AudioFormat"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double WindowLeft
+        {
+            get
+            {
+                return ((double)(this["WindowLeft"]));
+            }
+            set
+            {
+                this["WindowLeft"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double WindowTop
+        {
+            get
+            {
+                return ((double)(this["WindowTop"]));
+            }
+            set
+            {
+                this["WindowTop"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1024")]
+        public double WindowWidth
+        {
+            get
+            {
+                return ((double)(this["WindowWidth"]));
+            }
+            set
+            {
+                this["WindowWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("768")]
+        public double WindowHeight
+        {
+            get
+            {
+                return ((double)(this["WindowHeight"]));
+            }
+            set
+            {
+                this["WindowHeight"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Maximized")]
+        public string WindowState
+        {
+            get
+            {
+                return ((string)(this["WindowState"]));
+            }
+            set
+            {
+                this["WindowState"] = value;
+            }
+        }
+
         //TODO define other settings
 
     }

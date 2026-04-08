@@ -32,7 +32,7 @@ namespace CMGWpf.MVVM
                     }
                     else
                     {
-                        generator.Parent.Generators[index] = vm.UIGenerator;
+                        generator.Parent.Generators[index] = vm.UIGenerator.Clone(generator.Parent);
                         vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated successfully.", Error = false });
                         vm.IsDirty = true;
                     }
@@ -40,34 +40,36 @@ namespace CMGWpf.MVVM
                 }
                 else if (vm.Mode == GeneratorEditMode.Add)
                 {
-                    generator.Parent.Generators.Add(vm.UIGenerator);
+                    generator.Parent.Generators.Add(vm.UIGenerator.Clone(generator.Parent));
                     vm.IsDirty = true;
                     vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated added.", Error = false });
+                    vm.ActiveGeneratorDialog!.Close();
+                    vm.ActiveGeneratorDialog = null;
                 }
                 else // this should not happen, but if it does, display an error
                 {
                     vm.Messages.Add(new Message { Text = $"SYSTEM ERROR: Invalid generator edit mode '{vm.Mode}'.", Error = true });
                     return;
                 }
-                vm.ActiveDialog?.Close();
-                generator = vm.UIGenerator;
+                vm.ActiveGeneratorDialog?.Close();
+                vm.ActiveGeneratorDialog = null;
                 vm.UpdateGenerator(vm.UIGenerator);
                 vm.NotifyTrackChanged();
                 vm.NotifyGeneratorChanged();
-            }
-            else
-            {
-                vm.NotifyGeneratorChanged(nameof(vm.Messages));
             }
         }
         public void Delete()
         {
             if (generator == null) return;
-            System.Diagnostics.Debug.WriteLine($"Delete generator {generator.Name} command executed.");
+            vm.Status = [];
+            if (vm.ActiveGeneratorDialog != null)
+            {
+                _ = MessageBox.Show($"Generator '{generator.Name}' cannot be deleted while being edited.", "Generator Delete Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
-            // need a message here to the user to confirm deletion of the generator, as this cannot be undone.
-            System.Windows.MessageBoxResult result = System.Windows.MessageBox.Show($"Are you sure you want to delete the generator '{generator.Name}'? This action cannot be undone.", "Confirm Delete", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning);
-            if (result == System.Windows.MessageBoxResult.Yes)
+            MessageBoxResult result = MessageBox.Show($"Are you sure you want to delete the generator '{generator.Name}'? This action cannot be undone.", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.Yes)
             {
                 // User confirmed deletion, proceed with deleting the generator from the parent track
                 Track parentTrack = generator.Parent;
@@ -83,18 +85,11 @@ namespace CMGWpf.MVVM
                 vm.NotifyTrackChanged();
                 vm.Status = [new Message { Text = $"Generator '{generator.Name}' deleted from track '{parentTrack.Name}'.", Error = false }];
             }
-            else
-            {
-                // User canceled deletion, exit the method
-                vm.Status = [new Message { Text = $"Deletion of generator '{generator.Name}' canceled.", Error = false }];
-                return;
-            }
-
         }
         public void Mute()
         {
             if (generator == null) return;
-            // Toggle the mute state
+            vm.Status= [];
             generator.Mute = !generator.Mute;
 
             // Find and update the generator in the parent track
@@ -114,7 +109,13 @@ namespace CMGWpf.MVVM
         public void Edit()
         {
             if (generator == null) return;
-            System.Diagnostics.Debug.WriteLine($"Edit generator on track {generator.Parent.Name} command executing.");
+            vm.Status = [];
+            if (vm.ActiveGeneratorDialog != null)
+            {
+                _ = MessageBox.Show($"Generator {vm.Generator.Name} is already being edited.'", "Duplicate Generator Edit", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             vm.Mode = GeneratorEditMode.Modify;
             vm.NewGeneratorName = generator.Name;
 
@@ -128,13 +129,14 @@ namespace CMGWpf.MVVM
                 _ => null
             };
 
-            vm.ActiveDialog = new GeneratorDialog
+            vm.ActiveGeneratorDialog = new GeneratorDialog()
             {
                 DataContext = vm,
+                SizeToContent = SizeToContent.WidthAndHeight,
                 Owner = Application.Current.MainWindow,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
-            vm.ActiveDialog?.ShowDialog();
+            vm.ActiveGeneratorDialog.Show();
         }
         public void Move()
         {
@@ -149,16 +151,20 @@ namespace CMGWpf.MVVM
         public void MoveCopy()
         {
             if (generator == null) return;
-            System.Diagnostics.Debug.WriteLine($"Copy generator {generator.Name} command executed.");
-            // present a dialog containing a list of track to copy the new generator to. This dialog will be used by both move and copy, so it need to accept a parameter to determine whether the operation is a copy or a move. The dialog will also need to accept the generator to be copied or moved, so it can be added to the selected track when the user clicks the OK button.
-            vm.ActiveDialog = new MoveCopyGeneratorDialog
+            vm.Messages = [];
+            if (vm.ActiveGeneratorDialog != null)
+            {
+                _ = MessageBox.Show($"Cannot move or copy '{vm.Generator.Name}' while generator is being edited.", "Generator Move/Copy error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            vm.ActiveGeneratorDialog = new MoveCopyGeneratorDialog()
             {
                 DataContext = vm,
-                Owner = Application.Current.MainWindow,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 SizeToContent = SizeToContent.WidthAndHeight,
+                Owner = CMGWpf.MainWindow.GetInstance(),
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
-            vm.ActiveDialog.ShowDialog();
+            vm.ActiveGeneratorDialog.ShowDialog();
         }
         public void MoveCopyAction()
         {
@@ -166,7 +172,7 @@ namespace CMGWpf.MVVM
             Track? targetTrack = vm.SelectedTrack;
             if (targetTrack == null)
             {
-                vm.Status = [new Message { Text = "No target track selected.", Error = true }];
+                _ = MessageBox.Show("No target track selected.", "Move/copy Error", MessageBoxButton.OK, MessageBoxImage.Error );
                 return;
             }
 
@@ -181,11 +187,13 @@ namespace CMGWpf.MVVM
                 vm.MoveCopyMode,
                 newGeneratorName
             );
+            vm.ActiveGeneratorDialog?.Close();
+            vm.ActiveGeneratorDialog = null;
         }
         // This command causes the PlayEngine to startup with the current generator
         public void Play()
         {
-            PlayEngine.StartUp(generator);
+            PlayEngine.StartUp(generator, false);
         }
         #endregion
     }

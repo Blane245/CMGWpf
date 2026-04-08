@@ -1,4 +1,6 @@
-﻿using CMGWpf.MVVM;
+﻿using CMGWpf.Dialogs.Tools;
+using CMGWpf.Dialogs.TrackTools;
+using CMGWpf.MVVM;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;
 
@@ -95,7 +97,28 @@ namespace CMGWpf.View
                 return list;
             }
         }
-        public static ObservableCollection<string> MaintainAlignTimeOptions = ["Start Time", "Stop Time"];
+
+        // active generator properties
+        private MidiFrequencyConverterDialog? activeMidiFrequencyConverterDialog = null;
+        public MidiFrequencyConverterDialog? ActiveMidiFrequencyConverterDialog { get => activeMidiFrequencyConverterDialog; set { activeMidiFrequencyConverterDialog = value; OnPropertyChanged(); } }
+
+        private MeasureDurationCalculatorDialog? activeMeasureDurationCalculatorDialog = null;
+        public MeasureDurationCalculatorDialog? ActiveMeasureDurationCalculatorDialog { get => activeMeasureDurationCalculatorDialog; set { activeMeasureDurationCalculatorDialog = value; OnPropertyChanged(); } }
+
+        private OscillatorFrequencyCalculatorDialog? activeOscillatorFrequencyCalculatorDialog = null;
+        public OscillatorFrequencyCalculatorDialog? ActiveOscillatorFrequencyCalculatorDialog { get => activeOscillatorFrequencyCalculatorDialog; set { activeOscillatorFrequencyCalculatorDialog = value; OnPropertyChanged(); } }
+
+        private AlignGeneratorsDialog? activeAlignGeneratorsDialog = null;
+        public AlignGeneratorsDialog? ActiveAlignGeneratorsDialog { get => activeAlignGeneratorsDialog; set { activeAlignGeneratorsDialog = value; OnPropertyChanged(); } }
+
+        private SetGeneratorsDurationEqualDialog? activeSetGeneratorsDurationEqualDialog = null;
+        public SetGeneratorsDurationEqualDialog? ActiveSetGeneratorsDurationEqualDialog { get => activeSetGeneratorsDurationEqualDialog; set { activeSetGeneratorsDurationEqualDialog = value; OnPropertyChanged(); } }
+
+        private StaggerGeneratorsStartTimeDialog? activeStaggerGeneratorsStartTimeDialog = null;
+        public StaggerGeneratorsStartTimeDialog? ActiveStaggerGeneratorsStartTimeDialog { get => activeStaggerGeneratorsStartTimeDialog; set { activeStaggerGeneratorsStartTimeDialog = value; OnPropertyChanged(); } }
+
+        // dialog properties
+        public static readonly ObservableCollection<string> MaintainAlignTimeOptions = ["Start Time", "Stop Time"];
         private string _maintainTimeOption = "Start Time";
         public string MaintainTimeOption { get => _maintainTimeOption; set { _maintainTimeOption = value; OnPropertyChanged(); } }
         private double _staggerAmount = 0;
@@ -125,9 +148,20 @@ namespace CMGWpf.View
         private RelayCommand<object>? _staggerGeneratorsStartTimeCommand;
         public RelayCommand<object> StaggerGeneratorsStartTimeCommand =>
             _staggerGeneratorsStartTimeCommand ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).StaggerGeneratorsStartTime());
+        private RelayCommand<object>? _align;
         private RelayCommand<object>? _alignGeneratorsCommand;
         public RelayCommand<object> AlignGeneratorsCommand =>
             _alignGeneratorsCommand ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).AlignGenerators());
+
+        public RelayCommand<object> Align =>
+            _align ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).Align());
+
+        private RelayCommand<object>? _setEqual;
+        public RelayCommand<object> SetEqual =>
+            _setEqual ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).SetEqual());
+        private RelayCommand<object>? _stagger;
+        public RelayCommand<object> Stagger =>
+            _stagger ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).Stagger());
         #endregion
     }
 }

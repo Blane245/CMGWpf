@@ -33,10 +33,14 @@ namespace CMGWpf.MVVM
                 }
             }
             Debug.WriteLine("FileNew: File is not dirty or old file saved first.");
+
+            // Release lock on current file
+            FileLockService.Instance.ReleaseLock();
+
             vm.File = new()
             {
                 Comment = "",
-                TimeLine = new(SizeService.Instance.DisplayWidth.Value, SizeService.Instance.TimeLineHeight.Value),
+                TimeLine = new(SizeService.Instance.DisplayWidth, SizeService.Instance.TimeLineHeight),
                 Tracks = []
             };
             TimeLineViewModel.Instance.TimeLine = vm.File.TimeLine.Clone();
@@ -70,17 +74,47 @@ namespace CMGWpf.MVVM
             bool? openResult = dlg.ShowDialog();
             if (openResult == true)
             {
-                // clone the 
+                string newFileName = dlg.FileName;
+
+                // Try to acquire lock on the new file (will atomically replace current lock if successful)
+                if (!FileLockService.Instance.TryAcquireLock(newFileName))
+                {
+                    string lockInfo = FileLockService.GetLockInfo(newFileName) ?? "File is already open in another instance";
+                    MessageBox.Show(
+                        $"Cannot save to file:\n\n{newFileName}\n\n{lockInfo}", 
+                        "File Already Open", 
+                        MessageBoxButton.OK, 
+                        MessageBoxImage.Warning);
+                    vm.StatusMessages = [new Message { Text = $"File {newFileName} is already open in another instance.", Error = true }];
+                    return;
+                }
+
+                // clone the
                 file.TimeLine = TimeLineViewModel.Instance.TimeLine;
                 //TODO the same will be done for the tracks when that viewmodel is developed
-                _ = FileHandlers.Write(file, dlg.FileName);
-                vm.IsDirty = false;
-                vm.StatusMessages = [new Message { Text = $"New File {dlg.FileName} created.", Error = false }];
-                vm.FileName = dlg.FileName;
-                vm.AddRecentFile(vm.FileName);
+                string writeStatus = FileHandlers.Write(file, newFileName);
+
+                if (writeStatus == string.Empty)
+                {
+                    vm.IsDirty = false;
+                    vm.StatusMessages = [new Message { Text = $"New File {newFileName} created.", Error = false }];
+                    vm.FileName = newFileName;
+                    vm.AddRecentFile(newFileName);
+                }
+                else
+                {
+                    vm.StatusMessages = [new Message { Text = writeStatus, Error = true }];
+                    // Note: We've already acquired the lock on newFileName at this point.
+                    // If save failed but it was a different file, we're now locked to the new file
+                    // even though the save didn't complete. Release the lock to clean up.
+                    if (newFileName != vm.FileName)
+                    {
+                        FileLockService.Instance.ReleaseLock();
+                    }
+                }
             }
         }
-        public void Open()
+        public async void Open()
         {
             if (vm.IsDirty)
             {
@@ -104,19 +138,39 @@ namespace CMGWpf.MVVM
             bool? openResult = dlg.ShowDialog();
             if (openResult == true)
             {
-                file = new();
                 string fileName = dlg.FileName;
-                string status = FileHandlers.Read(out file, fileName);
+
+                // Try to acquire lock on the new file (will atomically replace current lock if successful)
+                if (!FileLockService.Instance.TryAcquireLock(fileName))
+                {
+                    string lockInfo = FileLockService.GetLockInfo(fileName) ?? "File is already open in another instance";
+                    MessageBox.Show(
+                        $"Cannot open file:\n\n{fileName}\n\n{lockInfo}", 
+                        "File Already Open", 
+                        MessageBoxButton.OK, 
+                        MessageBoxImage.Warning);
+                    vm.StatusMessages = [new Message { Text = $"File {fileName} is already open in another instance.", Error = true }];
+                    return;
+                }
+
+                file = new();
+                var (status, loadedFile) = await FileHandlers.Read(fileName);
+                file = loadedFile;
                 vm.IsDirty = false;
                 if (status == string.Empty) vm.StatusMessages = [new Message { Text = $"File {fileName} opened.", Error = false }];
-                else vm.StatusMessages = [new Message { Text = status, Error = true }];
+                else 
+                {
+                    vm.StatusMessages = [new Message { Text = status, Error = true }];
+                    FileLockService.Instance.ReleaseLock();
+                    return;
+                }
                 vm.FileName = fileName;
                 vm.AddRecentFile(fileName);
                 vm.File = file;
                 TimeLineViewModel.Instance.TimeLine = vm.File.TimeLine.Clone();
             }
         }
-        public void OpenRecent(string fileName)
+        public async void OpenRecent(string fileName)
         {
             Debug.WriteLine($"OpenRecentFile: {fileName}");
             if (vm.IsDirty)
@@ -131,8 +185,23 @@ namespace CMGWpf.MVVM
                     return;
                 }
             }
+
+            // Try to acquire lock on the new file (will atomically replace current lock if successful)
+            if (!FileLockService.Instance.TryAcquireLock(fileName))
+            {
+                string lockInfo = FileLockService.GetLockInfo(fileName) ?? "File is already open in another instance";
+                MessageBox.Show(
+                    $"Cannot open file:\n\n{fileName}\n\n{lockInfo}", 
+                    "File Already Open", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Warning);
+                vm.StatusMessages = [new Message { Text = $"File {fileName} is already open in another instance.", Error = true }];
+                return;
+            }
+
             file = new();
-            string status = FileHandlers.Read(out file, fileName);
+            var (status, loadedFile) = await FileHandlers.Read(fileName);
+            file = loadedFile;
             if (status == string.Empty)
             {
                 vm.IsDirty = false;
@@ -141,6 +210,11 @@ namespace CMGWpf.MVVM
                 vm.File = file;
                 TimeLineViewModel.Instance.TimeLine = vm.File.TimeLine.Clone();
                 vm.AddRecentFile(fileName);
+            }
+            else
+            {
+                vm.StatusMessages = [new Message { Text = status, Error = true }];
+                FileLockService.Instance.ReleaseLock();
             }
         }
         public void Exit()
@@ -167,12 +241,12 @@ namespace CMGWpf.MVVM
 
             // display the comment dialog
             vm.NewComment = vm.File.Comment;
-            vm.ActiveDialog = new CommentDialog
+            CommentDialog activeDialog = new()
             {
                 DataContext = vm,
                 Owner = Application.Current.MainWindow
             };
-            vm.ActiveDialog.ShowDialog();
+            activeDialog.ShowDialog();
         }
         public void EditCommentOk()
         {
@@ -188,16 +262,8 @@ namespace CMGWpf.MVVM
                 Debug.WriteLine("Comment has not changed.");
                 vm.StatusMessages = [new Message { Text = "Comment has not changed.", Error = false }];
             }
-            vm.ActiveDialog?.Close();
         }
 
-        public void EditCommentCancel()
-        {
-            Debug.WriteLine("Cancel Comment command being executed.");
-            vm.StatusMessages = [new Message { Text = "Comment not changed.", Error = false }];
-            // restore the comment in the UIModel to the original comment in the model
-            vm.ActiveDialog?.Close();
-        }
         public void EditPreferences()
         {
             Debug.WriteLine("EditPreferences command being executed.");
@@ -224,7 +290,7 @@ namespace CMGWpf.MVVM
         }
         public void Play(Generator? generator)
         {
-            PlayFunctions.PlayEngine.StartUp(generator);
+            PlayFunctions.PlayEngine.StartUp(generator, false);
         }
         public void Report()
         {

@@ -4,39 +4,47 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         d:DataContext="{d:DesignInstance Type=viewmodel:FileViewModel}"
         mc:Ignorable="d"
-        Title="Edit File Comment"
         WindowStyle="None"
-        Background="White"
-        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        MinWidth="750" MinHeight="430"
+        Title="{Binding WindowTitle}"
+        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
         >
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+    <Grid Margin="0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0">
-           <Label Content="Edit File Comment" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>
-        </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0">
-            <Button x:Name="CloseDialog" Width="20" HorizontalAlignment="Right" VerticalAlignment="Center" Content="X" Command="{Binding EditCommentCancelCommand}" Style="{StaticResource WindowButton}"/>
-            </StackPanel>
-        <TextBox Grid.Row="1" Grid.ColumnSpan="2" Height="350" Width="700" Margin="5,0,0,0"
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="{Binding WindowTitle}"
+                                     ChromeBackground="SaddleBrown">
+        </panels:CustomWindowChrome>
+        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <Label Content="Edit File Comment" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>
+                <TextBox Height="350" Width="700" Margin="5,0,0,0"
                  Text="{Binding NewComment}" 
                  AcceptsReturn="True"
                  TextWrapping="Wrap"
                  VerticalScrollBarVisibility="Auto"
                  ToolTip="Edit the comment for the CMG file."/>
-        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-            <Button x:Name="OK" Width="50" Content="OK" Command="{Binding EditCommentOkCommand}" Margin="0"/>
-            <Button x:Name="Cancel" Width="50" Content="Cancel" Command="{Binding EditCommentCancelCommand}" Margin="5,0,0,0"/>
-        </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button x:Name="OK" Width="50" Content="OK" Command="{Binding EditCommentOkCommand}" Margin="0"/>
+                    <Button x:Name="Cancel" Width="50" Content="Cancel" Click="Cancel_Click" Margin="5,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

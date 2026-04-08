@@ -173,7 +173,8 @@ namespace CMGWpf.PlayFunctions.DSP
             // these last two numbers may be less than the others depending on the duration of the note. These spacial cases are handled below.
             double noteEnd = duration;
             // if the note is staccato, drop the release phase and end the note noteEnd seconds.
-            double releaseEnd = (duration == interval)?noteEnd + releaseSeconds:noteEnd;
+            // also, if the release is very short, cut it off
+            double releaseEnd = (duration == interval && releaseSeconds > 0.11)?noteEnd + releaseSeconds:noteEnd;
 
             // build the gain envelope
             double volumeGain = Sf2Units.VolumeDbToGain(volumeDb);
@@ -239,7 +240,7 @@ namespace CMGWpf.PlayFunctions.DSP
             // the sample will entend from 0 to releaseEnd
             int totalSamples = (int)Math.Ceiling(outputSampleRate * releaseEnd);
             double[] finalSamples = new double[totalSamples]; // Single channel output.
-            DebugLog.Write($"Total samples={totalSamples}");
+            DebugLog.Write($"Total samples={totalSamples}, base resampling ratio={baseRatio}, startcents={startCents}, endcents={endCents}");
 
             DebugLog.Write($"=== Gain Envelope ({envelope.Length} points) ===");
             for (int idx = 0; idx < envelope.Length; idx++)
@@ -255,6 +256,7 @@ namespace CMGWpf.PlayFunctions.DSP
             int iEnvelope = 0; // the current index in the gain envelope.
             int maxEnvelope = envelope.Length - 1; // the maximum index for the gain envelope.
             double instrumentSampleIndex = 0; // the current poistion in the instrument sample data that is being read from. This is a double because is is calulated from using the base sample ratio, start and end cents, and tremolo. The integer part of this number will be used to determine which sample to read from the instrument sample data, and the fractional part will be used for interpolation between samples if necessary.
+            DebugLog.Write($"Total samples={totalSamples}, base resampling ratio={baseRatio}, startcents={startCents}, endcents={endCents}");
             for (int i = 0; i < totalSamples; i++)
             {
                 // the time of the sample point

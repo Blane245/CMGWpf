@@ -61,8 +61,8 @@
                 ValueFormat="{Binding DataContext.ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 AmplitudeFormat="{Binding DataContext.AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
         </DataTemplate>
-        <DataTemplate DataType="{x:Type model:Sequence}">
-            <local:SequencePanel 
+        <DataTemplate DataType="{x:Type model:Sequencer}">
+            <local:SequencerPanel 
                 ValueUnits="{Binding DataContext.ValueUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"         
                 AmplitudeUnits="{Binding DataContext.AmplitudeUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"        
                 Minimum="{Binding DataContext.Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}"         

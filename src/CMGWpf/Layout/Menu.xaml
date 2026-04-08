@@ -8,46 +8,31 @@
              xmlns:viewmodel="clr-namespace:CMGWpf.View" 
              d:DataContext="{d:DesignInstance Type=viewmodel:FileViewModel}"
              mc:Ignorable="d" 
-             d:DesignHeight="25" d:DesignWidth="800"
+             d:DesignHeight="40" d:DesignWidth="600"
+             Background="Transparent"
              >
-    <Grid MouseDown="Grid_MouseDown">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="40px"/>
-            <ColumnDefinition Width="200px"/>
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0">
-            <Image 
-                Source="pack://application:,,,/Assets/cmg-256.png" 
-                Stretch="Uniform"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                MaxWidth="20" 
-                MaxHeight="20" />
-        </StackPanel>
-        <StackPanel Grid.Column="1">
-            <Menu>
-                <MenuItem Header="_File" ToolTip="Perform a CMG file operation.">
-                    <MenuItem Header="_New..." Command="{Binding FileNewCommand}" InputGestureText="Ctrl+N" ToolTip="Create a blank CMG file."/>
-                    <MenuItem Header="_Open..." Command="{Binding FileOpenCommand}" InputGestureText="Ctrl+O" ToolTip="Open an existing CMG file."/>
-                    <MenuItem Header="_Save" Command="{Binding FileSaveCommand}" InputGestureText="Ctrl+S" ToolTip="Save the currently open CMG file."/>
-                    <MenuItem Header="Save _As..." Command="{Binding FileSaveAsCommand}" InputGestureText="Ctrl+A" ToolTip="Save the currently opened CMG file and another CMG file."/>
-                    <MenuItem Header="_Recent" ItemsSource="{Binding RecentFiles}" InputGestureText="Ctrl+R" ToolTip="Open a recently edited CMG file.">
-                        <!-- TODO Add Ctrl+n to the input gesture text for each item in the list, from 0 to 9-->
-                        <MenuItem.ItemTemplate>
-                            <DataTemplate>
-                                <MenuItem Header="{Binding}" Command="{Binding DataContext.FileOpenRecentCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
-                            </DataTemplate>
-                        </MenuItem.ItemTemplate>
-                    </MenuItem>
-                    <Separator/>
-                    <MenuItem Header="E_xit" Command="{Binding ExitFileCommand}"/>
+    <Grid Background="Transparent">
+        <Menu Background="Transparent" VerticalAlignment="Center">
+            <MenuItem Header="_File" ToolTip="Perform a CMG file operation.">
+                <MenuItem Header="_New..." Command="{Binding FileNewCommand}" InputGestureText="Ctrl+N" ToolTip="Create a blank CMG file."/>
+                <MenuItem Header="_Open..." Command="{Binding FileOpenCommand}" InputGestureText="Ctrl+O" ToolTip="Open an existing CMG file."/>
+                <MenuItem Header="_Save" Command="{Binding FileSaveCommand}" InputGestureText="Ctrl+S" ToolTip="Save the currently open CMG file."/>
+                <MenuItem Header="Save _As..." Command="{Binding FileSaveAsCommand}" InputGestureText="Ctrl+A" ToolTip="Save the currently opened CMG file and another CMG file."/>
+                <MenuItem Header="_Recent" ItemsSource="{Binding RecentFiles}" InputGestureText="Ctrl+R" ToolTip="Open a recently edited CMG file.">
+                    <!-- TODO Add Ctrl+n to the input gesture text for each item in the list, from 0 to 9-->
+                    <MenuItem.ItemTemplate>
+                        <DataTemplate>
+                            <MenuItem Header="{Binding}" Command="{Binding DataContext.FileOpenRecentCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
+                        </DataTemplate>
+                    </MenuItem.ItemTemplate>
                 </MenuItem>
-                <MenuItem Header="_Edit" ToolTip="Perform a application or file level edit operation.">
-                    <MenuItem Header="_Add Track" Command="{Binding AddTrackCommand}" InputGestureText="Ctrl+T" ToolTip="Add a new track to the CMG file."/>
-                    <MenuItem Header="_Comment..." Command="{Binding EditCommentCommand}" ToolTip="Edit a CMG file comment." InputGestureText="Ctrl+Shift+C"/>
-                    <MenuItem Header="_Preferences..." Command="{Binding GlobalServices.EditPreferencesCommand, RelativeSource={RelativeSource AncestorType=Window}}" ToolTip="Edit CMG preferences." InputGestureText="Ctrl+P"/>
+                <Separator/>
+                <MenuItem Header="E_xit" Command="{Binding ExitFileCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Edit" ToolTip="Perform a application or file level edit operation.">
+                <MenuItem Header="_Add Track" Command="{Binding AddTrackCommand}" InputGestureText="Ctrl+T" ToolTip="Add a new track to the CMG file."/>
+                <MenuItem Header="_Comment..." Command="{Binding EditCommentCommand}" ToolTip="Edit a CMG file comment." InputGestureText="Ctrl+Shift+C"/>
+                <MenuItem Header="_Preferences..." Command="{Binding Source={x:Static services:GlobalService.Instance}, Path=EditPreferencesCommand}" ToolTip="Edit CMG preferences." InputGestureText="Ctrl+P"/>
                 </MenuItem>
                 <MenuItem Header="_Tools" ToolTip="Access CMG tools.">
                     <MenuItem Header="_Midi/Frequency Converter..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MidiFrequencyConverterCommand}"
@@ -80,29 +65,15 @@
                               />
                 </MenuItem>
                 <MenuItem Header="_Play">
-                    <MenuItem Header="_Play..." Command="{Binding PlayViewModel.PlayCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                <MenuItem Header="_Play..." Command="{Binding PlayCommand}"
                               ToolTip="Play the audio and view the scroll rool of the active generators."
                               InputGestureText="Ctrl+Shift+P"
                               />
-                    <MenuItem Header="_Report..." Command="{Binding PlayViewModel.ReportCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                <MenuItem Header="_Report..." Command="{Binding ReportCommand}"
                               ToolTip="Generate an HTML report of the CMG file contents."
                               InputGestureText="Ctrl+Shift+R"
                               />
                 </MenuItem>
-            </Menu>
-        </StackPanel>
-        <TextBlock Grid.Column="2" Text="{Binding WindowTitle}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16" FontWeight="Bold"/>
-
-        <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="_" x:Name="BtnMinimize" Style="{StaticResource WindowButton}"
-                    Click="BtnMinimize_Click"
-                    />
-            <Button Content="⬜" x:Name="BtnMaximize"  Style="{StaticResource WindowButton}"
-                    Click="BtnMaximize_Click"
-                    />
-            <Button Content="X" x:Name="BtnClose"  Style="{StaticResource WindowButton}"
-                    Click="BtnClose_Click"
-                    />
-        </StackPanel>
+        </Menu>
     </Grid>
 </UserControl>

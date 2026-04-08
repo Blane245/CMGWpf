@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
+﻿using System.Diagnostics;
 
 namespace CMGWpf.PlayFunctions.Utilities
 {
     public static class DebugLog
     {
         // Set to true to enable debug output from PlayEngine, false to disable
-        private static readonly bool EnableDebugOutput = false;
+        private static readonly bool EnableDebugOutput = true;
 
         /// <summary>
         /// Conditional debug output - only writes when EnableDebugOutput is true

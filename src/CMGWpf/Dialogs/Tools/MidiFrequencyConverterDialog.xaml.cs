@@ -15,7 +15,18 @@ namespace CMGWpf.Dialogs.Tools
         public MidiFrequencyConverterDialog()
         {
             InitializeComponent();
-            DataContext = ToolsViewModel.Instance;
+            this.Closing += MidiFrequencyConverterDialog_Closing;
         }
+
+        private void MidiFrequencyConverterDialog_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (DataContext is ToolsViewModel vm) vm.ActiveMidiFrequencyConverterDialog = null;
+        }
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+            if (DataContext is ToolsViewModel vm) vm.ActiveMidiFrequencyConverterDialog = null;
+        }
+
     }
 }

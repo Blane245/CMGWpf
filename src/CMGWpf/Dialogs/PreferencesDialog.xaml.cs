@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using CMGWpf.Services;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CMGWpf.Dialogs
 {
@@ -17,9 +8,23 @@ namespace CMGWpf.Dialogs
     /// </summary>
     public partial class PreferencesDialog : Window
     {
+        GlobalService vm = GlobalService.Instance;
         public PreferencesDialog()
         {
             InitializeComponent();
+            DataContext = vm;
+            vm.StatusMessages.Clear();
+            this.Closing += PreferencesDialog_Closing;
+        }
+
+        private void PreferencesDialog_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+
         }
     }
 }

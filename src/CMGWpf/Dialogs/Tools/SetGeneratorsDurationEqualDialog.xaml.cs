@@ -1,4 +1,5 @@
 ﻿using CMGWpf.Types;
+using CMGWpf.Utilities;
 using CMGWpf.View;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,28 @@ namespace CMGWpf.Dialogs.Tools
         public SetGeneratorsDurationEqualDialog()
         {
             InitializeComponent();
-            DataContext = ToolsViewModel.Instance;
+            this.Loaded += SetGeneratorsDurationEqualDialog_Loaded;
+            this.Closing += SetGeneratorsDurationEqualDialog_Closing;
+        }
+
+        private void SetGeneratorsDurationEqualDialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Bind the ListBox multi-selection to the ViewModel's SecondaryGeneratorNames collection
+            if (DataContext is ToolsViewModel vm)
+            {
+                ListBoxHelper.BindSelectedItems(SecondaryGeneratorsListBox, vm.SecondaryGeneratorNames);
+            }
+        }
+
+        private void SetGeneratorsDurationEqualDialog_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (DataContext is ToolsViewModel vm) vm.ActiveSetGeneratorsDurationEqualDialog = null;
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ToolsViewModel vm) vm.ActiveSetGeneratorsDurationEqualDialog = null;
+            Close();
         }
     }
 }

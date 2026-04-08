@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CMGWpf.Utilities;
+using CMGWpf.View;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -20,6 +22,27 @@ namespace CMGWpf.Dialogs.Tools
         public StaggerGeneratorsStartTimeDialog()
         {
             InitializeComponent();
+            this.Loaded += StaggerGeneratorsStartTimeDialog_Loaded;
+            this.Closing += StaggerGeneratorsStartTimeDialog_Closing;
+        }
+
+        private void StaggerGeneratorsStartTimeDialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Bind the ListBox multi-selection to the ViewModel's SecondaryGeneratorNames collection
+            if (DataContext is ToolsViewModel vm)
+            {
+                ListBoxHelper.BindSelectedItems(SecondaryGeneratorsListBox, vm.SecondaryGeneratorNames);
+            }
+        }
+
+        private void StaggerGeneratorsStartTimeDialog_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (DataContext is ToolsViewModel vm) vm.ActiveStaggerGeneratorsStartTimeDialog = null;
+        }
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ToolsViewModel vm) vm.ActiveStaggerGeneratorsStartTimeDialog = null;
+            Close();
         }
     }
 }

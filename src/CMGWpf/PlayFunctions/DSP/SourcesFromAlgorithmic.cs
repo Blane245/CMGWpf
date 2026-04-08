@@ -110,7 +110,7 @@ namespace CMGWpf.PlayFunctions.DSP
                                     stereoBuffer[bufferIndex + 1] += instrumentSample[i] * right;
                                 }
                             }
-
+                            DebugLog.Write($"Intrument added to time line, Start (t, midi)=({time},{(int)note}, End (t,midi)=({time+noteDuration},{(int)note})");
                             SoundRollBuilder.AddInstrument(new TimeMidiLine
                             {
                                 Start = new TimeMidiPoint { Time = time, Midi = (int)note },
@@ -126,13 +126,13 @@ namespace CMGWpf.PlayFunctions.DSP
             {
                 // note sequencing is driven by the note item sequence and the spped of each beat. The note item sequence is a list of note items, each with a time and a note value. The speed algorithm determines the speed of the generator at each point in time, which affects the interval between notes. The attack, duration, pan, and volume algorithms determine the corresponding values for each note at each point in time.
                 DebugLog.Write($"Sequence algorithm voice generation");
-                Sequence sequence = (noteAlgorithm as Sequence)!;
-                SequenceItem[] seqNoteP = [..sequence.Items];
+                Sequencer sequencer = (noteAlgorithm as Sequencer)!;
+                SequenceItem[] seqNoteP = [..sequencer.Items];
                 double beats = 1;
-                double transpose = sequence.Transpose;
-                sequence.SetReflect();
-                sequence.SetReverse();
-                foreach (SequenceItem item in sequence.Items)
+                double transpose = sequencer.Transpose;
+                sequencer.SetReflect();
+                sequencer.SetReverse();
+                foreach (SequenceItem item in sequencer.Items)
                 {
                     double note = item.value + transpose;
                     double beat = item.beats;

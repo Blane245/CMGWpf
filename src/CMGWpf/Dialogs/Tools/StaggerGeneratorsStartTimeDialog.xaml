@@ -4,30 +4,55 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs.Tools"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
         d:DataContext="{d:DesignInstance Type=viewmodel:ToolsViewModel}"
         mc:Ignorable="d"
-        WindowStyle="ToolWindow"
+        WindowStyle="None"
         Background="White"
         WindowStartupLocation="CenterOwner"
+        SizeToContent="WidthAndHeight"
+        Width="500" Height="112"
         Title="Stagger Generators Start Times" MinHeight="100" MinWidth="400">
-    <Grid>
-        <StackPanel Orientation="Vertical">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Primary Generator: "/>
-                <ComboBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding PrimaryGeneratorName, Mode=TwoWay}" ToolTip="Select the generator that will be used to stagger the secondary generators."/>
-                <Label Content="Secondary Generators: "/>
-                <ListBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding SecondaryGeneratorNames}" SelectionMode="Multiple"  ToolTip="Select the generators whose start times will be stagger from the primary genrator. Note: they are done in order that they appears in the selection list."/>
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="Stagger Generator Start Times"
+                                   ChromeBackground="DarkCyan"
+                                    >
+        </panels:CustomWindowChrome>
+        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Primary Generator: "/>
+                    <ComboBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding PrimaryGeneratorName, Mode=TwoWay}" ToolTip="Select the generator that will be used start the staggering."/>
+                    <Label Content="Secondary Generators: "/>
+                    <ListBox x:Name="SecondaryGeneratorsListBox"
+                             ItemsSource="{Binding GeneratorList}" 
+                             SelectionMode="Multiple" 
+                             ToolTip="Select the generators whose durations will be set equal to the primary generator."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Stagger Amount (sec): "/>
+                    <xctk:DoubleUpDown Value="{Binding StaggerAmount, Mode=TwoWay}" Increment="0.01" ToolTip="Enter the number of seconds to stagger each secondary generator." Margin="5,0,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button Width="50" Content="OK" Command="{Binding Stagger}" Margin="0"/>
+                    <Button Width="50" Content="Cancel" Click="Cancel_Click" Margin="5,0,0,0"/>
+                </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Stagger Amount (sec): "/>
-                <xctk:DoubleUpDown Value="{Binding StaggerAmount, Mode=TwoWay}" Increment="0.01" ToolTip="Enter the number of seconds to stagger each secondary generator."/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Set Equal" Command="{Binding StaggerGeneratorsStartTimeCommand}"/>
-            </StackPanel>
-        </StackPanel>
-
+        </Border>
     </Grid>
 </Window>

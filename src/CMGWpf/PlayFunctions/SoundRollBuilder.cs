@@ -2,6 +2,7 @@ using CMGWpf.SoundFont_2;
 using CMGWpf.Types;
 using CMGWpf.View;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -19,8 +20,8 @@ namespace CMGWpf.PlayFunctions
     };
     public static class SoundRollBuilder
     {
-        private static double PixelsPerNote = 0;  
-        private static double PixelsPerSecond = 0;  
+        private static double PixelsPerNote = 0;
+        private static double PixelsPerSecond = 0;
         private const int MinNote = 0;   // C-1
         private const int MaxNote = 127; // G9
         private record struct TimeMidiPreset(TimeMidiLine Line, string SoundFontName, string PresetName);
@@ -42,7 +43,7 @@ namespace CMGWpf.PlayFunctions
         {
             double totalHeight = displayHeight;
             PixelsPerNote = totalHeight / (MaxNote - MinNote + 1);
-            return totalHeight; 
+            return totalHeight;
         }
 
         /// <summary>
@@ -62,8 +63,12 @@ namespace CMGWpf.PlayFunctions
             DrawOctaveLabels(canvas);
             var line = new Line
             {
-                X1 = 0, X2 = 0, Y1 = 0, Y2 = height,
-                Stroke = Brushes.Red, StrokeThickness = 1.0
+                X1 = 0,
+                X2 = 0,
+                Y1 = 0,
+                Y2 = height,
+                Stroke = Brushes.Red,
+                StrokeThickness = 1.0
             };
             canvas.Children.Add(line);
         }
@@ -72,11 +77,14 @@ namespace CMGWpf.PlayFunctions
             var octaveNotes = new[] { 0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120 };
 
             foreach (int note in octaveNotes)
-            {   
+            {
                 double y = (MaxNote - note) * PixelsPerNote;
                 var line = new Line
                 {
-                    X1 = 0, X2 = canvas.Width, Y1 = y, Y2 = y,
+                    X1 = 0,
+                    X2 = canvas.Width,
+                    Y1 = y,
+                    Y2 = y,
                     Stroke = note == 60 ? Brushes.DarkGray : Brushes.LightGray,
                     StrokeThickness = note == 60 ? 1.5 : 0.5
                 };
@@ -92,7 +100,10 @@ namespace CMGWpf.PlayFunctions
                 bool isMajorTick = sec % 5 == 0;
                 var line = new Line
                 {
-                    X1 = x, X2 = x, Y1 = 0, Y2 = canvas.Height,
+                    X1 = x,
+                    X2 = x,
+                    Y1 = 0,
+                    Y2 = canvas.Height,
                     Stroke = isMajorTick ? Brushes.Gray : Brushes.LightGray,
                     StrokeThickness = isMajorTick ? 1.0 : 0.5
                 };
@@ -110,8 +121,10 @@ namespace CMGWpf.PlayFunctions
                 double y = (MaxNote - octaveNotes[i]) * PixelsPerNote;
                 var label = new TextBlock
                 {
-                    Text = noteNames[i], FontSize = 10,
-                    Foreground = Brushes.Black, Background = Brushes.LightGray
+                    Text = noteNames[i],
+                    FontSize = 10,
+                    Foreground = Brushes.Black,
+                    Background = Brushes.LightGray
                 };
                 Canvas.SetLeft(label, 5);
                 Canvas.SetTop(label, y - 7);
@@ -125,8 +138,10 @@ namespace CMGWpf.PlayFunctions
                 double x = sec * PixelsPerSecond;
                 var label = new TextBlock
                 {
-                    Text = $"{sec}s", FontSize = 10,
-                    Foreground = Brushes.Black, Background = Brushes.LightGray
+                    Text = $"{sec}s",
+                    FontSize = 10,
+                    Foreground = Brushes.Black,
+                    Background = Brushes.LightGray
                 };
                 Canvas.SetLeft(label, x + 2);
                 Canvas.SetTop(label, 2);
@@ -141,26 +156,22 @@ namespace CMGWpf.PlayFunctions
             int i = 0;
             int count = sF_Presets.Count;
             ObservableCollection<PresetColor> presetColors = [];
-            foreach(SF_Preset preset in sF_Presets) {
+            foreach (SF_Preset preset in sF_Presets)
+            {
                 // check if the soundfont/preset exists and then skip it if it does, otherwise add it with a new color
-                try
+                PresetColor? found = Array.Find(presetColors.ToArray(), ((p) => p.SoundFontName == preset.SoundFontName && p.PresetName == preset.PresetName));
+                if (found != null) continue;
+                double hue = (double)i / count * 360.0;
+                Color color = HslToRgb(hue, 0.9, 0.5);
+                PresetColor newOne = new()
                 {
-                    PresetColor found = presetColors.First((p) => p.SoundFontName == preset.SoundFontName && p.PresetName == preset.PresetName);
-                }
-                catch (InvalidOperationException)
-                {
-                    double hue = (double)i / count * 360.0;
-                    Color color = HslToRgb(hue, 0.9, 0.5);
-                    PresetColor newOne = new()
-                    {
-                        SoundFontName = preset.SoundFontName,
-                        PresetName = preset.PresetName,
-                        Color = color
-                    };
-                    presetColors.Add(newOne);
-                }
-                i++;
+                    SoundFontName = preset.SoundFontName,
+                    PresetName = preset.PresetName,
+                    Color = color
+                };
+                presetColors.Add(newOne);
             }
+            i++;
             return presetColors;
         }
 
@@ -169,16 +180,16 @@ namespace CMGWpf.PlayFunctions
             double c = (1 - Math.Abs(2 * l - 1)) * s;
             double x = c * (1 - Math.Abs((h / 60) % 2 - 1));
             double m = l - c / 2;
-            
+
             double r = 0, g = 0, b = 0;
-            
+
             if (h < 60) { r = c; g = x; b = 0; }
             else if (h < 120) { r = x; g = c; b = 0; }
             else if (h < 180) { r = 0; g = c; b = x; }
             else if (h < 240) { r = 0; g = x; b = c; }
             else if (h < 300) { r = x; g = 0; b = c; }
             else { r = c; g = 0; b = x; }
-            
+
             return Color.FromRgb(
                 (byte)Math.Round((r + m) * 255),
                 (byte)Math.Round((g + m) * 255),
@@ -194,6 +205,7 @@ namespace CMGWpf.PlayFunctions
             foreach (var _timeMidiPreset in timeMidiPresets)
             {
                 Color color = presetColors.FirstOrDefault((p) => p.SoundFontName == _timeMidiPreset.SoundFontName && p.PresetName == _timeMidiPreset.PresetName)!.Color;
+     
                 double x1 = TimeToX(_timeMidiPreset.Line.Start.Time);
                 double y1 = NoteToY(_timeMidiPreset.Line.Start.Midi);
                 double x2 = TimeToX(_timeMidiPreset.Line.End.Time);
@@ -205,7 +217,7 @@ namespace CMGWpf.PlayFunctions
                     {
                         Width = circleSize,
                         Height = circleSize,
-                        Fill = new SolidColorBrush(color) { Opacity = 0.7 },
+                        Fill = new SolidColorBrush (color) { Opacity = 0.7},
                         Stroke = Brushes.Black,
                         StrokeThickness = 0.5
                     };

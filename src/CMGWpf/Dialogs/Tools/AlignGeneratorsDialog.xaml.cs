@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using CMGWpf.Utilities;
+using CMGWpf.View;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CMGWpf.Dialogs.Tools
 {
@@ -20,6 +12,28 @@ namespace CMGWpf.Dialogs.Tools
         public AlignGeneratorsDialog()
         {
             InitializeComponent();
+            this.Loaded += AlignGeneratorsDialog_Loaded;
+            this.Closing += AlignGeneratorsDialog_Closing;
+        }
+
+        private void AlignGeneratorsDialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Bind the ListBox multi-selection to the ViewModel's SecondaryGeneratorNames collection
+            if (DataContext is ToolsViewModel vm)
+            {
+                ListBoxHelper.BindSelectedItems(SecondaryGeneratorsListBox, vm.SecondaryGeneratorNames);
+            }
+        }
+
+        private void AlignGeneratorsDialog_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (DataContext is ToolsViewModel vm) vm.ActiveAlignGeneratorsDialog = null;
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ToolsViewModel vm) vm.ActiveAlignGeneratorsDialog = null;
+            Close();
         }
     }
 }

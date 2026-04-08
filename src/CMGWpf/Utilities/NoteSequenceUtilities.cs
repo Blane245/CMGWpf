@@ -11,7 +11,7 @@ namespace CMGWpf.Utilities
     {
         public static async Task<ObservableCollection<string>> GetNoteSequenceNamesAsync()
         {
-            DbResult<DbNoteSequenceValidNamesType> dbResponse = await CMGDB.FetchAsync<DbNoteSequenceValidNamesType>($"note/valid", "GET");
+            DbResult<DbNoteSequenceValidNamesType> dbResponse = await CMGDB.FetchAsync<DbNoteSequenceValidNamesType>($"note/valid", "GET").ConfigureAwait(false);
 
             if (dbResponse.IsSuccess && dbResponse.Value.value != null)
             {
@@ -22,21 +22,21 @@ namespace CMGWpf.Utilities
                 return [];
             }
         }
-        public static async Task<Sequence> GetNoteSequenceAsync(string name)
+        public static async Task<Sequencer> GetNoteSequenceAsync(string name)
         {
-            DbResult<DbNoteSequenceValueType> dbResponse = await CMGDB.FetchAsync<DbNoteSequenceValueType>($"note/{name}", "GET");
+            DbResult<DbNoteSequenceValueType> dbResponse = await CMGDB.FetchAsync<DbNoteSequenceValueType>($"note/{name}", "GET").ConfigureAwait(false);
             if (dbResponse.IsSuccess)
             {
-                Sequence sequence = new()
+                Sequencer sequencer = new()
                 {
                     Name = dbResponse.Value.value.name,
                     Items = [..dbResponse.Value.value.items],
                 };
-                return sequence;
+                return sequencer;
             }
             else
             {
-                return new Sequence { Name = name, Items = [] };
+                return new Sequencer { Name = name, Items = [] };
             }
 
         }

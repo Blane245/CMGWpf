@@ -5,36 +5,44 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
         d:DataContext="{d:DesignInstance Type=viewmodel:GeneratorViewModel}"
         mc:Ignorable="d"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         WindowStyle="None"
-        Background="White"
         ResizeMode="CanResize"
-        Title="MoveCopyGeneratorDialog" >
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        Width="300" Height="100"
+                Background="White"
+
+        >
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+    <Grid Margin="0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0">
-            <Label Content="{Binding MoveCopyMode}" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>
-            <Label Content="Generator" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>
-        </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0">
-            <Button x:Name="CloseDialog" Width="20" HorizontalAlignment="Right" VerticalAlignment="Center" Content="X" Command="{Binding GeneratorCancelCommand}" Style="{StaticResource WindowButton}"/>
-        </StackPanel>
-        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal">
-            <Label Content="Move Track To:" VerticalAlignment="Center" Margin="0"/>
-            <ComboBox ItemsSource="{Binding Tracks}" SelectedItem="{Binding SelectedTrack}" Width="150" ToolTip="Selct the track to receive the moved or copied generator."/>
-        </StackPanel>
-        <StackPanel  Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-                <Button x:Name="MoveCopyButton" Content="OK" Width="50" Command="{Binding MoveCopyCommand}" Margin="0"/>
-                <Button x:Name="CancelButton" Content="Cancel" Width="50" Command="{Binding GeneratorCancelCommand}" Margin="5,0,0,0"/>
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="{Binding MoveCopyTitle}"
+                                   ChromeBackground="DarkCyan"
+                                    >
+        </panels:CustomWindowChrome>
+        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Target Track :" VerticalAlignment="Center" Margin="0"/>
+                    <ComboBox ItemsSource="{Binding Tracks}" SelectedItem="{Binding SelectedTrack}" Width="150" ToolTip="Selct the track to receive the moved or copied generator."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button Width="50" Content="OK" Command="{Binding MoveCopyCommand}" Margin="0"/>
+                    <Button Width="50" Content="Cancel" Click="Cancel_Click" Margin="5,0,0,0"/>
+                </StackPanel>
             </StackPanel>
+        </Border>
     </Grid>
 </Window>

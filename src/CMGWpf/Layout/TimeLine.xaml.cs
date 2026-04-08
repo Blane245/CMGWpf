@@ -23,7 +23,7 @@ namespace CMGWpf.Layout
             if (DataContext is TimeLineViewModel viewModel)
             {
                 viewModel.RegisterCanvas(TimeLineCanvas);
-                viewModel.DrawTimeLine(TimeLineCanvas, viewModel.TimeLine.StartTime, SizeService.Instance.DisplayWidth.Value, SizeService.Instance.TimeLineHeight.Value, viewModel.TimeLine.CurrentZoomLevel, viewModel.TimeLine.TimeInterval);
+                viewModel.DrawTimeLine(TimeLineCanvas, viewModel.TimeLine.StartTime, SizeService.Instance.DisplayWidth, SizeService.Instance.TimeLineHeight, viewModel.TimeLine.CurrentZoomLevel, viewModel.TimeLine.TimeInterval);
             }
         }
     }

@@ -13,6 +13,18 @@ namespace CMGWpf.Dialogs
         public RenameTrack()
         {
             InitializeComponent();
+            this.Closing += RenameTrack_Closing;
+        }
+
+        private void RenameTrack_Closing(object? sender, CancelEventArgs e)
+        {
+            (DataContext as TrackViewModel)!.ActiveRenameDialog = null;
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+            (DataContext as TrackViewModel)!.ActiveRenameDialog = null;
         }
     }
 }

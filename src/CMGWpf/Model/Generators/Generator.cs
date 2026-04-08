@@ -56,7 +56,7 @@ namespace CMGWpf.Model.Generators
         public virtual bool Equals(Generator value) => base.Equals(value);
         public abstract CurrentValues GetCurrentValues(double time, double beats);
         public abstract void AppendXML(XmlDocument doc, XmlElement elem);
-        public abstract void LoadXML(XmlElement generatorElem, Track parent);
+        public abstract Task LoadXML(XmlElement generatorElem, Track parent);
         public virtual ObservableCollection<Message> Validate()
         {
             ObservableCollection<Message> errors = [];
@@ -77,8 +77,9 @@ namespace CMGWpf.Model.Generators
         public override void AppendXML(XmlDocument doc, XmlElement elem)
         {
         }
-        public override void LoadXML(XmlElement generatorElem, Track parent)
+        public override Task LoadXML(XmlElement generatorElem, Track parent)
         {
+            return Task.CompletedTask;
         }
         public new ObservableCollection<Message> Validate()
         {

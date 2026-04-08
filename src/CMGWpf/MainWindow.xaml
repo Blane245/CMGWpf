@@ -4,27 +4,38 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
         xmlns:services="clr-namespace:CMGWpf.Services"
         xmlns:layout="clr-namespace:CMGWpf.Layout"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         mc:Ignorable="d"
         WindowStyle="None"
-        WindowState="Maximized"
         ResizeMode="CanResize"
-        WindowStartupLocation="CenterScreen"
+        Icon="Assets/CMG-Logo.ico"
+        Title="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=WindowTitle}"
+        AllowsTransparency="False"
+        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
         d:DesignHeight="450" d:DesignWidth="800"
     >
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
     <Window.InputBindings>
         <!-- File Menu Shortcuts -->
-        <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding FileNewCommand}"/>
-        <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding FileOpenCommand}"/>
-        <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding FileSaveCommand}"/>
-        <KeyBinding Key="A" Modifiers="Ctrl+Shift" Command="{Binding FileSaveAsCommand}"/>
+        <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=FileNewCommand}"/>
+        <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=FileOpenCommand}"/>
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=FileSaveCommand}"/>
+        <KeyBinding Key="A" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=FileSaveAsCommand}"/>
 
         <!-- Edit Menu Shortcuts -->
-        <KeyBinding Key="T" Modifiers="Ctrl" Command="{Binding AddTrackCommand}"/>
-        <KeyBinding Key="C" Modifiers="Ctrl+Shift" Command="{Binding EditCommentCommand}"/>
-        <KeyBinding Key="P" Modifiers="Ctrl" Command="{Binding EditPreferencesCommand}"/>
+        <KeyBinding Key="T" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=AddTrackCommand}"/>
+        <KeyBinding Key="C" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=EditCommentCommand}"/>
+        <KeyBinding Key="P" Modifiers="Ctrl" Command="{Binding Source={x:Static services:GlobalService.Instance}, Path=EditPreferencesCommand}"/>
 
         <!-- Tools Menu Shortcuts -->
         <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MidiFrequencyConverterCommand}"/>
@@ -32,19 +43,32 @@
         <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=OscillatorFrequencyCalculatorCommand}"/>
         <KeyBinding Key="E" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=SetGeneratorsDurationEqualCommand}"/>
         <!-- Play Menu Shortcuts -->
-        <KeyBinding Key="P" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:PlayViewModel.Instance}, Path=PlayCommand}"/>
-        <KeyBinding Key="R" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:PlayViewModel.Instance}, Path=RecordCommand}"/>
+        <KeyBinding Key="P" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=PlayCommand}"/>
+        <KeyBinding Key="R" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=ReportCommand}"/>
     </Window.InputBindings>
-    <Grid>
+    <Grid Margin="0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=MenuHeight}"/>
-            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=TimeLineHeight}"/>
+            <!-- Custom Window Chrome -->
+            <RowDefinition Height="40"/>
+            <!-- Timeline -->
+            <RowDefinition Height="40"/>
             <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=BodyHeight}"/>
             <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=FooterHeight}"/>
         </Grid.RowDefinitions>
-        <layout:Menu Grid.Row="0"/>
-        <layout:TimeLine Grid.Row="1"/>
-        <layout:Body Grid.Row="2"/>
-        <layout:Footer Grid.Row="3"/>
+
+        <!-- Custom Window Chrome with Menu -->
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="{Binding WindowTitle}">
+            <panels:CustomWindowChrome.ChromeMenuContent>
+                <layout:Menu/>
+            </panels:CustomWindowChrome.ChromeMenuContent>
+        </panels:CustomWindowChrome>
+        <layout:TimeLine Grid.Row="1" Margin="0" VerticalAlignment="Stretch"/>
+        <Border  Grid.Row="2" BorderThickness="1" BorderBrush="Black">
+            <layout:Body/>
+        </Border>
+        <Border  Grid.Row="3" BorderThickness="1" BorderBrush="Black">
+            <layout:Footer/>
+        </Border>
     </Grid>
 </Window>

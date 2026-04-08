@@ -7,23 +7,22 @@ namespace CMGWpf.Utilities
 {
     public static class FileHandlers
     {
-        public static string Read(out CMGFile file, string fileName)
+        public static async Task<(string error, CMGFile file)> Read(string fileName)
         {
             System.Diagnostics.Debug.WriteLine($"FileHandlers.Read: {fileName}");
             try
             {
                 XmlDocument xml = new();
                 xml.Load(fileName);
-                file = new();
+                CMGFile file = new();
                 XmlElement? doc = (XmlElement?)xml.DocumentElement;
-                if (doc == null || doc.Name != "CMG") return $"{fileName} is missing the CMG tag.";
-                string result = file.LoadXML(doc, fileName);
-                return result;
+                if (doc == null || doc.Name != "CMG") return ($"{fileName} is missing the CMG tag.", file);
+                string result = await file.LoadXML(doc, fileName).ConfigureAwait(false);
+                return (result, file);
             }
             catch (Exception e)
             {
-                file = new();
-                return $"Exception ocurred while reading {fileName}: {e.Message}.";
+                return ($"Exception ocurred while reading {fileName}: {e.Message}.", new CMGFile());
             }
         }
 

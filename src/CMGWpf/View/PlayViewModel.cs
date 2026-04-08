@@ -1,11 +1,9 @@
 ﻿using CMGWpf.Model.Generators;
 using CMGWpf.MVVM;
 using CMGWpf.PlayFunctions;
-using System;
-using System.Collections.Generic;
+using CMGWpf.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Text;
 using static CMGWpf.Types.PlayTypes;
 
 namespace CMGWpf.View
@@ -19,6 +17,10 @@ namespace CMGWpf.View
         {
         }
         #region Play Dialog Properties
+        public string PlayTitle
+        {
+            get => GlobalService.Instance.PlayTitle;
+        }
         private ObservableCollection<Generator> playGenerators = [];
         public ObservableCollection<Generator> PlayGenerators
         {
@@ -55,10 +57,10 @@ namespace CMGWpf.View
                     provider.SetPosition(TimeSpan.FromSeconds(value));
                 }
 
-                OnPropertyChanged();
                 currentScrollPosition = -value / PlayDuration * ScrollRollWidth; // Update scroll position based on play position
-                OnPropertyChanged(nameof(currentScrollPosition));
+                OnPropertyChanged(nameof(CurrentScrollPosition));
                 OnPropertyChanged(nameof(CurrentPlayTime));
+                OnPropertyChanged();
             }
         }
         private double currentScrollPosition = 0;
@@ -159,7 +161,7 @@ namespace CMGWpf.View
             OnPropertyChanged(nameof(CurrentPlayPosition));
             OnPropertyChanged(nameof(CurrentPlayTime));
             currentScrollPosition = -position / PlayDuration * ScrollRollWidth; // Update scroll position based on play position
-            OnPropertyChanged(nameof(currentScrollPosition));
+            OnPropertyChanged(nameof(CurrentScrollPosition));
             isUpdatingPosition = false;
         }
 

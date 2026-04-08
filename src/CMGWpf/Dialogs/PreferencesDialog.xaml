@@ -5,63 +5,68 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:CMGWpf.Dialogs"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
         xmlns:viewmodel="clr-namespace:CMGWpf.Services"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         d:DataContext="{d:DesignInstance Type=viewmodel:GlobalService}"
-        Title="Edit Preferences"
-        WindowStyle="None"
-        Background="White"
-        WindowStartupLocation="CenterOwner"
-        Height="200" Width="300"
         mc:Ignorable="d"
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        MinHeight="210" MinWidth="300"
+        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
         >
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Margin="0" Orientation="Horizontal">
-            <Label Content="Edit Preferences" Foreground="Black" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            <Button x:Name="CloseDialog" Width="20" HorizontalAlignment="Right" VerticalAlignment="Center" Content="X" Command="{Binding EditPreferencesCancelCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource WindowButton}"/>
-        </StackPanel>
-        <StackPanel Grid.Row="1" Orientation="Vertical">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Soundfont Directory: "/>
-                <TextBlock Text="{Binding SoundFontFileLocation, Mode=TwoWay}" ToolTip="Enter the local computer file syste path to the folder that contains soundfont files."/>
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="Edit Preferences"
+                                     ChromeBackground="SaddleBrown">
+        </panels:CustomWindowChrome>
+        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Soundfont Directory: "/>
+                    <TextBox Text="{Binding SoundFontFileLocation, Mode=TwoWay}" ToolTip="Enter the local computer file syste path to the folder that contains soundfont files."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Record Format: "/>
+                    <ComboBox ItemsSource="{Binding RecordFormats}" SelectedItem="{Binding RecordFormat, Mode=TwoWay}" ToolTip="Select the desired audio recoring format."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Time Line Mode: "/>
+                    <ComboBox ItemsSource="{Binding TimeLineModes}" SelectedItem="{Binding TimeLineMode, Mode=TwoWay}" ToolTip="Currently not implemented."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Measure Length (sec): "/>
+                    <xctk:DoubleUpDown Value="{Binding MeasureLength, Mode=TwoWay}" Minimum="0" Maximum="1000" Increment="1" ToolTip="Currently not implemented."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Beats per Measure: "/>
+                    <xctk:IntegerUpDown Value="{Binding BeatsPerMeasure, Mode=TwoWay}" Minimum="1" Maximum="100" Increment="1" ToolTip="Currently not implemented"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Snap Mode: "/>
+                    <CheckBox IsChecked="{Binding IsSnap, Mode=TwoWay}" ToolTip="Currently not implemented"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Snap Increment: "/>
+                    <Label Content="{Binding SnapIncrementUnits}"/>
+                    <xctk:IntegerUpDown Value="{Binding SnapIncrement, Mode=TwoWay}" Minimum="1" Maximum="1000" ToolTip="Currently not implemented"/>
+                </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button x:Name="OK" Width="50" Content="OK" Command="{Binding EditPreferencesOkCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="0"/>
+                    <Button x:Name="Cancel" Width="50" Content="Cancel" Click="Cancel_Click" Margin="5,0,0,0"/>
+                </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Record Format: "/>
-                <ComboBox ItemsSource="{Binding RecordFormats}" SelectedItem="{Binding RecordFormat, Mode=TwoWay}" ToolTip="Select the desired audio recoring format."/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Time Line Mode: "/>
-                <ComboBox ItemsSource="{Binding TimeLineModes}" SelectedItem="{Binding TimeLineMode, Mode=TwoWay}" ToolTip="Currently not implemented."/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Measure Length (sec): "/>
-                <xctk:DoubleUpDown Value="{Binding MeasureLength, Mode=TwoWay}" Minimum="0" Maximum="1000" Increment="1" ToolTip="Currently not implemented."/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Beats per Measure: "/>
-                <xctk:IntegerUpDown Value="{Binding BeatsPerMeasure, Mode=TwoWay}" Minimum="1" Maximum="100" Increment="1" ToolTip="Currently not implemented"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Snap Mode: "/>
-                <CheckBox IsChecked="{Binding IsSnap, Mode=TwoWay}" ToolTip="Currently not implemented"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Snap Increment: "/>
-                <Label Content="{Binding SnapIncrementUnits}"/>
-                <xctk:IntegerUpDown Value="{Binding SnapIncrement, Mode=TwoWay}" Minimum="1" Maximum="1000" ToolTip="Currently not implemented"/>
-            </StackPanel>
-            <Border BorderBrush="Black" BorderThickness="1"/>
-        </StackPanel>
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left">
-            <Button x:Name="OK" Width="50" Content="OK" Command="{Binding EditPreferencesOkCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="0"/>
-            <Button x:Name="Cancel" Width="50" Content="Cancel" Command="{Binding EditPreferencesCancelCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="5,0,0,0"/>
-        </StackPanel>
+        </Border>
     </Grid>
 </Window>

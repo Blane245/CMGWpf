@@ -4,68 +4,61 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:viewmodel="clr-namespace:CMGWpf.View"
-        d:DataContext="{d:DesignInstance Type=viewmodel:GeneratorViewModel, IsDesignTimeCreatable=False}"
         xmlns:local="clr-namespace:CMGWpf.Dialogs"
         xmlns:panels="clr-namespace:CMGWpf.Panels"
+        xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        d:DataContext="{d:DesignInstance Type=viewmodel:GeneratorViewModel, IsDesignTimeCreatable=False}"
         mc:Ignorable="d"
         Title="Add/Edit Generator"
         WindowStyle="None"
-        WindowState="Normal"
-        WindowStartupLocation="CenterOwner"
-        Background="White"
         ResizeMode="CanResize"
-        AllowsTransparency="False"
-        d:DesignHeight="450" d:DesignWidth="800"
+        Width="1000" Height="1000"
+        Background="White"
+        d:DesignHeight="450" d:DesignWidth="1000"
         >
-    <Border BorderThickness="2" BorderBrush="Black">
-    <Grid>
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+    <Grid Margin="0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="40"/>
+            <!-- chrome -->
             <RowDefinition Height="Auto"/>
+            <!-- name, start and stop time -->
             <RowDefinition Height="Auto"/>
+            <!-- generator-specific panel -->
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <!-- messages -->
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <panels:CMGIcon Grid.Column="0"/>
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Label Content="{Binding Mode}"/>
-                <Label Content="{Binding UIGenerator}"/>
-                <Label Content="Generator"/>
-                <Label Content="{Binding UIGenerator.Name}"/>
-            </StackPanel>
-            <StackPanel Grid.Column="2" HorizontalAlignment="Right" Orientation="Horizontal">
-                <Button Content="_" x:Name="BtnMinimize" Style="{StaticResource WindowButton}"                    Click="BtnMinimize_Click"/>
-                <Button Content="⬜" x:Name="BtnMaximize"  Style="{StaticResource WindowButton}"                   Click="BtnMaximize_Click"/>
-                <Button x:Name="ExitGenerator" Content="X" Style="{StaticResource WindowButton}" Command="{Binding GeneratorCancelCommand}"/>
-            </StackPanel>
-        </Grid>
-        <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <Label Content="Name: "/>
-            <TextBox x:Name="GeneratorName" Text="{Binding NewGeneratorName}" ToolTip="Enter a new unique name for the generator."/>
-            <Label Content="Start Time (sec): "/>
-            <xctk:DoubleUpDown x:Name="StartTime" FormatString="F2" Value="{Binding UIGenerator.StartTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the start time of the generator. TBD A change to this will cause the stop time to change maintaing the generator's duration."/>
-            <Label Content="Stop Time (sec): "/>
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="{Binding GeneratorDialogTitle}"
+                                   ChromeBackground="DarkCyan"
+                                    >
+        </panels:CustomWindowChrome>
+        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Name: "/>
+                <TextBox x:Name="GeneratorName" Text="{Binding NewGeneratorName}" ToolTip="Enter a new unique name for the generator."/>
+                <Label Content="Start Time (sec): "/>
+                <xctk:DoubleUpDown x:Name="StartTime" FormatString="F2" Value="{Binding UIGenerator.StartTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the start time of the generator. TBD A change to this will cause the stop time to change maintaing the generator's duration."/>
+                <Label Content="Stop Time (sec): "/>
                 <xctk:DoubleUpDown x:Name="StopTime" FormatString="F2" Value="{Binding UIGenerator.StopTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the stop time of the generator."/>
-        </StackPanel>
-        <!-- Generator-specific controls go here -->
-        <StackPanel Grid.Row="2" Orientation="Vertical" Margin="0">
-            <ContentControl x:Name="GeneratorSpecificPanel" Content="{Binding GeneratorPanel}" />
-        </StackPanel>
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0" HorizontalAlignment="Left">
-            <Button x:Name="Submit" Content="Submit" Width="50" Command="{Binding GeneratorSubmitCommand}"/>
-            <Button x:Name="CancelGenerator" Content="Cancel" Width="50" Command="{Binding GeneratorCancelCommand}"/>
-                <Button Content="Play" Width="50" Command="{Binding GeneratorPlayCommand}"/>
             </StackPanel>
-        <StackPanel Grid.Row="4" Orientation="Vertical" Margin="0">
-            <panels:MessageBox Source="{Binding Messages}"/>
-        </StackPanel>
+        </Border>
+        <Border Grid.Row="2" BorderBrush="Black" BorderThickness="1" Padding="5">
+            <ContentControl x:Name="GeneratorSpecificPanel" Content="{Binding GeneratorPanel}" />
+        </Border>
+        <Border Grid.Row="3" BorderBrush="Black" BorderThickness="1" Padding="5">
+            <StackPanel Orientation="Horizontal">
+                <Button Width="50" Content="OK" Command="{Binding GeneratorSubmitCommand}" Margin="0"/>
+                <Button Width="50" Content="Play" Command="{Binding GeneratorPlayCommand}" Margin="5,0,0,0"/>
+                <Button Width="50" Content="Cancel" Click="Cancel_Click" Margin="5,0,0,0"/>
+            </StackPanel>
+        </Border>
     </Grid>
-    </Border>
 </Window>

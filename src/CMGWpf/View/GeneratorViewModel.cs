@@ -50,7 +50,7 @@ namespace CMGWpf.View
         // Method to update the generator reference after modifications
         public void UpdateGenerator(Model.Generators.Generator updatedGenerator)
         {
-            generator = updatedGenerator;
+            generator = updatedGenerator.Clone(generator.Parent);
             OnPropertyChanged(nameof(Generator));
         }
         public Model.Generators.Generator UIGenerator
@@ -106,6 +106,11 @@ namespace CMGWpf.View
                 OnPropertyChanged(nameof(StochasticComposition));
             }
         }
+        private Window? activeGeneratorDialog = null; // only one generator dialog per generator can be opened
+        public Window? ActiveGeneratorDialog { get => activeGeneratorDialog; set { activeGeneratorDialog = value; OnPropertyChanged(); } }
+        public string GeneratorDialogTitle { get => $"{Mode} Generator {UIGenerator.Name}"; }
+        public string MoveCopyTitle { get => $"{MoveCopyMode} Generator '{UIGenerator.Name}'"; }
+
         private string newGeneratorName = "";
         public string NewGeneratorName
         {
@@ -144,7 +149,7 @@ namespace CMGWpf.View
         public static TimeLine TimeLine => TimeLineViewModel.Instance.TimeLine;
         private static double TimeToOffset(double time)
         {
-            double result = SizeService.Instance.DisplayWidth.Value * (time - TimeLine.StartTime) / TimeLineTypes.TimeLineScales[TimeLine.CurrentZoomLevel].Extent;
+            double result = SizeService.Instance.DisplayWidth * (time - TimeLine.StartTime) / TimeLineTypes.TimeLineScales[TimeLine.CurrentZoomLevel].Extent;
             return result;
         }
 
@@ -156,7 +161,7 @@ namespace CMGWpf.View
         {
             get
             {
-                double duration = SizeService.Instance.DisplayWidth.Value * (generator.StopTime - generator.StartTime) / TimeLineTypes.TimeLineScales[TimeLine.CurrentZoomLevel].Extent;
+                double duration = SizeService.Instance.DisplayWidth * (generator.StopTime - generator.StartTime) / TimeLineTypes.TimeLineScales[TimeLine.CurrentZoomLevel].Extent;
                 return duration;
             }
         }
@@ -175,8 +180,7 @@ namespace CMGWpf.View
         }
 
         // Height is 1/3 of track height as per requirements
-        public static double Height => SizeService.Instance.TrackHeight.Value / 3.0;
-
+        public static double Height => SizeService.Instance.TrackHeight / 3.0;
         private bool IsSelected() => (Generator.StartTime >= TimeLine.TimeInterval.StartTime && Generator.StopTime <= TimeLine.TimeInterval.EndTime);
 
         // Background color based on generator type and selection state
@@ -241,15 +245,6 @@ namespace CMGWpf.View
             get { return stochasticPanel; }
             set { stochasticPanel = value; }
         }
-        public Window? ActiveDialog
-        {
-            get => GlobalService.Instance.ActiveDialog;
-            set
-            {
-                GlobalService.Instance.ActiveDialog = value;
-                OnPropertyChanged();
-            }
-        }
         public bool IsDirty { get => GlobalService.Instance.IsDirty; set { GlobalService.Instance.IsDirty = value; OnPropertyChanged(); } }
         public void NotifyGeneratorChanged(string? name = null)
         {
@@ -289,32 +284,11 @@ namespace CMGWpf.View
         private RelayCommand<Model.Generators.Generator>? _deleteCommand;
         public RelayCommand<Model.Generators.Generator> DeleteCommand =>
             _deleteCommand ??= new RelayCommand<Model.Generators.Generator>(execute => new GeneratorCommands(this, UIGenerator).Delete());
-        private RelayCommand<object>? _generatorCancelCommand;
-        public RelayCommand<object> GeneratorCancelCommand =>
-            _generatorCancelCommand ??= new RelayCommand<object>(execute =>
-            {
-                ActiveDialog?.Close();
-                switch (UIGenerator)
-                {
-                    case Silent:
-                        UIGenerator = (Silent)Generator.Clone(Generator.Parent);
-                        break;
-                    case Algorithmic:
-                        UIGenerator = (Algorithmic)Generator.Clone(Generator.Parent);
-                        break;
-                    case Stochastic:
-                        UIGenerator = (Stochastic)Generator.Clone(Generator.Parent);
-                        break;
-                    default:
-                        break;
-                }
-                Status = new ObservableCollection<Message> { new Message { Text = "Generator action closed without updates", Error = false } };
-            });
         private RelayCommand<Model.Generators.Generator>? _generatorPlayCommand;
         public RelayCommand<Model.Generators.Generator> GeneratorPlayCommand =>
             _generatorPlayCommand ??= new RelayCommand<Model.Generators.Generator>(generator =>
             {
-                PlayFunctions.PlayEngine.StartUp(generator);
+                PlayFunctions.PlayEngine.StartUp(generator, true);
             });
         private RelayCommand<Model.Generators.Generator>? _generatorSubmitCommand;
         public RelayCommand<Model.Generators.Generator> GeneratorSubmitCommand =>
@@ -830,14 +804,14 @@ namespace CMGWpf.View
                 Messages.Clear(); Messages.Add(new Message { Text = $"Error reloading note sequences: {ex.Message}", Error = true });
             }
         }
-        private RelayCommand<Sequence>? _viewSequenceCommand;
-        public RelayCommand<Sequence> ViewSequenceCommand =>
-            _viewSequenceCommand ??= new RelayCommand<Sequence>(sequence =>
+        private RelayCommand<Sequencer>? _viewSequenceCommand;
+        public RelayCommand<Sequencer> ViewSequenceCommand =>
+            _viewSequenceCommand ??= new RelayCommand<Sequencer>(sequence =>
             {
                 Window dialog = new ViewSequence()
                 {
                     DataContext = sequence,
-                    Owner= FileViewModel.Instance.ActiveDialog,
+                    Owner= Application.Current.MainWindow,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner,
                     SizeToContent = SizeToContent.WidthAndHeight,
                 };
@@ -1035,7 +1009,7 @@ namespace CMGWpf.View
                     {
                         // For other attributes, exclude Sequence
                         return new ObservableCollection<ALGORITHMTYPE>(
-                            AlgorithmTypes.Where(t => t != ALGORITHMTYPE.Sequence));
+                            AlgorithmTypes.Where(t => t != ALGORITHMTYPE.Sequencer));
                     }
                 }
             }
@@ -1079,7 +1053,7 @@ namespace CMGWpf.View
                     Wiener => ALGORITHMTYPE.Wiener,
                     Markovian => ALGORITHMTYPE.Markovian,
                     Autoregressive => ALGORITHMTYPE.Autoregressive,
-                    Sequence => ALGORITHMTYPE.Sequence,
+                    Sequencer => ALGORITHMTYPE.Sequencer,
                     _ => ALGORITHMTYPE.Constant
                 };
             }

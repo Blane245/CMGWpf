@@ -1,9 +1,9 @@
-﻿using CMGWpf.Model;
-using CMGWpf.Model.Generators;
+﻿using CMGWpf.Model.Generators;
 using CMGWpf.PlayFunctions.DSP;
 using CMGWpf.PlayFunctions.Utilities;
 using CMGWpf.Types;
 using CMGWpf.View;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Threading;
@@ -11,14 +11,37 @@ using static CMGWpf.Types.PlayTypes;
 
 namespace CMGWpf.PlayFunctions
 {
+
     //this will start the integration of the soundfont BuildVoicesForPresetAtKeyVel routine which is the first step in getting instrument smaples for DSP. It will be used in the PlayEngine and will be called when a note is played to determine which samples to use for that note. 
     public static class PlayEngine
     {
-        public static void StartUp (Generator? generator)
+        public static bool CheckActiveGenerators()
+        {
+            ObservableCollection<TrackViewModel>? trackViewModels = TracksViewModel.Instance.CachedTracks;
+            if (trackViewModels == null) return false;
+            foreach (var trackVm in trackViewModels)
+            {
+                var genVms = trackVm.CachedGenerators;
+                if (genVms == null) continue;
+                foreach (var genVm in genVms)
+                {
+                    if (genVm.ActiveGeneratorDialog != null) return true;
+                }
+            }
+            return false;
+        }
+        public static void StartUp (Generator? generator, bool isBeingEdited)
         {
             Debug.WriteLine("Play command being executed.");
-            // Check ReadyPlay and start the play dialog if the file is ready to play
 
+            // check if any generators or being edited and give the user the option to continue or not. Special handling is needed when play is invoked from the generator edit dialog
+            if (!isBeingEdited && CheckActiveGenerators())
+                {
+                    MessageBoxResult response = MessageBox.Show($"One or more generators are currently being edited. Any changes to them will not be reflected in the composition audio or scroll roll. Do you wish to continue?", "Generators Being Edited", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    if (response == MessageBoxResult.No) return;
+                }
+
+            // Check ReadyPlay and start the play dialog if the file is ready to play
             PlayTypes.ReadyPlayOutput ready = ReadyPlay.Check(generator);
             if (ready.ErrorMessage != "")
             {
@@ -28,12 +51,12 @@ namespace CMGWpf.PlayFunctions
             }
             PlayDialog playDialog = new()
             {
-                DataContext = FileViewModel.Instance,
+                DataContext = PlayViewModel.Instance,
                 Owner = Application.Current.MainWindow
             };
 
             // Set the PlayDialog as the active dialog
-            FileViewModel.Instance.ActiveDialog = playDialog;
+            //FileViewModel.Instance.ActiveDialog = playDialog;
 
             PlayViewModel.Instance.PlayGenerators = ready.Generators;
             PlayViewModel.Instance.PlayDuration = ready.Duration;
@@ -137,8 +160,8 @@ namespace CMGWpf.PlayFunctions
             // normalize using rms * 2 so that the samples at the rms value become 0.5, but clip anything outside of -1 and +1
             for (int i = 0; i < buffer.Length; i++)
             {
-                floatBuffer[i] /= (float)(rms * 2.0F);
-                floatBuffer[i] = Math.Clamp((float)buffer[i], -1.0F, 1.0F);
+                floatBuffer[i] = (float)buffer[i] / (float)(rms * 2.0F);
+                floatBuffer[i] = Math.Clamp(floatBuffer[i], -1.0F, 1.0F);
             }
             DebugLog.Write($"Final audio buffer normalized, average={average}, max={max}, rms={rms}");
             return floatBuffer;

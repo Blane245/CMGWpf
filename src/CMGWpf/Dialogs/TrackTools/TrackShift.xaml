@@ -4,27 +4,45 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs.TrackTools"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             xmlns:view="clr-namespace:CMGWpf.View"
-             xmlns:services="clr-namespace:CMGWpf.Services"
-             d:DataContext="{d:DesignInstance Type=view:TrackViewModel}"
-             mc:Ignorable="d" 
-        Title="Shift Track in Time"
-        Icon="/Assets/cmg-256.png"
-        WindowStyle="ToolWindow"
-        WindowStartupLocation="CenterOwner"
-        Width="350" Height="100"
+        xmlns:view="clr-namespace:CMGWpf.View"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        d:DataContext="{d:DesignInstance Type=view:TrackViewModel}"
+        mc:Ignorable="d" 
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        Width="250" Height="100"
+        Background="White"
         >
-    <Grid>
-        <StackPanel Orientation="Vertical">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Shift Amount for Track'"/>
-                <Label Content="{Binding Track.Name}"/><Label Content="' (sec): "/>
-                <xctk:DoubleUpDown Value="{Binding ShiftAmount}" Increment="0.01" MinWidth="100" ToolTip="Enter the number of seconds to shift the track's generators"/>
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="{Binding ShiftWindowTitle}"
+                                   ChromeBackground="DarkCyan"
+                                    >
+        </panels:CustomWindowChrome>
+        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Shift Ammount (sec):"/>
+                    <xctk:DoubleUpDown Value="{Binding ShiftAmount}" Increment="0.01" MinWidth="100" ToolTip="Enter the number of seconds to shift the track's generators"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button Width="50" Content="Shift" Command="{Binding ShiftOKCommand}" Margin="0"/>
+                    <Button Width="50" Content="Cancel" Click="Cancel_Click" Margin="5,0,0,0"/>
+                </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Shift" Command="{Binding ShiftOKCommand}"/>
-            </StackPanel>
-        </StackPanel>
+        </Border>
     </Grid>
 </Window>

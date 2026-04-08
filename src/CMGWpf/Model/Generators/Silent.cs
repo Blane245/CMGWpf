@@ -27,20 +27,21 @@ namespace CMGWpf.Model.Generators
         {
             elem.SetAttribute("type", this.ToString());
             elem.SetAttribute("name", Name);
-            elem.SetAttribute("start", StartTime.ToString());
-            elem.SetAttribute("stop", StopTime.ToString());
+            elem.SetAttribute("startTime", StartTime.ToString());
+            elem.SetAttribute("stopTime", StopTime.ToString());
             elem.SetAttribute("mute", Mute.ToString());
             elem.SetAttribute("position", Position.ToString());
 
         }
-        public override void LoadXML(XmlElement elem, Track parent)
+        public override Task LoadXML(XmlElement elem, Track parent)
         {
             Name = XMLFunctions.GetAttributeString(elem, "name", "");
             Parent = parent;
-            StartTime = XMLFunctions.GetAttributeDouble(elem, "start", 0);
-            StopTime = XMLFunctions.GetAttributeDouble(elem, "stop", 0);
+            StartTime = XMLFunctions.GetAttributeDouble(elem, "startTime", 0);
+            StopTime = XMLFunctions.GetAttributeDouble(elem, "stopTime", 0);
             Position = XMLFunctions.GetAttributeInt(elem, "position", 0);
             Mute = XMLFunctions.GetAttributeBool(elem, "mute", false);
+            return Task.CompletedTask;
         }
         public new ObservableCollection<Message> Validate()
         {

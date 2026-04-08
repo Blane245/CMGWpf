@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using CMGWpf.View;
+using System.Windows;
 
 namespace CMGWpf.Dialogs.TrackTools
 {
@@ -10,6 +11,17 @@ namespace CMGWpf.Dialogs.TrackTools
         public TrackShift()
         {
             InitializeComponent();
+            this.Closing += TrackShift_Closing;
+        }
+
+        private void TrackShift_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            (DataContext as TrackViewModel)!.ActiveShiftDialog = null;
+        }
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+            (DataContext as TrackViewModel)!.ActiveRenameDialog = null;
         }
     }
 }

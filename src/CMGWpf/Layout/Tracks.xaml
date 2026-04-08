@@ -19,12 +19,13 @@
         <ItemsControl ItemsSource="{Binding Tracks}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <StackPanel/>
+                    <StackPanel Margin="0"/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid Height="{Binding Source={x:Static services:SizeService.Instance}, Path=TrackHeight.Value}" 
+                    <Grid Margin="0"
+                          Height="{Binding Source={x:Static services:SizeService.Instance}, Path=TrackHeight}" 
                           Width="{Binding Source={x:Static services:SizeService.Instance}, Path=WindowWidth}">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseEnter">

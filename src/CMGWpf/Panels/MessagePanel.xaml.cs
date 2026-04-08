@@ -6,13 +6,13 @@ using System.Windows.Controls;
 namespace CMGWpf.Panels
 {
     /// <summary>
-    /// Interaction logic for MessageBox.xaml
+    /// Interaction logic for MessagePanel.xaml
     /// </summary>
-    public partial class MessageBox : UserControl
+    public partial class MessagePanel : UserControl
     {
-        public static readonly DependencyProperty SourceProperty = DependencyProperty.Register(nameof(Source), typeof(ObservableCollection<Message>), typeof(MessageBox), new PropertyMetadata(null));
+        public static readonly DependencyProperty SourceProperty = DependencyProperty.Register(nameof(Source), typeof(ObservableCollection<Message>), typeof(MessagePanel), new PropertyMetadata(null));
         public ObservableCollection<Message>? Source { get => (ObservableCollection<Message>?)GetValue(SourceProperty); set => SetValue(SourceProperty, value); }
-        public MessageBox()
+        public MessagePanel()
         {
             InitializeComponent();
         }

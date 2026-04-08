@@ -9,6 +9,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="800">
     <Grid Background="LightGray">
-        <panels:MessageBox Source="{Binding DataContext.StatusMessages, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        <panels:MessagePanel Source="{Binding DataContext.StatusMessages, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
     </Grid>
 </UserControl>

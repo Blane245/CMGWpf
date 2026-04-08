@@ -162,8 +162,8 @@ namespace CMGWpf.Model.Generators
         {
             generatorElem.SetAttribute("type", this.ToString());
             generatorElem.SetAttribute("name", Name);
-            generatorElem.SetAttribute("start", StartTime.ToString());
-            generatorElem.SetAttribute("stop", StopTime.ToString());
+            generatorElem.SetAttribute("startTime", StartTime.ToString());
+            generatorElem.SetAttribute("stopTime", StopTime.ToString());
             generatorElem.SetAttribute("mute", Mute.ToString());
             generatorElem.SetAttribute("position", Position.ToString());
             // strip the path from the soundfont file name
@@ -213,12 +213,12 @@ namespace CMGWpf.Model.Generators
         public string Name = name;
         public Algorithm Type = type;
         }
-        public override void LoadXML(XmlElement elem, Track parent)
+        public override async Task LoadXML(XmlElement elem, Track parent)
         {
             Name = XMLFunctions.GetAttributeString(elem, "name", "");
             Parent = parent;
-            StartTime = XMLFunctions.GetAttributeDouble(elem, "start", 0);
-            StopTime = XMLFunctions.GetAttributeDouble(elem, "stop", 0);
+            StartTime = XMLFunctions.GetAttributeDouble(elem, "startTime", 0);
+            StopTime = XMLFunctions.GetAttributeDouble(elem, "stopTime", 0);
             Position = XMLFunctions.GetAttributeInt(elem, "position", 0);
             Mute = XMLFunctions.GetAttributeBool(elem, "mute", false);
             SoundFontFileName = XMLFunctions.GetAttributeString(elem, "soundFontFile", "");
@@ -285,10 +285,16 @@ namespace CMGWpf.Model.Generators
                             ALGORITHMTYPE.Markovian => new Markovian(),
                             ALGORITHMTYPE.Wiener => new Wiener(),
                             ALGORITHMTYPE.Oscillator => new Oscillator(),
-                            ALGORITHMTYPE.Sequence => new Sequence(),
+                            ALGORITHMTYPE.Sequencer => new Sequencer(),
                             _ => new Constant(),
                         };
                         a.LoadXML(aElem);
+
+                        // If it's a Sequencer, initialize it asynchronously to load items from database
+                        if (a is Sequencer sequencer)
+                        {
+                            await sequencer.InitializeAsync().ConfigureAwait(false);
+                        }
 
                         // Assign the loaded algorithm back to the appropriate property
                         switch (d.Name)

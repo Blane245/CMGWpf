@@ -40,6 +40,7 @@ namespace CMGWpf.Types
             public string SoundFontName { get; set; } = "";
             public string PresetName { get; set; } = "";
             public Color Color { get; set; } = new Color();
+            public Brush ColorBrush => new SolidColorBrush(Color);
         }
         public const int SampleRate = 44100;
     }

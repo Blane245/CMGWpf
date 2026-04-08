@@ -5,49 +5,38 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         xmlns:local="clr-namespace:CMGWpf.PlayFunctions"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
         xmlns:services="clr-namespace:CMGWpf.Services"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
-        xmlns:panels="clr-namespace:CMGWpf.Panels"
-        d:DataContext="{d:DesignInstance Type=viewmodel:FileViewModel}"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        d:DataContext="{d:DesignInstance Type=viewmodel:PlayViewModel}"
+        mc:Ignorable="d"
         WindowStyle="None"
         WindowState="Maximized"
-        ResizeMode="CanResize"
+        ResizeMode="NoResize"
         AllowsTransparency="False"
-        mc:Ignorable="d"
-        Title="Play" Height="450" Width="800">
+        Title="Play" Height="450" Width="800"
+        >
     <Window.Resources>
         <ResourceDictionary Source="/Styles/PlayDialogStyles.xaml"/>
     </Window.Resources>
-    <Grid>
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+    <Grid Margin="0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=MenuHeight}"/>
-            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=MenuHeight}"/>
-            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=BodyHeight}"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Background="Bisque">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="40px"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Image Grid.Column="0"
-                Source="pack://application:,,,/Assets/CGM2.png" 
-                Stretch="Uniform"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                MaxWidth="20" 
-                MaxHeight="20" />
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Label Content="Audio/Roll Play for File:"/>
-                <Label Content="{Binding FileName}"/>
-            </StackPanel>
-            <StackPanel Grid.Column="2" HorizontalAlignment="Right" Orientation="Horizontal">
-                <Button Content="_" x:Name="BtnMinimize" Style="{StaticResource WindowButton}" Click="BtnMinimize_Click"/>
-                <Button Content="⬜" x:Name="BtnMaximize"  Style="{StaticResource WindowButton}" Click="BtnMaximize_Click"/>
-                <Button Content="X" x:Name="BtnClose"  Style="{StaticResource WindowButton}" Click="BtnClose_Click"/>
-            </StackPanel>
-
-        </Grid>
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="{Binding PlayTitle}"
+                                     ChromeBackground="SaddleBrown">
+        </panels:CustomWindowChrome>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <Button Content="{materialIcons:MaterialIconExt Kind=Restart}" Command="{Binding RewindCommand}" Margin="5"/>
             <Button Command="{Binding PlayPauseCommand}" Margin="5">
@@ -67,7 +56,7 @@
                 </materialIcons:MaterialIcon>
             </Button>
             <StackPanel>
-                <TextBox Text="Volume" Margin="0" HorizontalAlignment="Center"/>
+                <TextBlock Text="Volume" Margin="0" HorizontalAlignment="Center"/>
                 <Slider
                 Width="200"
                 Minimum="-10"
@@ -81,7 +70,7 @@
             />
             </StackPanel>
             <StackPanel>
-                <TextBox Text="Position" Width="50" Margin="0" HorizontalAlignment="Center"/>
+                <TextBlock Text="Position" Width="50" Margin="0" HorizontalAlignment="Center"/>
                 <Slider 
                     Width="200" 
                     Minimum="0" 
@@ -92,7 +81,10 @@
                     />
             </StackPanel>
             <Label Content="{Binding CurrentPlayTime}" Width="50"/>
-            <Button Content="{materialIcons:MaterialIconExt Kind=AudioBook}" Command="{Binding ShowVoicesCommand}" Margin="5"/>
+            <Button Content="{materialIcons:MaterialIconExt Kind=AudioBook}" 
+                    Command="{Binding ShowVoicesCommand}" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" 
+                    Margin="5"/>
             <Border BorderBrush="LightGray" BorderThickness="1" Margin="5">
                 <Grid Width="100" Margin="0">
                     <Line X1="0" Y1="15" X2="{Binding SignalLevelPixels[0]}" Y2="15" Stroke="Red" StrokeThickness="1" />
@@ -107,7 +99,6 @@
             </Border>
         </StackPanel>
         <Grid Grid.Row="2" Background="LightGray" Margin="10,0,0,0">
-            <!-- Scrollable canvas layer - scrolling controlled programmatically -->
             <ScrollViewer x:Name="SoundRollScrollViewer"
                           HorizontalScrollBarVisibility="Hidden" 
                           VerticalScrollBarVisibility="Hidden">
@@ -115,8 +106,6 @@
                         Background="White"
                         Initialized="ScrollRollCanvas_Initialized"/>
             </ScrollViewer>
-
-            <!-- Fixed overlay canvas (does not scroll) -->
             <Canvas x:Name="SoundRollFixedCanvas" 
                     Background="Transparent"
                     IsHitTestVisible="False"

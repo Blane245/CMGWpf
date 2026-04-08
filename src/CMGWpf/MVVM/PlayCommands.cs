@@ -39,12 +39,12 @@ namespace CMGWpf.MVVM
         }
         public void ShowVoicesToggle(PlayDialog dialog)
         {
+            vm.ShowVoices = !vm.ShowVoices;
             if (vm.ShowVoices)
             {
-                Debug.WriteLine("[ShowVoices] Creating VoiceDialog...");
                 vm.VoiceDialog = new VoiceDialog
                 {
-                    DataContext = FileViewModel.Instance,
+                    DataContext = PlayViewModel.Instance,
                     Owner = dialog,
                     Width = 300,
                     Height = 500,

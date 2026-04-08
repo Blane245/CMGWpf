@@ -30,6 +30,10 @@ namespace CMGWpf.View
                 {
                     OnPropertyChanged(nameof(WindowTitle));
                 }
+                if (e.PropertyName == nameof(GlobalService.Instance.StatusMessages))
+                {
+                    OnPropertyChanged(nameof(StatusMessages));
+                }
             };
         }
 
@@ -37,11 +41,6 @@ namespace CMGWpf.View
         {
             get => GlobalService.Instance.StatusMessages;
             set { GlobalService.Instance.StatusMessages = value; OnPropertyChanged(); }
-        }
-        public System.Windows.Window? ActiveDialog
-        {
-            get => GlobalService.Instance.ActiveDialog;
-            set { GlobalService.Instance.ActiveDialog = value; OnPropertyChanged(); }
         }
         public bool IsDirty
         {
@@ -67,6 +66,9 @@ namespace CMGWpf.View
             while (recentFiles.Count > 10) recentFiles.RemoveAt(10);
             Settings.Default.CMGRecentFiles = String.Join("|", [.. RecentFiles]);
             Settings.Default.Save();
+
+            // Add to Windows Jump List
+            Services.JumpListService.Instance.AddToRecentFiles(filePath);
         }
         public void NotifyTracksChanged(List<Track> newTracks)
         {
@@ -155,9 +157,6 @@ namespace CMGWpf.View
         public RelayCommand<object> EditCommentOkCommand =>
             _editCommentOkCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).EditCommentOk());
 
-        private RelayCommand<object>? _editCommentCancelCommand;
-        public RelayCommand<object> EditCommentCancelCommand =>
-            _editCommentCancelCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).EditCommentCancel());
         private RelayCommand<object>? _addTrackCommand;
         public RelayCommand<object> AddTrackCommand =>
             _addTrackCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).AddTrack());

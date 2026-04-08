@@ -1,4 +1,5 @@
 ﻿using CMGWpf.View;
+using System.ComponentModel;
 using System.Windows;
 
 namespace CMGWpf.Dialogs
@@ -11,25 +12,18 @@ namespace CMGWpf.Dialogs
         public GeneratorDialog()
         {
             InitializeComponent();
-            this.Loaded += GeneratorDialog_Loaded;
+            this.Closing += Generator_Closing;
+        }
+        private void Generator_Closing(object? sender, CancelEventArgs e)
+        {
+            if (DataContext is GeneratorViewModel vm) vm.ActiveGeneratorDialog = null;
+        }
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+            if (DataContext is GeneratorViewModel vm) vm.ActiveGeneratorDialog = null;
         }
 
-        private void GeneratorDialog_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (this.DataContext is GeneratorViewModel vm)
-            {
-                vm.Messages = [];
-            }
-        }
 
-        private void BtnMaximize_Click(object sender, RoutedEventArgs e)
-        {
-            this.WindowState = (this.WindowState == WindowState.Maximized) ? WindowState.Normal : WindowState.Maximized;
-        }
-
-        private void BtnMinimize_Click(object sender, RoutedEventArgs e)
-        {
-            this.WindowState = WindowState.Minimized;
-        }
     }
 }

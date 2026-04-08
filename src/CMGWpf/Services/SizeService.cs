@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using CMGWpf.View;
+using System.Windows;
 
 namespace CMGWpf.Services
 {
@@ -11,13 +12,23 @@ namespace CMGWpf.Services
         public double WindowWidth
         {
             get { return windowWidth; }
-            set { windowWidth = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayWidth)); }
+            set
+            {
+                windowWidth = value; OnPropertyChanged();
+                displayWidth = windowWidth - ControlWidth;
+                OnPropertyChanged(nameof(DisplayWidth));
+            }
         }
         private double windowHeight;
         public double WindowHeight
         {
             get { return windowHeight; }
-            set { windowHeight = value; OnPropertyChanged(); OnPropertyChanged(nameof(BodyHeight)); }
+            set
+            {
+                windowHeight = value; OnPropertyChanged();
+                bodyHeight = WindowHeight - ChromeHeight - TimeLineHeight - FooterHeight;
+                OnPropertyChanged(nameof(BodyHeight));
+            }
         }
 
         private SizeService()
@@ -25,20 +36,19 @@ namespace CMGWpf.Services
             // Initialize with reasonable default values to avoid negative dimensions during startup
             windowWidth = 800;
             windowHeight = 450;
+            // Initialize calculated values
+            displayWidth = windowWidth - ControlWidth;
+            bodyHeight = windowHeight - ChromeHeight - TimeLineHeight - FooterHeight;
         }
-        public GridLength ControlWidth { get; } = new(200);
-        public GridLength DisplayWidth
-        {
-            get { return new GridLength(WindowWidth - ControlWidth.Value); }
-        }
-        public GridLength MenuHeight { get; } = new(45);
-        public GridLength TimeLineHeight { get; } = new(45);
-        public GridLength FooterHeight { get; } = new(45);
-        public GridLength TrackHeight { get; } = new(100);
-        public GridLength BodyHeight
-        {
-            get { return new GridLength(WindowHeight - MenuHeight.Value - TimeLineHeight.Value - FooterHeight.Value); }
-        }
-        public GridLength TableColumnWidth { get { return new GridLength(DisplayWidth.Value / 12); } }
+        public double ControlWidth { get; } = 200;
+        public double ChromeHeight { get; } = 40; // Custom window chrome height
+        public double TimeLineHeight { get; } = 40;
+        public double FooterHeight { get; } = 100;
+        public double TrackHeight { get; } = 100;
+
+        private double displayWidth = 0;
+        public double DisplayWidth { get => displayWidth; }
+        private double bodyHeight = 0;
+        public double BodyHeight { get => bodyHeight; }
     }
 }

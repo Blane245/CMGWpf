@@ -61,11 +61,11 @@ namespace CMGWpf.Model
             }
         }
 
-        public string LoadXML(XmlElement doc, string fileName)
+        public async Task<string> LoadXML(XmlElement doc, string fileName)
         {
             // load the timeline tag, which is optional, if it is not present, create a new timeline with default values
             XmlElement? timeLineElem = doc.GetElementsByTagName("timeLine").Cast<XmlElement?>().FirstOrDefault();
-            TimeLine = new(SizeService.Instance.DisplayWidth.Value, SizeService.Instance.TimeLineHeight.Value);
+            TimeLine = new(SizeService.Instance.DisplayWidth, SizeService.Instance.TimeLineHeight);
             if (timeLineElem != null) TimeLine.LoadXml(timeLineElem);
 
             // load the filecontents tag
@@ -82,7 +82,7 @@ namespace CMGWpf.Model
                     if (trackElem.Name == "track")
                     {
                         Track t = new(0);
-                        t.LoadXML(trackElem);
+                        await t.LoadXML(trackElem).ConfigureAwait(false);
                         Tracks.Add(t);
                     } // skip any non-track elements in the tracks tag
                 }

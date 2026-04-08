@@ -1,12 +1,10 @@
 ﻿
 using CMGWpf.Model;
 using CMGWpf.Model.Generators;
-using CMGWpf.MVVM;
 using CMGWpf.Services;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Windows;
 
 namespace CMGWpf.View
 {
@@ -23,7 +21,7 @@ namespace CMGWpf.View
     {
         private static TracksViewModel? _instance;
         public static TracksViewModel Instance => _instance ??= new TracksViewModel();
-        private ObservableCollection<TrackViewModel>? cachedTracks;
+        public ObservableCollection<TrackViewModel>? CachedTracks;
 
         private TracksViewModel()
         {
@@ -32,7 +30,7 @@ namespace CMGWpf.View
             {
                 if (e.PropertyName == nameof(FileViewModel.Instance.File))
                 {
-                    cachedTracks = null;
+                    CachedTracks = null;
                     OnPropertyChanged(nameof(Tracks));
                 }
             };
@@ -42,26 +40,17 @@ namespace CMGWpf.View
         {
             get
             {
-                if (cachedTracks == null)
+                if (CachedTracks == null)
                 {
                     List<Track> tracks = FileViewModel.Instance.File.Tracks;
-                    cachedTracks = tracks == null ? [] : new ObservableCollection<TrackViewModel>(tracks.Select(t => new TrackViewModel(t)));
+                    CachedTracks = tracks == null ? [] : new ObservableCollection<TrackViewModel>(tracks.Select(t => new TrackViewModel(t)));
                 }
-                return cachedTracks;
-            }
+                return CachedTracks;
+            }   
             set
             {
                 FileViewModel.Instance.File.Tracks = [.. value.Select(vm => vm.Track)];
-                cachedTracks = null;
-                OnPropertyChanged();
-            }
-        }
-        public Window? ActiveDialog
-        {
-            get => GlobalService.Instance.ActiveDialog;
-            set
-            {
-                GlobalService.Instance.ActiveDialog = value;
+                CachedTracks = null;
                 OnPropertyChanged();
             }
         }
@@ -99,11 +88,11 @@ namespace CMGWpf.View
         // when the mouse enters a track select the track and update the selected track field, which will be used for some of the commands. When the mouse leaves a track, deselect the track and set the selected track field to null. Note that this behavior may need to be modified based on UI needs, but this is a starting point.
         private RelayCommand<TrackViewModel>? _mouseEnterCommand;
         public RelayCommand<TrackViewModel> MouseEnterCommand =>
-            _mouseEnterCommand ??= new RelayCommand<TrackViewModel>(trackVM => { Debug.WriteLine($"Entering track {trackVM.Track.Name}"); SelectedTrack = trackVM; });
+            _mouseEnterCommand ??= new RelayCommand<TrackViewModel>(trackVM => {SelectedTrack = trackVM; });
 
         private RelayCommand<TrackViewModel>? _mouseLeaveCommand;
         public RelayCommand<TrackViewModel> MouseLeaveCommand =>
-            _mouseLeaveCommand ??= new RelayCommand<TrackViewModel>(trackVM => { Debug.WriteLine($"Leaving track {trackVM.Track.Name}"); SelectedTrack = null; });
+            _mouseLeaveCommand ??= new RelayCommand<TrackViewModel>(trackVM => {SelectedTrack = null; });
 
         public void NotifyTracksChanged(ObservableCollection<TrackViewModel> newTracks)
         {
@@ -115,7 +104,7 @@ namespace CMGWpf.View
         /// </summary>
         public void RefreshAllTracks()
         {
-            cachedTracks = null;
+            CachedTracks = null;
             OnPropertyChanged(nameof(Tracks));
         }
 
@@ -130,7 +119,7 @@ namespace CMGWpf.View
                 Generator copiedGenerator = generator.Clone(targetTrack);
                 copiedGenerator.Name = newGeneratorName;
                 targetTrack.Generators.Add(copiedGenerator);
-                Status = new ObservableCollection<Message> { new Message { Text = $"Generator '{generator.Name}' copied to track '{targetTrack.Name}' as '{newGeneratorName}'.", Error = false } };
+                Status = [new Message { Text = $"Generator '{generator.Name}' copied to track '{targetTrack.Name}' as '{newGeneratorName}'.", Error = false }];
             }
             else if (mode == MoveCopyMode.Move)
             {
@@ -139,20 +128,16 @@ namespace CMGWpf.View
                 // Update the parent reference and add to target track
                 generator.Parent = targetTrack;
                 targetTrack.Generators.Add(generator);
-                Status = new ObservableCollection<Message> { new Message { Text = $"Generator '{generator.Name}' moved from track '{sourceTrack.Name}' to track '{targetTrack.Name}'.", Error = false } };
+                Status = [new Message { Text = $"Generator '{generator.Name}' moved from track '{sourceTrack.Name}' to track '{targetTrack.Name}'.", Error = false } ];
             }
             else
             {
-                Status = new ObservableCollection<Message> { new Message { Text = $"SYSTEM ERROR: Invalid move/copy mode '{mode}'.", Error = true } };
+                Status = [ new Message { Text = $"SYSTEM ERROR: Invalid move/copy mode '{mode}'.", Error = true }];
                 return;
             }
 
             // Mark as dirty
             IsDirty = true;
-
-            // Close the dialog
-            ActiveDialog?.Close();
-
             // Refresh all track view models to reflect the changes
             RefreshAllTracks();
         }

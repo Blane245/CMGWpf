@@ -7,6 +7,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="40">
     <Grid Background="Transparent">
-        <Image Source="/CMGWpf;component/Assets/cmg-256.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Width="20" Height="20" MaxWidth="20" MaxHeight="20" />
+        <Image Source="/CMGWpf;component/Assets/CMG-Logo.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Width="20" Height="20" MaxWidth="20" MaxHeight="20" />
     </Grid>
 </UserControl>

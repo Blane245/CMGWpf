@@ -58,7 +58,7 @@ namespace CMGWpf.Model
                 generator.AppendXML(doc, generatorElem);
             }
         }
-        public void LoadXML(XmlElement elem)
+        public async Task LoadXML(XmlElement elem)
         {
             Name = XMLFunctions.GetAttributeString(elem, "name", "");
             Mute = XMLFunctions.GetAttributeBool(elem, "mute", false);
@@ -78,21 +78,21 @@ namespace CMGWpf.Model
                             case "Silent":
                                 {
                                     Silent g = new(0, this);
-                                    g.LoadXML(generatorElem, this);
+                                    await g.LoadXML(generatorElem, this).ConfigureAwait(false);
                                     Generators.Add(g);
                                     break;
                                 }
                             case "Algorithmic":
                                 {
                                     Algorithmic g = new(0, this);
-                                    g.LoadXML(generatorElem, this);
+                                    await g.LoadXML(generatorElem, this).ConfigureAwait(false);
                                     Generators.Add(g);
                                     break;
                                 }
                             case "Stochastic":
                                 {
                                     Stochastic g = new(0, this);
-                                    g.LoadXML(generatorElem, this);
+                                    await g.LoadXML(generatorElem, this).ConfigureAwait(false);
                                     Generators.Add(g);
                                     break;
                                 }

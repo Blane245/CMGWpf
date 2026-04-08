@@ -23,7 +23,7 @@ namespace CMGWpf.PlayFunctions.Utilities
                     ErrorMessage = "No file or timeline loaded."
                 };
             }
-            // filter the selected genertors. First, if the generator parameter is not null, the return that generator. Second, if there is a Time Interval include only those genertors that are within its bounds. Third, in all other cases, process track solo and mute and generator mute settings
+            // filter the selected generators. First, if the generator parameter is not null, the return that generator. Second, if there is a Time Interval include only those genertors that are within its bounds. Third, in all other cases, process track solo and mute and generator mute settings
             else if (generator != null)
             {
                 return new ReadyPlayOutput

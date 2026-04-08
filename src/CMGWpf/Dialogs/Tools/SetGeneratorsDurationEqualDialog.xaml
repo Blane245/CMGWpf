@@ -4,29 +4,55 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs.Tools"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         d:DataContext="{d:DesignInstance Type=viewmodel:ToolsViewModel}"
         mc:Ignorable="d"
-        WindowStyle="ToolWindow"
+        WindowStyle="None"
+        ResizeMode="CanResize"
         Background="White"
         WindowStartupLocation="CenterOwner"
-        Title="Set Generators Duration Equal" MinHeight="100" MinWidth="400">
-    <Grid>
-        <StackPanel Orientation="Vertical">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Primary Generator: "/>
-                <ComboBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding PrimaryGeneratorName, Mode=TwoWay}" ToolTip="Select the generator that will be used to determine the duration to be used."/>
-                <Label Content="Secondary Generators: "/>
-                <ListBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding SecondaryGeneratorNames}" SelectionMode="Multiple" ToolTip="Select the generators whose durations will be set equal to the primary genrator."/>
+        SizeToContent="WidthAndHeight"
+        MinHeight="100" MinWidth="400">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="Set Generator Durations Equal"
+                                   ChromeBackground="DarkCyan"
+                                    >
+        </panels:CustomWindowChrome>
+        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Primary Generator: "/>
+                    <ComboBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding PrimaryGeneratorName, Mode=TwoWay}" ToolTip="Select the generator that will be used to determine the duration to be used."/>
+                    <Label Content="Secondary Generators: "/>
+                    <ListBox x:Name="SecondaryGeneratorsListBox"
+                             ItemsSource="{Binding GeneratorList}" 
+                             SelectionMode="Multiple" 
+                             ToolTip="Select the generators whose durations will be set equal to the primary generator."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Align Time? "/>
+                <ComboBox ItemsSource="{x:Static viewmodel:ToolsViewModel.MaintainAlignTimeOptions}" SelectedItem="{Binding AlignTimeOption}" ToolTip="Select either the start or stop time for setting generation durations equal."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button Width="50" Content="OK" Command="{Binding SetEqual}" Margin="0"/>
+                    <Button Width="50" Content="Cancel" Click="Cancel_Click" Margin="5,0,0,0"/>
+                </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Maintain Start or Stop Time? "/>
-                <ComboBox ItemsSource="{Binding MaintainAlignTimeOptions}" SelectedItem="{Binding AlignTimeOption}" ToolTip="Select which time will be kept the same for duration calculations."/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Set Equal" Command="{Binding SetGeneratorsDurationEqualCommand}"/>
-            </StackPanel>
-        </StackPanel>
+        </Border>
     </Grid>
 </Window>

@@ -296,8 +296,8 @@ namespace CMGWpf.Model.Generators
         {
             elem.SetAttribute("type", this.ToString());
             elem.SetAttribute("name", Name);
-            elem.SetAttribute("start", StartTime.ToString());
-            elem.SetAttribute("stop", StopTime.ToString());
+            elem.SetAttribute("startTime", StartTime.ToString());
+            elem.SetAttribute("stopTime", StopTime.ToString());
             elem.SetAttribute("mute", Mute.ToString());
             elem.SetAttribute("position", Position.ToString());
             XmlElement ensembleElem = doc.CreateElement("ensemble");
@@ -356,12 +356,12 @@ namespace CMGWpf.Model.Generators
         //{
         //    (Ensemble, Voices) = await EnsembleUtilities.GetEnsembleAsync(name);
         //}
-        public override void LoadXML(XmlElement generatorElem, Track parent)
+        public override Task LoadXML(XmlElement generatorElem, Track parent)
         {
             Name = XMLFunctions.GetAttributeString(generatorElem, "name", "");
             Parent = parent;
-            StartTime = XMLFunctions.GetAttributeDouble(generatorElem, "start", 0);
-            StopTime = XMLFunctions.GetAttributeDouble(generatorElem, "stop", 0);
+            StartTime = XMLFunctions.GetAttributeDouble(generatorElem, "startTime", 0);
+            StopTime = XMLFunctions.GetAttributeDouble(generatorElem, "stopTime", 0);
             Position = XMLFunctions.GetAttributeInt(generatorElem, "position", 0);
             Mute = XMLFunctions.GetAttributeBool(generatorElem, "mute", false);
 
@@ -479,9 +479,10 @@ namespace CMGWpf.Model.Generators
                     }
                 }
             }
+            return Task.CompletedTask;
         }
 
-        // CMG does not use CurrentValues from the Stocastic class. Rather, values calculations are done in the GetSourcesFrom Stochastic routine. 
+        // CMG does not use CurrentValues from the Stocastic class. Rather, values calculations are done in the GetSourcesFrom Stochastic routine.
         public override CurrentValues GetCurrentValues(double time, double beats)
         {
             return new CurrentValues

@@ -4,29 +4,45 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs.TrackTools"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             xmlns:view="clr-namespace:CMGWpf.View"
-             xmlns:services="clr-namespace:CMGWpf.Services"
-             d:DataContext="{d:DesignInstance Type=view:TrackViewModel}"
-             mc:Ignorable="d" 
-        WindowStyle="ToolWindow"
-        WindowStartupLocation="CenterOwner"
+        xmlns:view="clr-namespace:CMGWpf.View"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+       d:DataContext="{d:DesignInstance Type=view:TrackViewModel}"
+        mc:Ignorable="d" 
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        Background="White"
         Width="350" Height="100"
-        Title="Adjust Track Volume"
-        Icon="/Assets/cmg-256.png"
         >
-    <Grid>
-        <StackPanel Orientation="Vertical">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="New Track Volume for Track '"/>
-                <Label Content="{Binding Track.Name}"/>
-                <Label Content="' [-10,+10]dB: "/>
-                <xctk:IntegerUpDown Value="{Binding NewVolume, Mode=TwoWay}" Minimum="-10" Maximum="10" ToolTip="Enter the volume of the track. This will change the volume of all generators in the track."/>
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="{Binding VolumeWindowTitle}"
+                                   ChromeBackground="DarkCyan"
+                                    >
+        </panels:CustomWindowChrome>
+        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Track Volume [-10,+10] dB: "/>
+                    <xctk:IntegerUpDown Value="{Binding NewVolume, Mode=TwoWay}" Minimum="-10" Maximum="10" ToolTip="Enter the volume of the track. This will change the volume of all generators in the track."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="OK" Command="{Binding VolumeOKCommand}"/>
+                    <Button Width="50" Content="Cancel" Click="Cancel_Click" Margin="5,0,0,0"/>
+                </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Button Content="OK" Command="{Binding VolumeOKCommand}"/>
-            </StackPanel>
-        </StackPanel>
-
+        </Border>
     </Grid>
 </Window>

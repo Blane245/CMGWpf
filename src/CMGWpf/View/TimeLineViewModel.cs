@@ -17,20 +17,24 @@ namespace CMGWpf.View
 
         private TimeLineViewModel()
         {
+            // Subscribe to SizeService property changes to redraw timeline when display width changes
+            SizeService.Instance.PropertyChanged += (sender, e) =>
+            {
+                if (e.PropertyName == nameof(SizeService.DisplayWidth))
+                {
+                    RedrawTimeLine();
+                    TracksViewModel.Instance.RefreshAllTracks();
+                }
+            };
         }
         #region View Properties
         public TimeLine TimeLine
         {
-            get => FileViewModel.Instance.File.TimeLine;
+            get {
+                return FileViewModel.Instance.File.TimeLine; }
             set {
-                ////the only times that we want the timeline redrawn is if the start time or zoom level, which are the properties that affect the timeline display. This optimization prevents unnecessary redraws of the timeline when other properties of the UIModel change that do not impact the visual representation of the timeline, improving performance and responsiveness of the application.
-                //if (TimeLine.StartTime != value.StartTime || TimeLine.CurrentZoomLevel != value.CurrentZoomLevel)
-                //{
-                //    _timeIntervalRectangle = null;
-                DrawTimeLine(_timeLineCanvas, value.StartTime, SizeService.Instance.DisplayWidth.Value, SizeService.Instance.TimeLineHeight.Value, value.CurrentZoomLevel, value.TimeInterval);
-                //}
                 FileViewModel.Instance.File.TimeLine = value;
-                TracksViewModel.Instance.RefreshAllTracks();
+                RedrawTimeLine();
                 OnPropertyChanged();
             }
         }
@@ -173,6 +177,21 @@ namespace CMGWpf.View
             return intervalBox;
         }
 
+        private void RedrawTimeLine()
+        {
+            if (_timeLineCanvas == null) return;
+
+            var timeLine = FileViewModel.Instance.File.TimeLine;
+            DrawTimeLine(
+                _timeLineCanvas,
+                timeLine.StartTime,
+                SizeService.Instance.DisplayWidth,
+                SizeService.Instance.TimeLineHeight,
+                timeLine.CurrentZoomLevel,
+                timeLine.TimeInterval);
+            TracksViewModel.Instance.RefreshAllTracks();
+        }
+
         #endregion
         #region TimeLine Button Commands
         private RelayCommand<object>? _zoomInCommand;
@@ -212,7 +231,7 @@ namespace CMGWpf.View
                 _timeIntervalChangeMode = TimeIntervalChangeMode.Edge;
                 // if there is no timeinterval rectangle on the canvas
                 // one needs to be created and its mouse events added
-                if (_timeIntervalRectangle == null) _timeIntervalRectangle = CreateTimeIntervalRectangle(_timeLineCanvas, position.X, position.X, SizeService.Instance.TimeLineHeight.Value);
+                if (_timeIntervalRectangle == null) _timeIntervalRectangle = CreateTimeIntervalRectangle(_timeLineCanvas, position.X, position.X, SizeService.Instance.TimeLineHeight);
                 StartDragInterval(position.X);
             });
         // when the mouse is moved with the left button pressed continue timeinterval edge movements until the left mouse button is released, which releases the mouse capture and sets the timeinterval mode to none, indicating that the timeinterval manipulation is complete.
@@ -256,7 +275,7 @@ namespace CMGWpf.View
             });
         private void OffsetToTime(TimeInterval interval)
         {
-            double timePerPixel = TimeLineScales[TimeLine.CurrentZoomLevel].Extent / SizeService.Instance.DisplayWidth.Value;
+            double timePerPixel = TimeLineScales[TimeLine.CurrentZoomLevel].Extent / SizeService.Instance.DisplayWidth;
             interval.StartTime = TimeLine.StartTime + interval.StartOffset * timePerPixel;
             interval.EndTime = TimeLine.StartTime + interval.EndOffset * timePerPixel;
         }
@@ -366,7 +385,7 @@ namespace CMGWpf.View
                 if (x > interval.EndOffset)
                 {
                     interval.StartOffset = interval.EndOffset;
-                    interval.EndOffset = Math.Min(x, SizeService.Instance.DisplayWidth.Value);
+                    interval.EndOffset = Math.Min(x, SizeService.Instance.DisplayWidth);
                     _timeIntervalEdge = TimeIntervalEdge.End;
                 }
                 else
@@ -383,7 +402,7 @@ namespace CMGWpf.View
                     _timeIntervalEdge = TimeIntervalEdge.Start;
                 }
                 else
-                    interval.EndOffset = Math.Min(x, SizeService.Instance.DisplayWidth.Value);
+                    interval.EndOffset = Math.Min(x, SizeService.Instance.DisplayWidth);
             }
             OffsetToTime(interval);
             Debug.WriteLine($"drag {_timeIntervalEdge}, time interval {interval}");
@@ -400,10 +419,10 @@ namespace CMGWpf.View
             TimeInterval interval = TimeLine.TimeInterval;
             Debug.WriteLine($"move interval to ({interval.StartOffset}, {interval.EndOffset})");
             // make sure that the time interval is at least partially dipslayed on the time line 
-            if (interval.EndOffset <= 0 || interval.StartOffset >= SizeService.Instance.DisplayWidth.Value) return;
+            if (interval.EndOffset <= 0 || interval.StartOffset >= SizeService.Instance.DisplayWidth) return;
             // redefine the time interval rectangle position and size based on the new start and end offsets, which allows the time interval to be visually updated on the timeline to reflect any changes made by the user through mouse interactions. This ensures that the time interval display is always in sync with its underlying data model, providing a consistent and accurate representation of the time interval on the timeline.
             double left = Math.Max(0, interval.StartOffset);
-            double width = Math.Min(SizeService.Instance.DisplayWidth.Value, interval.EndOffset) - left;
+            double width = Math.Min(SizeService.Instance.DisplayWidth, interval.EndOffset) - left;
             _timeIntervalRectangle.Width = width;
             Canvas.SetLeft(_timeIntervalRectangle, left);
             Canvas.SetTop(_timeIntervalRectangle, 0);
@@ -422,7 +441,7 @@ namespace CMGWpf.View
             double newStartOffset = TimeLine.TimeInterval.StartOffset + offsetChange;
             double newEndOffset = TimeLine.TimeInterval.EndOffset + offsetChange;
             // we need to prevent the move if either the start or end offsets go beyond the timeline boundaries, which ensures that the time interval remains visible and interactable within the timeline, and prevents it from being dragged off-screen where it cannot be accessed by the user.
-            if (newStartOffset < 0 || newEndOffset > SizeService.Instance.DisplayWidth.Value)
+            if (newStartOffset < 0 || newEndOffset > SizeService.Instance.DisplayWidth)
                 return;
             TimeInterval interval = TimeLine.TimeInterval;
             interval.StartOffset = newStartOffset;
@@ -437,10 +456,10 @@ namespace CMGWpf.View
         public void TimeToOffset(TimeInterval interval)
         {
             // convert the timeinterval start and end times to pixel offsets on the timeline, which allows the time interval to be displayed correctly on the timeline. This conversion is based on the current zoom level and the display width of the timeline, ensuring that the time interval is accurately represented in the UI.
-            interval.StartOffset = (interval.StartTime - TimeLine.StartTime) / TimeLineScales[TimeLine.CurrentZoomLevel].Extent * SizeService.Instance.DisplayWidth.Value;
-            interval.EndOffset = (interval.EndTime - TimeLine.StartTime) / TimeLineScales[TimeLine.CurrentZoomLevel].Extent * SizeService.Instance.DisplayWidth.Value;
-            interval.StartOffset = Math.Min(Math.Max(0D, interval.StartOffset), SizeService.Instance.DisplayWidth.Value);
-            interval.EndOffset = Math.Min(Math.Max(0D, interval.EndOffset), SizeService.Instance.DisplayWidth.Value);
+            interval.StartOffset = (interval.StartTime - TimeLine.StartTime) / TimeLineScales[TimeLine.CurrentZoomLevel].Extent * SizeService.Instance.DisplayWidth;
+            interval.EndOffset = (interval.EndTime - TimeLine.StartTime) / TimeLineScales[TimeLine.CurrentZoomLevel].Extent * SizeService.Instance.DisplayWidth;
+            interval.StartOffset = Math.Min(Math.Max(0D, interval.StartOffset), SizeService.Instance.DisplayWidth);
+            interval.EndOffset = Math.Min(Math.Max(0D, interval.EndOffset), SizeService.Instance.DisplayWidth);
         }
         #endregion   
     }

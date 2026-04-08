@@ -45,14 +45,19 @@ namespace CMGWpf.MVVM
         public void Rename()
         {
             if (vm.Track == null) return;
-            System.Diagnostics.Debug.WriteLine($"Rename track {vm.Track.Name} command executed.");
+            if (vm.ActiveRenameDialog != null)
+            {
+                _ = MessageBox.Show($"Rename already in progress for track '{vm.Track.Name}'", "Duplicate Rename Dialog", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             vm.NewTrackName = vm.Track.Name;
-            vm.ActiveDialog = new RenameTrack
+            vm.ActiveRenameDialog = new RenameTrack
             {
                 DataContext = vm,
                 Owner = Application.Current.MainWindow
             };
-            vm.ActiveDialog.ShowDialog();
+            vm.StatusMessages.Clear();
+            vm.ActiveRenameDialog.Show();
         }
         public void RenameOK()
         {
@@ -61,32 +66,24 @@ namespace CMGWpf.MVVM
             string oldName = vm.Track.Name;
             if (string.IsNullOrEmpty(newName))
             {
-                MessageBox.Show("Track name cannot be empty.", "Invalid Name", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _ = MessageBox.Show("Track name cannot be empty.", "Invalid Name", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             foreach (TrackViewModel trackVM in TracksViewModel.Instance.Tracks)
             {
                 if (vm.Track != trackVM.Track && string.Equals(trackVM.Track.Name, newName, StringComparison.OrdinalIgnoreCase))
                 {
-                    MessageBox.Show($"Track name '{newName}' already exists. Please choose a different name.", "Duplicate Name", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    _ = MessageBox.Show($"Track name '{newName}' already exists. Please choose a different name.", "Duplicate Name", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
             }
-            //Track newTrack = vm.Track.Clone();
-            //newTrack.Name = newName;
             vm.Track.Name = newName;
             vm.IsDirty = true;
-            vm.Status = new ObservableCollection<Message> { new Message { Text = $"Renamed track: '{oldName}' to '{newName}'", Error = false } };
+            vm.Status = [ new Message { Text = $"Renamed track: '{oldName}' to '{newName}'", Error = false } ];
             vm.NotifyTrackChanged(vm.Track);
-            vm.ActiveDialog?.Close();
+            vm.ActiveRenameDialog?.Close();
+            vm.ActiveRenameDialog = null;
         }
-        public void RenameCancel()
-        {
-            System.Diagnostics.Debug.WriteLine("Cancel Track Rename command being executed.");
-            vm.Status = new ObservableCollection<Message> { new Message { Text = "Track name not changed.", Error = false } };
-            vm.ActiveDialog?.Close();
-        }
-
         public void Mute()
         {
             if (vm.Track == null) return;
@@ -154,7 +151,6 @@ namespace CMGWpf.MVVM
         public void AddGenerator(GENERATORTYPE type)
         {
             if (vm.Track == null) return;
-            System.Diagnostics.Debug.WriteLine($"Add ${type} generator to track {vm.Track.Name} command executing.");
             var generator = Generator.GeneratorFactory.Create(type, vm.Track);
             GeneratorViewModel generatorViewModel = new(generator, vm)
             {
@@ -170,35 +166,42 @@ namespace CMGWpf.MVVM
                 "Stochastic" => new Panels.Stochastic.StochasticPanel(),
                 _ => null
             };
-            Window activeDialog = new GeneratorDialog()
+            GeneratorDialog activeDialog = new()
             {
                 DataContext = generatorViewModel,
-                Owner = Application.Current.MainWindow,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 SizeToContent = SizeToContent.WidthAndHeight,
+                Owner = Application.Current.MainWindow,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
-            vm.ActiveDialog = activeDialog;
-            vm.ActiveDialog.ShowDialog();
+            generatorViewModel.ActiveGeneratorDialog = activeDialog;
+            activeDialog.ShowDialog();
         }
-        private static TrackShift? _trackShift = null;
-        private static TrackVolume? _trackVolume = null;
         public void Shift()
         {
+            //TBD Notify generators with open dialogs that their start and stop time have changed
             if (vm.Track == null) return;
-            _trackShift = new() { 
-                Owner = Application.Current.MainWindow,
-                DataContext = vm
+            if (vm.ActiveShiftDialog != null)
+            {
+                _ = MessageBox.Show($"Track shift already in progress for track '{vm.Track.Name}'", "Duplicate Shift Dialog", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            vm.ActiveShiftDialog = new TrackShift
+            {
+                DataContext = vm,
+                Owner = Application.Current.MainWindow
             };
-            _trackShift.Show();
+            vm.StatusMessages.Clear();
+            vm.ActiveShiftDialog.Show();
         }
         public void ShiftOK()
         {
             if (vm.Track == null) return;
+
             // check that the shift amount will not cause any of the track's generator to have a start time less that 0
             Generator? g = vm.Track.Generators.Find((g) => g.StartTime + vm.ShiftAmount < 0);
             if (g != null)
             {
-                _ = MessageBox.Show($"The shift amount will move the start time of at least one generator, '{g.Name}', before zero.", "Track Shift Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show($"The shift amount will move the start time of at least one generator, '{g.Name}', before zero.", "Track Shift Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             Track newTrack = vm.Track.Clone();
@@ -208,8 +211,11 @@ namespace CMGWpf.MVVM
                 generator.StopTime += vm.ShiftAmount;
             }
             vm.NotifyTrackChanged(newTrack);
-            _trackShift?.Close();
-            _trackShift = null;
+            vm.IsDirty = true;
+            vm.Status = [new Message { Text = $"Generators for track '{vm.Track.Name} shifted by {vm.ShiftAmount} seconds", Error = false }];
+            vm.NotifyTrackChanged(vm.Track);
+            vm.ActiveShiftDialog?.Close();
+            vm.ActiveShiftDialog = null;
         }
         public void Duplicate()
         {
@@ -227,21 +233,28 @@ namespace CMGWpf.MVVM
         public void Volume()
         {
             if (vm.Track == null) return;
-            _trackVolume = new() 
-            { 
-                Owner = Application.Current.MainWindow,
-                DataContext = vm
+            if (vm.ActiveVolumeDialog != null)
+            {
+                _ = MessageBox.Show($"Volume adjustment already in progress for track '{vm.Track.Name}'", "Duplicate Volume Dialog", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            vm.ActiveVolumeDialog = new TrackVolume
+            {
+                DataContext = vm,
+                Owner = Application.Current.MainWindow
             };
-            _trackVolume.Show();
+            vm.StatusMessages.Clear();
+            vm.ActiveVolumeDialog.Show();
         }
         public void VolumeOK()
         {
             if (vm.Track == null) return;
-            Track newTrack = vm.Track.Clone();
-            newTrack.Volume = vm.NewVolume;
-            vm.NotifyTrackChanged(newTrack);
-            _trackVolume?.Close();
-            _trackVolume = null;
+            vm.Track.Volume = vm.NewVolume;
+            vm.IsDirty = true;
+            vm.Status = [new Message { Text = $"Volume for track '{vm.Track.Name} set to {vm.Track.Volume}", Error = false }];
+            vm.NotifyTrackChanged(vm.Track);
+            vm.ActiveVolumeDialog?.Close();
+            vm.ActiveVolumeDialog = null;
         }
         #endregion
     }

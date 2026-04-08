@@ -20,7 +20,7 @@ namespace CMGWpf.Model
         Markovian,
         Wiener,
         Autoregressive,
-        Sequence
+        Sequencer
     }
     public enum MARKOVSTATE
     {
@@ -45,7 +45,7 @@ namespace CMGWpf.Model
                 ALGORITHMTYPE.Markovian => new Markovian(),
                 ALGORITHMTYPE.Wiener => new Wiener(),
                 ALGORITHMTYPE.Autoregressive => new Autoregressive(),
-                ALGORITHMTYPE.Sequence => new Sequence(),
+                ALGORITHMTYPE.Sequencer => new Sequencer(),
                 _ => throw new ArgumentException("Unknown generator type", nameof(type)),
             };
         }
@@ -758,7 +758,7 @@ namespace CMGWpf.Model
         }
         public override string ToString() => "Autoregressive";
     }
-    public class Sequence : Algorithm
+    public class Sequencer : Algorithm
     {
         private string _name = "";
         // when the sequence name changes , we need to load the sequence items from the CMG DB based on the new name. This is done in the setter of the Name property.
@@ -766,7 +766,7 @@ namespace CMGWpf.Model
         {
             if (!string.IsNullOrEmpty(name))
             {
-                Sequence sequence = await NoteSequenceUtilities.GetNoteSequenceAsync(name);
+                Sequencer sequence = await NoteSequenceUtilities.GetNoteSequenceAsync(name);
                 _items = [.. sequence.Items];
             }
             else
@@ -797,17 +797,17 @@ namespace CMGWpf.Model
         private double _reflectPitch = 0;
         public double ReflectPitch { get => _reflectPitch; set { if (_reflectPitch != value) { _reflectPitch = value; OnPropertyChanged(); } } }
 
-        public Sequence() { }
-        public override Sequence Clone()
+        public Sequencer() { }
+        public override Sequencer Clone()
         {
-            Sequence n = (Sequence)this.MemberwiseClone();
+            Sequencer n = (Sequencer)this.MemberwiseClone();
             n.Items = [.. this.Items];
             return n;
         }
         public bool Equals(Algorithm value)
         {
             return value.GetType() == GetType() &&
-                value is Sequence g &&
+                value is Sequencer g &&
                 Name == g.Name &&
                 Transpose == g.Transpose &&
                 ReverseSequence == g.ReverseSequence &&
@@ -823,6 +823,14 @@ namespace CMGWpf.Model
             elem.SetAttribute("reflectSequence", ReflectSequence.ToString());
             elem.SetAttribute("reflectPitch", ReflectPitch.ToString());
         }
+        public async Task InitializeAsync()
+        {
+            if (!string.IsNullOrEmpty(Name))
+            {
+                var sequence = await NoteSequenceUtilities.GetNoteSequenceAsync(Name);
+                if (sequence != null) Items = sequence.Items;
+            }
+        }
         public override void LoadXML(XmlElement elem)
         {
             Name = XMLFunctions.GetAttributeString(elem, "name", "");
@@ -830,14 +838,13 @@ namespace CMGWpf.Model
             ReverseSequence = XMLFunctions.GetAttributeBool(elem, "reverseSequence", false);
             ReflectSequence = XMLFunctions.GetAttributeBool(elem, "reflectSequence", false);
             ReflectPitch = XMLFunctions.GetAttributeDouble(elem, "reflectPitch", 0);
-            // load the sequence from the CMG DB based on the name
-            Items = NoteSequenceUtilities.GetNoteSequenceAsync(Name).Result.Items;
+            // Note: Items are loaded separately via InitializeAsync() after XML parsing completes
         }
         public override ObservableCollection<Message> Validate()
         {
             ObservableCollection<Message> errors = [];
-            if (string.IsNullOrEmpty(Name)) errors.Add(new Message() { Text = "Sequence Name cannot be empty.", Error = true });
-            if (Items == null || Items.Count == 0) errors.Add(new Message() { Text = "Sequence must have at least one item.", Error = true });
+            if (string.IsNullOrEmpty(Name)) errors.Add(new Message() { Text = "Sequencer Name cannot be empty.", Error = true });
+            if (Items == null || Items.Count == 0) errors.Add(new Message() { Text = "Sequencer must have at least one item.", Error = true });
             return errors;
         }
         public void SetReverse()
@@ -857,7 +864,7 @@ namespace CMGWpf.Model
                 id = item.id})];
             }
         }
-        private int beatsToIndex(double beat, SequenceItem[] items)
+        private int BeatsToIndex(double beat, SequenceItem[] items)
         {
             if (items.Length == 0) return 0;
             double beatSum = 0;
@@ -871,7 +878,7 @@ namespace CMGWpf.Model
         }
         public override double GetCurrentValue(double time)
         {
-            int itemIndex = beatsToIndex(time, [.. Items]);
+            int itemIndex = BeatsToIndex(time, [.. Items]);
             double value = itemIndex < 0 ? 0 : Items[itemIndex].value;
             return value + Transpose;
         }

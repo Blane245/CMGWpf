@@ -5,34 +5,35 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
-        d:DataContext="{d:DesignInstance Type=viewmodel:FileViewModel}"
-        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        WindowStyle="ToolWindow"
+        d:DataContext="{d:DesignInstance Type=viewmodel:PlayViewModel}"
+        mc:Ignorable="d"
+        WindowStyle="SingleBorderWindow"
         WindowState="Normal"
         WindowStartupLocation="Manual"
-        ResizeMode="CanResize"
+        ResizeMode="NoResize"
         AllowsTransparency="False"
-        mc:Ignorable="d"
         Closed="Window_Closed"
         Title="Voices"
-        Icon="/Assets/CGM2.png"
+        SizeToContent="Width" Height="250"
         >
     <Window.Resources>
         <ResourceDictionary Source="/Styles/PlayDialogStyles.xaml"/>
     </Window.Resources>
-        <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
-            <DataGrid CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserSortColumns="False" ItemsSource="{Binding PresetColors}">
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+            <DataGrid CanUserAddRows="False" 
+                      CanUserDeleteRows="False" 
+                      CanUserReorderColumns="False" 
+                      CanUserSortColumns="False" 
+                      CanUserResizeColumns="False"
+                      AutoGenerateColumns="False"
+                      ItemsSource="{Binding PresetColors}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="SoundFont" Binding="{Binding SoundFontName}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Preset" Binding="{Binding PresetName}" IsReadOnly="True"/>
                     <DataGridTemplateColumn Header="Color" IsReadOnly="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Rectangle Width="60" Height="16">
-                                    <Rectangle.Fill>
-                                        <SolidColorBrush Color="{Binding Color}"/>
-                                    </Rectangle.Fill>
-                                </Rectangle>
+                                <Rectangle Width="60" Height="16" Fill="{Binding ColorBrush}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

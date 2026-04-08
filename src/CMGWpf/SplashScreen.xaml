@@ -1,0 +1,22 @@
+<Window x:Class="CMGWpf.SplashScreen"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CMG"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True">
+    <Border BorderBrush="#2C3E50" BorderThickness="2" CornerRadius="10" Background="White">
+        <Grid Margin="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Image Grid.Row="0" Source="Assets/CMG Splash.png" 
+                   Stretch="Uniform"
+                   Margin="0"/>
+            <Label Grid.Row="0" Content="Version" />
+        </Grid>
+    </Border>
+</Window>
