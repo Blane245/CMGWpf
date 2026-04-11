@@ -28,6 +28,7 @@ namespace CMGWpf.Dialogs.Tools
 
         private void StaggerGeneratorsStartTimeDialog_Loaded(object sender, RoutedEventArgs e)
         {
+            Services.GlobalService.Instance.StatusMessages.Clear();
             // Bind the ListBox multi-selection to the ViewModel's SecondaryGeneratorNames collection
             if (DataContext is ToolsViewModel vm)
             {

@@ -1,4 +1,5 @@
 ﻿
+using CMGWpf.Services;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
 using System.Globalization;
@@ -6,12 +7,20 @@ using System.Xml;
 
 namespace CMGWpf.Model
 {
-    public struct TimeInterval(double start, double end)
+    public class TimeInterval(double start, double end)
     {
         public double StartOffset { get; set; } = start;
         public double EndOffset { get; set; } = end;
         public double StartTime { get; set; } = 0;
         public double EndTime { get; set; } = 0;
+        public TimeInterval Clone()
+        {
+            return new TimeInterval(StartOffset, EndOffset)
+            {
+                StartTime = StartTime,
+                EndTime = EndTime,
+            };
+        }
     }
     public class TimeLine(double width, double height)
     {
@@ -36,8 +45,9 @@ namespace CMGWpf.Model
                 SnapIncrement = SnapIncrement,
                 MeasureSize = MeasureSize,
                 BeatsPerMeasure = BeatsPerMeasure,
-                TimeInterval = TimeInterval,
+                TimeInterval = TimeInterval.Clone()
             };
+
             return n;
         }
         public void ZoomIn()
@@ -67,6 +77,10 @@ namespace CMGWpf.Model
             timeLineElem.SetAttribute("snapIncrement", SnapIncrement.ToString(CultureInfo.InvariantCulture));
             timeLineElem.SetAttribute("beatsPerMeasure", BeatsPerMeasure.ToString());
             timeLineElem.SetAttribute("measureSize", MeasureSize.ToString(CultureInfo.InvariantCulture));
+            XmlElement timeIntervalElem = doc.CreateElement("timeInterval");
+            timeLineElem.AppendChild(timeIntervalElem);
+            timeIntervalElem.SetAttribute("startTime", TimeInterval.StartTime.ToString(CultureInfo.InvariantCulture));
+            timeIntervalElem.SetAttribute("endTime", TimeInterval.EndTime.ToString(CultureInfo.InvariantCulture));
         }
         public void LoadXml(XmlElement elem)
         {
@@ -77,6 +91,15 @@ namespace CMGWpf.Model
             SnapIncrement = XMLFunctions.GetAttributeInt(elem, "snapIncrement", 0);
             BeatsPerMeasure = XMLFunctions.GetAttributeInt(elem, "beatsPerMeasure", 0);
             MeasureSize = XMLFunctions.GetAttributeDouble(elem, "measureSize", 0);
+            XmlElement? timeIntervalElem = elem.GetElementsByTagName("timeInterval").Cast<XmlElement?>().FirstOrDefault();
+            if (timeIntervalElem == null) TimeInterval = new(0, 0);
+            else
+            {
+                double startTime = XMLFunctions.GetAttributeDouble(timeIntervalElem, "startTime", 0);
+                double endTime = XMLFunctions.GetAttributeDouble(timeIntervalElem, "endTime", 0);
+                TimeInterval = new(0, 0) { StartTime = startTime, EndTime = endTime};
+                
+            }
         }
     }
 }

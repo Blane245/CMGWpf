@@ -306,7 +306,7 @@ namespace CMGWpf.PlayFunctions.DSP
                 double envelopeGain = (iEnvelope < maxEnvelope) ? Interpolation.Linear(t, envelope[iEnvelope - 1].Time, envelope[iEnvelope].Time, envelope[iEnvelope - 1].Gain, envelope[iEnvelope].Gain) : volumeGain * initialAttenuationGain;
                 double tremoloGain = Sf2Units.VolumeDbToGain(tremolo.GetCurrentValue(t));
                 finalSamples[i] = sample * envelopeGain * tremoloGain;
-                if (double.IsNaN(finalSamples[i])) throw new Exception($"Final sample is invalid at i={i}, sampl={sample}, envelopeGain={envelopeGain}, tremoloGain={tremoloGain}");
+                if (double.IsNaN(finalSamples[i])) throw new Exception($"Final sample is invalid at i={i}, sample={sample}, envelopeGain={envelopeGain}, tremoloGain={tremoloGain}");
             }
 
             // oh my gosh, I think I got it all. 

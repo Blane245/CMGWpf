@@ -76,12 +76,18 @@ namespace CMGWpf.Model.Generators
         public override Algorithmic Clone(Track parent)
         {
             Algorithmic n = (Algorithmic)MemberwiseClone();
+            n.Parent = parent;  // FIX: Set the correct parent track
             n.NoteAlgorithm = NoteAlgorithm.Clone();
             n.AttackAlgorithm = AttackAlgorithm.Clone();
             n.DurationAlgorithm = DurationAlgorithm.Clone();
             n.SpeedAlgorithm = SpeedAlgorithm.Clone();
             n.VolumeAlgorithm = VolumeAlgorithm.Clone();
             n.PanAlgorithm = PanAlgorithm.Clone();
+            n.Tremolo = Tremolo.Clone();  // Clone Tremolo
+            n.Vibrato = Vibrato.Clone();  // Clone Vibrato
+            n.Random = new Random();  // Create new Random instance
+            n.activeNotes = (int[])activeNotes.Clone();  // Clone array
+            n.beatSequence = (int[])beatSequence.Clone();  // Clone array
             return n;
         }
 
@@ -131,19 +137,19 @@ namespace CMGWpf.Model.Generators
             int entry = currentRhythmEntry;
             currentRhythmEntry = (currentRhythmEntry + 1) % MeasureLength;
             bool beat = beatSequence[entry] != 0;
-            double note = NoteAlgorithm.GetCurrentValue(time);
+            double note = NoteAlgorithm.GetCurrentValue(time, beats);
             note = Math.Clamp(note, 0, 127);
             note = GetSelectedNote(note);
             if (!Microtones) note = Math.Round(note);
-            double attack = AttackAlgorithm.GetCurrentValue(time);
+            double attack = AttackAlgorithm.GetCurrentValue(time, beats);
             attack = Math.Clamp(attack, 0, 127);
-            double speed = SpeedAlgorithm.GetCurrentValue(time);
+            double speed = SpeedAlgorithm.GetCurrentValue(time, beats);
             speed = Math.Clamp(speed, 0.001, 10_000);
-            double duration = DurationAlgorithm.GetCurrentValue(time);
+            double duration = DurationAlgorithm.GetCurrentValue(time, beats);
             duration = Math.Clamp(duration, 0.01, 100);
-            double volume = VolumeAlgorithm.GetCurrentValue(time);
+            double volume = VolumeAlgorithm.GetCurrentValue(time, beats);
             volume = Math.Clamp(volume, -10, 10);
-            double pan = PanAlgorithm.GetCurrentValue(time);
+            double pan = PanAlgorithm.GetCurrentValue(time, beats);
             pan = Math.Clamp(pan, -1, 1);
             return new CurrentValues()
             {

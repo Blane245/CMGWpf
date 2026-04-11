@@ -12,6 +12,12 @@ namespace CMGWpf.Dialogs.Tools
         {
             InitializeComponent();
             DataContext = ToolsViewModel.Instance;
+            this.Loaded += OscillatorFrequencyCalculatorDialog_Loaded;
+        }
+
+        private void OscillatorFrequencyCalculatorDialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            Services.GlobalService.Instance.StatusMessages.Clear();
         }
     }
 }

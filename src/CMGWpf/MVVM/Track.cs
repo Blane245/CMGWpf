@@ -61,7 +61,7 @@ namespace CMGWpf.MVVM
         }
         public void RenameOK()
         {
-            if (vm.Track == null) return; 
+            if (vm.Track == null) return;
             string newName = vm.NewTrackName.Trim();
             string oldName = vm.Track.Name;
             if (string.IsNullOrEmpty(newName))
@@ -79,7 +79,7 @@ namespace CMGWpf.MVVM
             }
             vm.Track.Name = newName;
             vm.IsDirty = true;
-            vm.Status = [ new Message { Text = $"Renamed track: '{oldName}' to '{newName}'", Error = false } ];
+            vm.Status = [new Message { Text = $"Renamed track: '{oldName}' to '{newName}'", Error = false }];
             vm.NotifyTrackChanged(vm.Track);
             vm.ActiveRenameDialog?.Close();
             vm.ActiveRenameDialog = null;
@@ -102,7 +102,8 @@ namespace CMGWpf.MVVM
             vm.Status = new ObservableCollection<Message> { new Message { Text = $"Track '{vm.Track.Name}' is now {(vm.Track.Solo ? "soloed" : "unsoloed")}.", Error = false } };
             vm.NotifyTrackChanged(vm.Track);
         }
-        public void MoveUp() { 
+        public void MoveUp()
+        {
             if (vm.Track == null) return;
             System.Diagnostics.Debug.WriteLine($"Move track {vm.Track.Name} up command executed.");
             int index = -1;
@@ -125,7 +126,8 @@ namespace CMGWpf.MVVM
                 vm.Status = new ObservableCollection<Message> { new Message { Text = $"Moved track '{vm.Track.Name}' up.", Error = false } };
             }
         }
-        public void MoveDown() { 
+        public void MoveDown()
+        {
             if (vm.Track == null) return;
             System.Diagnostics.Debug.WriteLine($"Move track {vm.Track.Name} down command executed.");
             int index = -1;
@@ -180,6 +182,20 @@ namespace CMGWpf.MVVM
         {
             //TBD Notify generators with open dialogs that their start and stop time have changed
             if (vm.Track == null) return;
+            // check if a generator on this track is being edited and block if so
+            if (vm.CachedGenerators != null)
+            {
+                foreach (var gVm in vm.CachedGenerators)
+                {
+                    if (gVm.ActiveGeneratorDialog != null)
+                    {
+                        _ = MessageBox.Show($"One or more generators on track '{vm.Track.Name}' are being edited. Track cannot be duplicated.", "Track Duplication Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+            }
+
+            // prevent multiple shift dialogs
             if (vm.ActiveShiftDialog != null)
             {
                 _ = MessageBox.Show($"Track shift already in progress for track '{vm.Track.Name}'", "Duplicate Shift Dialog", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -220,15 +236,45 @@ namespace CMGWpf.MVVM
         public void Duplicate()
         {
             if (vm.Track == null) return;
+            // check if a generator on this track is being edited and block if so
+            if (vm.CachedGenerators != null)
+            {
+                foreach (var gVm in vm.CachedGenerators)
+                {
+                    if (gVm.ActiveGeneratorDialog != null)
+                    {
+                        _ = MessageBox.Show($"One or more generators on track '{vm.Track.Name}' are being edited. Track cannot be duplicated.", "Track Duplication Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+            }
             MessageBoxResult response = MessageBox.Show($"Press OK to confirm duplication of track '{vm.Track.Name}' or Cancel to abort duplication.", "Track Duplication", MessageBoxButton.OKCancel);
             if (response == MessageBoxResult.Cancel) return;
-            // duplicate the track by finding a new track uid, cloning the current one, and then adding the new track to the file
-            int uid = Utilities.Uid.Get("Track", FileViewModel.Instance.File.Tracks);
-            Track newTrack = vm.Track.Clone();
-            newTrack.Name = "T"+uid.ToString();
+
+            // Create new file first
             CMGFile newFile = FileViewModel.Instance.File.Clone();
+
+            // Clone the track - this already clones all generators with the correct parent reference
+            Track newTrack = vm.Track.Clone();
+            int uid = Utilities.Uid.Get("Track", newFile.Tracks);
+            newTrack.Name = "T" + uid.ToString();
+
+            // ADD the track to the file BEFORE renaming generators
+            // so Uid.Get can see all generators when generating unique names
             newFile.Tracks.Add(newTrack);
-            FileViewModel.Instance.File = newFile; // should trigger a property change and update display
+
+            // NOW rename generators to have unique names (Uid.Get can see them in newFile.Tracks)
+            foreach (var g in newTrack.Generators)
+            {
+                int gUid = Utilities.Uid.Get("Generator", newFile.Tracks);
+                g.Name = "G" + gUid.ToString();
+            }
+            vm.IsDirty = true;
+
+            // Set the new file - this automatically triggers TracksViewModel to refresh
+            FileViewModel.Instance.File = newFile;
+
+            Services.GlobalService.Instance.StatusMessages = [new Message() { Text = $"Track '{vm.Track.Name}' duplicated to Track '{newTrack.Name}'.", Error = false }];
         }
         public void Volume()
         {
@@ -243,7 +289,7 @@ namespace CMGWpf.MVVM
                 DataContext = vm,
                 Owner = Application.Current.MainWindow
             };
-            vm.StatusMessages.Clear();
+            vm.StatusMessages = [];
             vm.ActiveVolumeDialog.Show();
         }
         public void VolumeOK()
@@ -251,7 +297,7 @@ namespace CMGWpf.MVVM
             if (vm.Track == null) return;
             vm.Track.Volume = vm.NewVolume;
             vm.IsDirty = true;
-            vm.Status = [new Message { Text = $"Volume for track '{vm.Track.Name} set to {vm.Track.Volume}", Error = false }];
+            vm.Status = [new Message { Text = $"Volume for track '{vm.Track.Name} set to {vm.Track.Volume}dB", Error = false }];
             vm.NotifyTrackChanged(vm.Track);
             vm.ActiveVolumeDialog?.Close();
             vm.ActiveVolumeDialog = null;

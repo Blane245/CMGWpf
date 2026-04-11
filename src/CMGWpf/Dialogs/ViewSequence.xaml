@@ -6,35 +6,46 @@
         xmlns:local="clr-namespace:CMGWpf.Dialogs"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
         xmlns:model="clr-namespace:CMGWpf.Model"
-        d:DataContext="{d:DesignInstance Type=model:Sequence}"
+        d:DataContext="{d:DesignInstance Type=model:Sequencer}"
         mc:Ignorable="d"
         Title="View Sequence Items"
-        WindowStyle="None"
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize"
         Background="White"
+        SizeToContent="Width"
         WindowStartupLocation="CenterOwner"
         >
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
-        <Label Content="{Binding Name, StringFormat='Sequence: {0}'}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Sequence:" FontSize="12" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <Label Content="{Binding Name, StringFormat='Sequence: {0}'}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            </StackPanel>
         </Grid>
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-            <DataGrid
-            ItemsSource="{Binding Items}"
-            AutoGenerateColumns="False"
-            CanUserAddRows="False"
-            CanUserDeleteRows="False"
-            IsReadOnly="True"
-            >
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Note" Binding="{Binding value}"/>
-                    <DataGridTextColumn Header="Beats" Binding="{Binding beats}"/>
-                </DataGrid.Columns>
-            </DataGrid>
+            <StackPanel>
+                <!-- Header Row -->
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <TextBlock Text="Note" Width="100" FontWeight="Bold"/>
+                    <TextBlock Text="Beats" Width="100" FontWeight="Bold"/>
+                </StackPanel>
+                <!-- Data Rows -->
+                <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
+                                <TextBlock Text="{Binding value}" Width="100"/>
+                                <TextBlock Text="{Binding beats}" Width="100"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </ScrollViewer>
         <Button Grid.Row="2" Content="Close" Width="40" HorizontalAlignment="Left" Margin="5,0,0,0" Click="Close" />
     </Grid>

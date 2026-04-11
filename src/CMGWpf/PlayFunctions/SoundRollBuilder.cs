@@ -1,20 +1,16 @@
-using CMGWpf.SoundFont_2;
 using CMGWpf.Types;
-using CMGWpf.View;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using static CMGWpf.Types.PlayTypes;
-using static CMGWpf.View.FileViewModel;
 
 namespace CMGWpf.PlayFunctions
 {
     /// <summary>
     /// Builds the Sound Roll grid and visual elements
     /// </summary>
-    public class TimeMidiPreset(PlayTypes.TimeMidiLine line, string soundFontName, string presetName)
+    public class TimeMidiPreset(TimeMidiLine line, string soundFontName, string presetName)
     {
         TimeMidiLine Line { get; set; } = line; string SoundFontName { get; set; } = soundFontName; string PresetName { get; set; } = presetName;
     };
@@ -26,6 +22,7 @@ namespace CMGWpf.PlayFunctions
         private const int MaxNote = 127; // G9
         private record struct TimeMidiPreset(TimeMidiLine Line, string SoundFontName, string PresetName);
         private static List<TimeMidiPreset> timeMidiPresets = [];
+        public static void ClearInstruments() { timeMidiPresets = []; }
 
         /// <summary>
         /// Calculate canvas width based on total duration

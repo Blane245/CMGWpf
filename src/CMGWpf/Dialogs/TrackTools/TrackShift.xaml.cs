@@ -12,6 +12,12 @@ namespace CMGWpf.Dialogs.TrackTools
         {
             InitializeComponent();
             this.Closing += TrackShift_Closing;
+            this.Loaded += TrackShift_Loaded;
+        }
+
+        private void TrackShift_Loaded(object sender, RoutedEventArgs e)
+        {
+            Services.GlobalService.Instance.StatusMessages.Clear();
         }
 
         private void TrackShift_Closing(object? sender, System.ComponentModel.CancelEventArgs e)

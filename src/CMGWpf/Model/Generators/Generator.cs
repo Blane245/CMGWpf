@@ -31,6 +31,7 @@ namespace CMGWpf.Model.Generators
     {
         public string Name { get; set; } = "G" + uid;
         public Track Parent { get; set; } = parent;
+        // when the starttime changes update the stop time to maintain the duration of the generator
         public double StartTime { get; set; } = 0;
         public double StopTime { get; set; } = 0;
         public bool Mute { get; set; } = false;

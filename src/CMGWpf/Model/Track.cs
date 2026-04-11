@@ -14,11 +14,13 @@ namespace CMGWpf.Model
         public List<Generator> Generators { get; set; } = [];
         public Track Clone()
         {
-            Track n = new(uid);
-            n.Name = Name;
-            n.Mute = Mute;
-            n.Solo = Solo;
-            n.Volume = Volume;
+            Track n = new(0)
+            {
+                Name = Name,
+                Mute = Mute,
+                Solo = Solo,
+                Volume = Volume
+            };
             n.Generators = [.. Generators.Select(g => g.Clone(n))];
             return n;
         }

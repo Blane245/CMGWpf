@@ -10,7 +10,7 @@
              xmlns:local="clr-namespace:CMGWpf.Layout"
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="800">
-    <Canvas Background="Transparent" ClipToBounds="True">
+    <Canvas Background="Transparent" ClipToBounds="True"            >
         <!-- ItemsControl to render generators from Track.Generators collection -->
         <ItemsControl ItemsSource="{Binding Generators}">
             <ItemsControl.ItemsPanel>
@@ -37,11 +37,11 @@
                             BorderThickness="1"
                             CornerRadius="2"
                             Cursor="Hand"
-                            MouseDown="Generator_MouseDown">
+                            Loaded="GeneratorBorder_Loaded">
 
                         <!-- Right-click context menu -->
                         <Border.ContextMenu>
-                            <ContextMenu>
+                            <ContextMenu Padding="0">
                                 <MenuItem Header="Edit..." Command="{Binding EditCommand}"/>
                                 <MenuItem Header="Copy to Track..." Command="{Binding CopyCommand}"/>
                                 <MenuItem Header="Move to Track..." Command="{Binding MoveCommand}"/>
@@ -51,6 +51,17 @@
                                 <MenuItem Header="Delete" Command="{Binding DeleteCommand}"/>
                             </ContextMenu>
                         </Border.ContextMenu>
+
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <!-- Hide context menu when dragging -->
+                                    <DataTrigger Binding="{Binding IsDragging}" Value="True">
+                                        <Setter Property="ContextMenu" Value="{x:Null}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
 
                         <!-- Generator name -->
                         <TextBlock Text="{Binding Generator.Name}" 

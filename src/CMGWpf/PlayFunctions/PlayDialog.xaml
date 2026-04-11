@@ -102,9 +102,9 @@
             <ScrollViewer x:Name="SoundRollScrollViewer"
                           HorizontalScrollBarVisibility="Hidden" 
                           VerticalScrollBarVisibility="Hidden">
-                <Canvas x:Name="ScrollRollCanvas" 
+                <Canvas x:Name="SoundRollCanvas" 
                         Background="White"
-                        Initialized="ScrollRollCanvas_Initialized"/>
+                        Initialized="SoundRollCanvas_Initialized"/>
             </ScrollViewer>
             <Canvas x:Name="SoundRollFixedCanvas" 
                     Background="Transparent"

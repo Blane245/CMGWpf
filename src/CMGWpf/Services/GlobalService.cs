@@ -237,7 +237,7 @@ namespace CMGWpf.Services
         }
         public string PlayTitle
         {
-            get { return $"CMG {Settings.Default.Version} Play/Scroll Roll - ({FileName}){(IsDirty ? "*" : "")}"; }
+            get { return $"CMG {Settings.Default.Version} Play/Sound Roll - ({FileName}){(IsDirty ? "*" : "")}"; }
         }
 
         private ObservableCollection<string> soundFontFileNames = SoundFontUtilities.List(Settings.Default.CMGSoundFontLocation);

@@ -5,7 +5,7 @@
 xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
  xmlns:services="clr-namespace:CMGWpf.Services"
  xmlns:viewmodel="clr-namespace:CMGWpf.View"
- d:DataContext="{d:DesignInstance Type=viewmodel:GeneratorViewModel+AttributeDescriptor}"
+ d:DataContext="{d:DesignInstance Type=viewmodel:GeneratorViewModel}"
  xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
  xmlns:local="clr-namespace:CMGWpf.Panels.Algorithmic"
  xmlns:model="clr-namespace:CMGWpf.Model"
@@ -69,8 +69,8 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                 <Label Content="Vibrato:" FontStyle="Italic"/>
                 <Label Content="Speed (Mhz)"/>
                 <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding AlgorithmicGenerator.Vibrato.Speed}"/>
-                <Label Content="Depth (dB)"/>
-                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.1" Value="{Binding AlgorithmicGenerator.Vibrato.Depth}"/>
+                <Label Content="Depth (cents)"/>
+                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="0.1" Value="{Binding AlgorithmicGenerator.Vibrato.Depth}"/>
                 <Label Content="Modulator"/>
                 <ComboBox ItemsSource="{Binding ModulatorTypes}" SelectedItem="{Binding AlgorithmicGenerator.Vibrato.WaveForm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </StackPanel>

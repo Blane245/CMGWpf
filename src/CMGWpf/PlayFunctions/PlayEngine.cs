@@ -37,7 +37,7 @@ namespace CMGWpf.PlayFunctions
             // check if any generators or being edited and give the user the option to continue or not. Special handling is needed when play is invoked from the generator edit dialog
             if (!isBeingEdited && CheckActiveGenerators())
                 {
-                    MessageBoxResult response = MessageBox.Show($"One or more generators are currently being edited. Any changes to them will not be reflected in the composition audio or scroll roll. Do you wish to continue?", "Generators Being Edited", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    MessageBoxResult response = MessageBox.Show($"One or more generators are currently being edited. Any changes to them will not be reflected in the composition audio or sound roll. Do you wish to continue?", "Generators Being Edited", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                     if (response == MessageBoxResult.No) return;
                 }
 
@@ -62,6 +62,8 @@ namespace CMGWpf.PlayFunctions
             PlayViewModel.Instance.PlayDuration = ready.Duration;
 
             // Generate the audio buffer
+            // set a spining cursor while play is putting things together
+            Application.Current.MainWindow.Cursor = System.Windows.Input.Cursors.Wait;
             float[] floatBuffer = Go();
             PlayViewModel.Instance.AudioBuffer = floatBuffer;
 
@@ -88,7 +90,7 @@ namespace CMGWpf.PlayFunctions
                     });
                 };
             }
-
+            Application.Current.MainWindow.Cursor = System.Windows.Input.Cursors.Arrow;
             playDialog.ShowDialog();
 
             // Clean up when dialog closes
@@ -102,7 +104,8 @@ namespace CMGWpf.PlayFunctions
         {
             int totalSamples = (int)Math.Ceiling(PlayViewModel.Instance.PlayDuration) * PlayTypes.SampleRate;
             double[] stereoBuffer = new double[totalSamples * 2]; // the sample buffer for the entire composition with interlaced stereo
-            List<SF_Preset> sF_Presets = PlayViewModel.Instance.SF_Presets; // this will be populated with the sounfont/preset unique list for later assigning colors 
+            List<SF_Preset> sF_Presets = []; // this will be populated with the sounfont/preset unique list for later assigning colors
+            PlayFunctions.SoundRollBuilder.ClearInstruments();
             foreach (Generator gen in PlayViewModel.Instance.PlayGenerators)
             {
                 switch (gen)

@@ -38,6 +38,7 @@ namespace CMGWpf.View
                         var generatorVM = new GeneratorViewModel(generator, this);
                         generatorVM.InitializeSubscriptions();
                         CachedGenerators.Add(generatorVM);
+                        generatorVM.UpdateColor();
                     }
                 }
                 return CachedGenerators;

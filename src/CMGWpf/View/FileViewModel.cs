@@ -143,7 +143,18 @@ namespace CMGWpf.View
         public RelayCommand<string> FileOpenRecentCommand =>
             _fileOpenRecentCommand ??= new RelayCommand<string>(filePath => new FileCommands(this, File).OpenRecent(filePath));
 
-        private RelayCommand<object>? _exitFileCommand;
+        private RelayCommand<object>? _openRecentFileCommand;
+        public RelayCommand<object> OpenRecentFileCommand =>
+            _openRecentFileCommand ??= new RelayCommand<object>(param =>
+            {
+                if (param is int index || (param is string str && int.TryParse(str, out index)))
+                {
+                    if (index >= 0 && index < RecentFiles.Count)
+                    {
+                        new FileCommands(this, File).OpenRecent(RecentFiles[index]);
+                    }
+                }
+            }); private RelayCommand<object>? _exitFileCommand;
         public RelayCommand<object> ExitFileCommand =>
             _exitFileCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).Exit());
 

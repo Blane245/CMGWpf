@@ -31,7 +31,17 @@
         <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=FileOpenCommand}"/>
         <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=FileSaveCommand}"/>
         <KeyBinding Key="A" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=FileSaveAsCommand}"/>
-
+        <!-- Recent Files Shortcuts (Ctrl+0 through Ctrl+9) -->
+        <KeyBinding Key="D0" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=OpenRecentFileCommand}" CommandParameter="0"/>
+        <KeyBinding Key="D1" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=OpenRecentFileCommand}" CommandParameter="1"/>
+        <KeyBinding Key="D2" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=OpenRecentFileCommand}" CommandParameter="2"/>
+        <KeyBinding Key="D3" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=OpenRecentFileCommand}" CommandParameter="3"/>
+        <KeyBinding Key="D4" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=OpenRecentFileCommand}" CommandParameter="4"/>
+        <KeyBinding Key="D5" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=OpenRecentFileCommand}" CommandParameter="5"/>
+        <KeyBinding Key="D6" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=OpenRecentFileCommand}" CommandParameter="6"/>
+        <KeyBinding Key="D7" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=OpenRecentFileCommand}" CommandParameter="7"/>
+        <KeyBinding Key="D8" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=OpenRecentFileCommand}" CommandParameter="8"/>
+        <KeyBinding Key="D9" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=OpenRecentFileCommand}" CommandParameter="9"/>
         <!-- Edit Menu Shortcuts -->
         <KeyBinding Key="T" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=AddTrackCommand}"/>
         <KeyBinding Key="C" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=EditCommentCommand}"/>

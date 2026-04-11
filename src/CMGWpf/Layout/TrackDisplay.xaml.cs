@@ -1,7 +1,6 @@
 ﻿using CMGWpf.View;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace CMGWpf.Layout
 {
@@ -36,7 +35,9 @@ namespace CMGWpf.Layout
                 var generatorVMs = new ObservableCollection<GeneratorViewModel>();
                 foreach (var generator in trackVM.Track.Generators)
                 {
-                    generatorVMs.Add(new GeneratorViewModel(generator, trackVM));
+                    GeneratorViewModel vm = new GeneratorViewModel(generator, trackVM);
+                    generatorVMs.Add(vm);
+                    vm.UpdateColor();
                 }
 
                 // Update the ItemsControl's ItemsSource
@@ -45,18 +46,13 @@ namespace CMGWpf.Layout
             }
         }
 
-        // Left-click handler for dragging generators
-        private void Generator_MouseDown(object sender, MouseButtonEventArgs e)
+        private void GeneratorBorder_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
+            // Attach native mouse event handlers directly to the Border (like TimeLineViewModel does with Rectangle)
+            if (sender is Border border && border.DataContext is GeneratorViewModel vm)
             {
-                // TODO: Implement drag logic
-                // - Store initial mouse position
-                // - Attach MouseMove and MouseUp handlers
-                // - Update generator.Position (Y offset) during drag
-                // - Update generator.StartTime/StopTime if dragging edges
-
-                e.Handled = true; // Prevent other handlers from firing
+                // Register the border with the ViewModel so it can manage capture
+                vm.AttachMouseHandlers(border);
             }
         }
     }

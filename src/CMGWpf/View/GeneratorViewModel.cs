@@ -1,4 +1,3 @@
-global using COMPOSITION = int[][];
 using CMGWpf.Dialogs;
 using CMGWpf.Model;
 using CMGWpf.Model.Generators;
@@ -13,8 +12,9 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Input;
 using static CMGWpf.Model.Generators.StochasticTypes;
-using static CMGWpf.Types.DBTypes;
+using System.Diagnostics;
 
 namespace CMGWpf.View
 {
@@ -117,6 +117,21 @@ namespace CMGWpf.View
             get { return newGeneratorName; }
             set { if (newGeneratorName != value) { newGeneratorName = value; OnPropertyChanged(); } }
         }
+        private double newStartTime = 0;
+        public double NewStartTime
+        {
+            get => newStartTime;
+            set
+            {
+                if (newStartTime == value) return;
+                double duration = UIGenerator.StopTime - newStartTime;
+                UIGenerator.StartTime = newStartTime;
+                UIGenerator.StopTime = value + duration;
+                newStartTime = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(UIgenerator));
+            }
+        }
 
         private GeneratorEditMode mode = GeneratorEditMode.Modify;
         public GeneratorEditMode Mode { get => mode; set { mode = value; OnPropertyChanged(); } }
@@ -140,6 +155,7 @@ namespace CMGWpf.View
 
             }
         }
+
         private Track? selectedTrack;
         public Track? SelectedTrack
         {
@@ -181,28 +197,33 @@ namespace CMGWpf.View
 
         // Height is 1/3 of track height as per requirements
         public static double Height => SizeService.Instance.TrackHeight / 3.0;
-        private bool IsSelected() => (Generator.StartTime >= TimeLine.TimeInterval.StartTime && Generator.StopTime <= TimeLine.TimeInterval.EndTime);
+        private bool IsSelected()
+        {
+            bool selected = (Generator.StartTime >= TimeLine.TimeInterval.StartTime && Generator.StopTime <= TimeLine.TimeInterval.EndTime);
+            return selected;
+        }
 
         // Background color based on generator type and selection state
-        public Brush BackgroundColor
+        public void UpdateColor()
         {
-            get
+            String type = Generator.ToString();
+            bool selected = IsSelected();
+            Brush brush = type switch
             {
-                // the color is based on two factors. First, the type of generator and second wether or not it is within the time interval. I light color is used for unselcted generators and a bright color is used for selected generators. 
-                // TODO: Check if generator is within timeline TimeInterval for highlighting
-                String type = Generator.ToString();
-                Brush brush = type switch
-                {
-                    "Silent" => (IsSelected()) ? Brushes.DarkGray : Brushes.LightGray,
-                    "Algorithmic" => (IsSelected()) ? Brushes.Cyan : Brushes.LightCyan,
-                    "Stochastic" => (IsSelected()) ? Brushes.Coral : Brushes.LightCoral,
-                    _ => Brushes.White
-                };
-                return brush;
-            }
+                "Silent" => selected ? Brushes.DarkGray : Brushes.LightGray,
+                "Algorithmic" => selected ? Brushes.Cyan : Brushes.LightCyan,
+                "Stochastic" => selected ? Brushes.Coral : Brushes.LightCoral,
+                _ => Brushes.White
+            };
+            _backgroundColor = brush;
+            OnPropertyChanged(nameof(BackgroundColor));
         }
+        private Brush _backgroundColor = Brushes.White;
+        public Brush BackgroundColor { get => _backgroundColor; set { _backgroundColor = value; OnPropertyChanged(); } }
         private ObservableCollection<Message> messages = [];
-        public ObservableCollection<Message> Messages { get { return messages; } 
+        public ObservableCollection<Message> Messages
+        {
+            get { return messages; }
             set
             {
                 if (messages != value)
@@ -279,7 +300,7 @@ namespace CMGWpf.View
 
         private RelayCommand<Model.Generators.Generator>? _playCommand;
         public RelayCommand<Model.Generators.Generator> PlayCommand =>
-            _playCommand ??= new RelayCommand<Model.Generators.Generator> (execute => new GeneratorCommands(this, UIGenerator).Play());
+            _playCommand ??= new RelayCommand<Model.Generators.Generator>(execute => new GeneratorCommands(this, UIGenerator).Play());
 
         private RelayCommand<Model.Generators.Generator>? _deleteCommand;
         public RelayCommand<Model.Generators.Generator> DeleteCommand =>
@@ -297,6 +318,127 @@ namespace CMGWpf.View
         public RelayCommand<Model.Generators.Generator> MoveCopyCommand =>
             _moveCopyCommand ??= new RelayCommand<Model.Generators.Generator>(execute => new GeneratorCommands(this, UIGenerator).MoveCopyAction());
 
+        #endregion
+        #region Left Mouse Generator Movement Commands
+        // Handle mouse drag actions using native WPF mouse events (like TimeLineViewModel does)
+        private FrameworkElement? _generatorBorder;
+
+        private bool _isDragging;
+        public bool IsDragging
+        {
+            get => _isDragging;
+            set
+            {
+                _isDragging = value;
+                OnPropertyChanged();
+            }
+        }
+
+        // Called from TrackDisplay.xaml.cs when Border is loaded
+        public void AttachMouseHandlers(FrameworkElement border)
+        {
+            _generatorBorder = border;
+
+            // Attach native mouse event handlers (same pattern as TimeLineViewModel)
+            border.MouseLeftButtonDown += GeneratorBorder_MouseLeftButtonDown;
+            border.MouseMove += GeneratorBorder_MouseMove;
+            border.MouseLeftButtonUp += GeneratorBorder_MouseLeftButtonUp;
+            border.MouseLeave += GeneratorBorder_MouseLeave;
+        }
+
+        private void GeneratorBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (_generatorBorder == null) return;
+
+            Debug.WriteLine($"[{Generator.Name}] Mouse down - starting drag");
+            IsDragging = true;
+
+            // Capture mouse (same as TimeLineViewModel)
+            _generatorBorder.CaptureMouse();
+            _generatorBorder.Cursor = Cursors.SizeNS;
+
+            e.Handled = true;
+        }
+
+        private void GeneratorBorder_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_generatorBorder == null || !_generatorBorder.IsMouseCaptured) return;
+
+            Debug.WriteLine($"[{Generator.Name}] Mouse move with capture");
+
+            // Get the Canvas parent to calculate position relative to track
+            if (FindParentCanvas(_generatorBorder) is Canvas canvas)
+            {
+                Point position = e.GetPosition(canvas);
+                DragGenerator(position.Y);
+            }
+
+            e.Handled = true;
+        }
+
+        private void GeneratorBorder_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (_generatorBorder == null) return;
+
+            // Only continue dragging if mouse is captured and leaves the border
+            if (_generatorBorder.IsMouseCaptured)
+            {
+                if (FindParentCanvas(_generatorBorder) is Canvas canvas)
+                {
+                    Point position = e.GetPosition(canvas);
+                    DragGenerator(position.Y);
+                }
+            }
+            // If not captured, don't change cursor - let XAML default (Hand) remain
+
+            e.Handled = true;
+        }
+
+        private void GeneratorBorder_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_generatorBorder == null) return;
+
+            Debug.WriteLine($"[{Generator.Name}] Mouse up - ending drag");
+
+            _generatorBorder.ReleaseMouseCapture();
+            _generatorBorder.Cursor = Cursors.Hand;
+            IsDragging = false;
+
+            // NOW notify track to refresh (after drag is complete)
+            NotifyTrackChanged();
+
+            e.Handled = true;
+        }
+
+        private static Canvas? FindParentCanvas(DependencyObject child)
+        {
+            DependencyObject? parent = VisualTreeHelper.GetParent(child);
+            while (parent != null)
+            {
+                Debug.WriteLine($"Searching for parent: {parent.GetType().Name}");
+                if (parent is Canvas canvas)
+                    return canvas;
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            return null;
+        }
+
+        private void DragGenerator(double y)
+        {
+            // y is already absolute Canvas position, clamp it to track height
+            double newPosition = Math.Clamp(y, 0, SizeService.Instance.TrackHeight - SizeService.Instance.TrackHeight / 3);
+            Debug.WriteLine($"move generator to position {newPosition}");
+
+            // Update VerticalOffset which is bound to Canvas.Top in XAML
+            // This moves the visual element without causing a track refresh
+            VerticalOffset = newPosition;
+
+            // Also update the underlying generator position for when drag completes
+            Generator.Position = (int)Math.Round(newPosition);
+
+            // DO NOT call NotifyTrackChanged() here - it destroys and recreates the Border!
+            // NotifyTrackChanged() is called in MouseLeftButtonUp when drag is complete
+        }
         #endregion
         #region Algorithmic Generator Specific Properties and Commands
         // the following is specific to the algorithmic generator as it has one soundfont and one list of presets. The stochastic generator will have multiple soundfonts and preset lists 
@@ -679,12 +821,62 @@ namespace CMGWpf.View
         #region Stochastic Generator Specific Properties and Commands
         public ObservableCollection<string> EnsembleNames { get => GlobalService.Instance.EnsembleNames; set { GlobalService.Instance.EnsembleNames = value; OnPropertyChanged(); } }
         public ObservableCollection<string> NoteSequenceNames { get => GlobalService.Instance.NoteSequenceNames; set { GlobalService.Instance.NoteSequenceNames = value; OnPropertyChanged(); } }
+        private string _newSequenceName = "";
+        public string NewSequenceName 
+        { 
+            get => _newSequenceName; 
+            set 
+            {
+                if (AlgorithmicGenerator == null || AlgorithmicGenerator.NoteAlgorithm == null) return;
+                if (_newSequenceName == value) return; // Avoid redundant calls
+
+                _newSequenceName = value;
+                OnPropertyChanged();
+
+                // Fire and forget the async load - use discard to indicate intentional non-await
+                _ = LoadSequenceAsync(value);
+            }
+        }
+
+        private async Task LoadSequenceAsync(string sequenceName)
+        {
+            if (AlgorithmicGenerator?.NoteAlgorithm is not Sequencer sequencer) return;
+
+            try
+            {
+                // Set the name first
+                sequencer.Name = sequenceName;
+
+                // Load the sequence from the database using NoteSequenceUtilities
+                var sequence = await NoteSequenceUtilities.GetNoteSequenceAsync(sequenceName);
+                if (sequence != null)
+                {
+                    sequencer.Items = sequence.Items;
+
+                    // Notify that the sequencer has been updated
+                    OnPropertyChanged(nameof(AlgorithmicGenerator));
+                    Messages.Clear(); 
+                    Messages.Add(new Message { Text = $"Sequence '{sequenceName}' loaded with {sequence.Items.Count} items.", Error = false });
+                }
+                else
+                {
+                    Messages.Clear(); 
+                    Messages.Add(new Message { Text = $"Sequence '{sequenceName}' not found.", Error = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                Messages.Clear(); 
+                Messages.Add(new Message { Text = $"Error loading sequence: {ex.Message}", Error = true });
+            }
+        }
 
         public Stochastic? StochasticGenerator => UIgenerator as Stochastic;
         private string ensembleName = string.Empty;
         public string StochasticEnsembleName
         {
-            get {
+            get
+            {
                 if (StochasticGenerator != null && StochasticGenerator.Ensemble.Name != ensembleName)
                 {
                     ensembleName = StochasticGenerator.Ensemble.Name;
@@ -794,7 +986,7 @@ namespace CMGWpf.View
             });
         private async Task ReloadSequencesAsync()
         {
-       try
+            try
             {
                 ObservableCollection<string> names = await NoteSequenceUtilities.GetNoteSequenceNamesAsync();
                 GlobalService.Instance.NoteSequenceNames = names;
@@ -811,7 +1003,7 @@ namespace CMGWpf.View
                 Window dialog = new ViewSequence()
                 {
                     DataContext = sequence,
-                    Owner= Application.Current.MainWindow,
+                    Owner = Application.Current.MainWindow,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner,
                     SizeToContent = SizeToContent.WidthAndHeight,
                 };
@@ -883,7 +1075,7 @@ namespace CMGWpf.View
 
         private async Task ReloadVoicesAsync()
         {
-            try 
+            try
             {
                 if (StochasticGenerator == null) return;
                 Stochastic g = StochasticGenerator;

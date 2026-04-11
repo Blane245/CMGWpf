@@ -23,7 +23,7 @@ namespace CMGWpf.View
                 if (e.PropertyName == nameof(SizeService.DisplayWidth))
                 {
                     RedrawTimeLine();
-                    TracksViewModel.Instance.RefreshAllTracks();
+                    UpdateGeneratorColors();
                 }
             };
         }
@@ -35,6 +35,7 @@ namespace CMGWpf.View
             set {
                 FileViewModel.Instance.File.TimeLine = value;
                 RedrawTimeLine();
+                UpdateGeneratorColors();
                 OnPropertyChanged();
             }
         }
@@ -75,9 +76,16 @@ namespace CMGWpf.View
             TimeLine = newTimeLine;
         }
         // draw the timeline on the canvas based on the current UIModel properties, which include the start time, zoom level, and time interval. This method is responsible for rendering the visual representation of the timeline on the canvas, including the time ticks, labels, and the time interval box. It is called whenever there are changes to the UIModel that affect the timeline display, ensuring that the timeline is always up-to-date with the underlying data model.
-        public void DrawTimeLine(Canvas? timeLineCanvas, double startTime, double displayWidth, double timeLineHeight, int currentZoomLevel, TimeInterval timeInterval)
+        public void DrawTimeLine()
         {
-            if (timeLineCanvas == null) return;
+            if (_timeLineCanvas == null) return;
+            Canvas timeLineCanvas = _timeLineCanvas;
+            timeLineCanvas.ClipToBounds = true;
+            double startTime = TimeLine.StartTime;
+            double displayWidth = Services.SizeService.Instance.DisplayWidth;
+            double timeLineHeight = SizeService.Instance.TimeLineHeight;
+            int currentZoomLevel = TimeLine.CurrentZoomLevel;
+            TimeInterval timeInterval = TimeLine.TimeInterval;
             timeLineCanvas.Children.Clear();
             // draw the timeline box
             Rectangle box = new()
@@ -148,17 +156,9 @@ namespace CMGWpf.View
 
             // adjust the time interval offsets based on the current time line, draw the visible part of the time interval, and add its mouse events for the body and edges of its rectangle. This ensures that the time interval is accurately represented on the timeline according to the current zoom level and start time, and allows the user to interact with the time interval directly on the timeline by dragging its edges or moving its body, providing a dynamic and responsive user experience.
             TimeToOffset(timeInterval);
-            //TimeLine.TimeInterval = timeInterval;
-            if (timeInterval.StartOffset >= displayWidth || timeInterval.EndOffset <= 0) return;
-
             double startInterval = timeInterval.StartOffset;
             double endInterval = timeInterval.EndOffset;
-            if (startInterval == endInterval) return;
-            _timeIntervalRectangle = CreateTimeIntervalRectangle(timeLineCanvas, startInterval, endInterval, timeLineHeight);
-            timeLineCanvas.Children.Add(_timeIntervalRectangle);
-        }
-        Rectangle CreateTimeIntervalRectangle(Canvas timeLineCanvas, double startInterval, double endInterval, double timeLineHeight)
-        {
+
             Debug.WriteLine($"Time Interval Rectangle created at ({startInterval}, {endInterval}");
             Rectangle intervalBox = new()
             {
@@ -167,28 +167,18 @@ namespace CMGWpf.View
                 Fill = Brushes.LightGray,
                 Stroke = Brushes.Gray,
                 StrokeThickness = 1,
-                Opacity = 0.5
+                Opacity = 0.8
             };
             _timeIntervalRectangle = intervalBox;
             AddTimeIntervalMouseEvents();
             Canvas.SetLeft(intervalBox, startInterval);
             Canvas.SetTop(intervalBox, 0);
             timeLineCanvas.Children.Add(intervalBox);
-            return intervalBox;
         }
-
         private void RedrawTimeLine()
         {
             if (_timeLineCanvas == null) return;
-
-            var timeLine = FileViewModel.Instance.File.TimeLine;
-            DrawTimeLine(
-                _timeLineCanvas,
-                timeLine.StartTime,
-                SizeService.Instance.DisplayWidth,
-                SizeService.Instance.TimeLineHeight,
-                timeLine.CurrentZoomLevel,
-                timeLine.TimeInterval);
+            DrawTimeLine();
             TracksViewModel.Instance.RefreshAllTracks();
         }
 
@@ -229,9 +219,6 @@ namespace CMGWpf.View
                 _timeLineCanvas.Cursor = System.Windows.Input.Cursors.ScrollWE;
                 _timeLineCanvas.CaptureMouse();
                 _timeIntervalChangeMode = TimeIntervalChangeMode.Edge;
-                // if there is no timeinterval rectangle on the canvas
-                // one needs to be created and its mouse events added
-                if (_timeIntervalRectangle == null) _timeIntervalRectangle = CreateTimeIntervalRectangle(_timeLineCanvas, position.X, position.X, SizeService.Instance.TimeLineHeight);
                 StartDragInterval(position.X);
             });
         // when the mouse is moved with the left button pressed continue timeinterval edge movements until the left mouse button is released, which releases the mouse capture and sets the timeinterval mode to none, indicating that the timeinterval manipulation is complete.
@@ -244,6 +231,8 @@ namespace CMGWpf.View
                 Debug.WriteLine($"mouse move on time line to {e.GetPosition(_timeLineCanvas)}");
                 Point position = e.GetPosition(_timeLineCanvas);
                 DragInterval(position.X);
+                // signal the tracks to redraw thus highlighting generators that are selected by the timeInterval
+                UpdateGeneratorColors();
             });
 
         // when the mouse leaves the timeline canvas and the mouse not is captured, the cursor is reset to the default arrow cursor, indicating that the user is no longer interacting with the timeline. If the mouse is captured, it means the user is dragging the timeinterval edge, so the cursor remains in its current state until the mouse button is released.
@@ -272,6 +261,7 @@ namespace CMGWpf.View
                 _timeLineCanvas.ReleaseMouseCapture();
                 _timeIntervalChangeMode = TimeIntervalChangeMode.None;
                 _timeLineCanvas.Cursor = System.Windows.Input.Cursors.Arrow;
+                TracksViewModel.Instance.RefreshAllTracks();
             });
         private void OffsetToTime(TimeInterval interval)
         {
@@ -303,7 +293,7 @@ namespace CMGWpf.View
                 }
                 else
                 {
-                    _timeIntervalRectangle.Cursor = System.Windows.Input.Cursors.Hand;
+                    _timeIntervalRectangle.Cursor = System.Windows.Input.Cursors.ScrollWE;
                     _timeIntervalChangeMode = TimeIntervalChangeMode.Body;
                 }
             };
@@ -319,13 +309,15 @@ namespace CMGWpf.View
                     Debug.WriteLine($"Dragging edge to {e.GetPosition(_timeLineCanvas).X}.");
                     DragInterval(e.GetPosition(_timeLineCanvas).X);
                     _timeIntervalRectangle.CaptureMouse();
+                    e.Handled = true; // Prevent event from bubbling to Canvas
                     return;
                 }
                 else if (_timeIntervalChangeMode == TimeIntervalChangeMode.Body)
                 {
-                    Debug.WriteLine($"start dragging body at {e.GetPosition(_timeIntervalRectangle).X}");
-                    StartDragBody(e.GetPosition(_timeIntervalRectangle).X);
+                    Debug.WriteLine($"start dragging body at {e.GetPosition(_timeLineCanvas).X}");
+                    StartDragBody(e.GetPosition(_timeLineCanvas).X);
                     _timeIntervalRectangle.CaptureMouse();
+                    e.Handled = true; // Prevent event from bubbling to Canvas
                     return;
                 }
             };
@@ -342,9 +334,31 @@ namespace CMGWpf.View
                     }
                     else
                     {
-                        Debug.WriteLine($"mouse move body to {e.GetPosition(_timeIntervalRectangle)}");
-                        DragBody(e.GetPosition(_timeIntervalRectangle).X);
+                        Debug.WriteLine($"mouse move body to {e.GetPosition(_timeLineCanvas)}");
+                        DragBody(e.GetPosition(_timeLineCanvas).X);
                     }
+                    // signal the tracks to redraw thus highlighting generators that are selected by the timeInterval
+                    UpdateGeneratorColors();
+                    e.Handled = true; // Prevent event from bubbling to Canvas
+                } else
+                {
+                    // mouse is not captured - update the cursor and mode 
+                    double x = e.GetPosition(_timeIntervalRectangle).X;
+                    if (x < 5 || x > _timeIntervalRectangle.Width - 5)
+                    {
+                        _timeIntervalChangeMode = TimeIntervalChangeMode.Edge;
+                        if (x < 5)
+                            _timeIntervalEdge = TimeIntervalEdge.Start;
+                        else
+                            _timeIntervalEdge = TimeIntervalEdge.End;
+                        _timeIntervalRectangle.Cursor = System.Windows.Input.Cursors.SizeWE;
+                    }
+                    else
+                    {
+                        _timeIntervalRectangle.Cursor = System.Windows.Input.Cursors.ScrollWE;
+                        _timeIntervalChangeMode = TimeIntervalChangeMode.Body;
+                    }
+
                 }
             };
             _timeIntervalRectangle.MouseLeave += (s, e) =>
@@ -359,23 +373,26 @@ namespace CMGWpf.View
                 _timeIntervalRectangle.ReleaseMouseCapture();
                 _timeIntervalRectangle.Cursor = System.Windows.Input.Cursors.Arrow;
                 _timeIntervalChangeMode = TimeIntervalChangeMode.None;
+                TracksViewModel.Instance.RefreshAllTracks();
+                e.Handled = true; // Prevent event from bubbling to Canvas
             };
 
         }
         private void StartDragInterval(double x)
         {
-            TimeInterval interval = TimeLine.TimeInterval;
+            TimeInterval interval = TimeLine.TimeInterval.Clone();
             interval.StartOffset = x;
             interval.EndOffset = x;
             OffsetToTime(interval);
             _timeIntervalEdge = TimeIntervalEdge.Start;
             TimeLine.TimeInterval = interval;
+            IsDirty = true;
             OnPropertyChanged(nameof(TimeLine));
         }
         private void DragInterval(double x)
         {
             if (_timeIntervalChangeMode != TimeIntervalChangeMode.Edge) return;
-            var interval = TimeLine.TimeInterval;
+            var interval = TimeLine.TimeInterval.Clone();
 
             // a couple of modes to consider:
             // 1. The user is dragging the start edge. If the position goes past the end edge, switch to dragging the end edge and exchange the start end end offsets; otherwise move the start edge
@@ -407,6 +424,7 @@ namespace CMGWpf.View
             OffsetToTime(interval);
             Debug.WriteLine($"drag {_timeIntervalEdge}, time interval {interval}");
             TimeLine.TimeInterval = interval;
+            IsDirty = true;
             OnPropertyChanged(nameof(TimeLine));
             MoveTimeIntervalRectangle();
             return;
@@ -414,7 +432,6 @@ namespace CMGWpf.View
         // Modify the time interval rectangle based on its new definition, which is determined by the mouse events that are added to the time interval rectangle. These mouse events allow the user to interact with the time interval on the timeline, enabling them to adjust its start and end times by dragging its edges or moving its body. The mouse events provide a way for the user to manipulate the time interval directly on the timeline, making it easier to use and more intuitive.
         private void MoveTimeIntervalRectangle()
         {
-            //TODO this isn't working. There are not changes made to the TimeLine.TimeInterval
             if (_timeIntervalRectangle == null || _timeLineCanvas == null) return;
             TimeInterval interval = TimeLine.TimeInterval;
             Debug.WriteLine($"move interval to ({interval.StartOffset}, {interval.EndOffset})");
@@ -443,7 +460,7 @@ namespace CMGWpf.View
             // we need to prevent the move if either the start or end offsets go beyond the timeline boundaries, which ensures that the time interval remains visible and interactable within the timeline, and prevents it from being dragged off-screen where it cannot be accessed by the user.
             if (newStartOffset < 0 || newEndOffset > SizeService.Instance.DisplayWidth)
                 return;
-            TimeInterval interval = TimeLine.TimeInterval;
+            TimeInterval interval = TimeLine.TimeInterval.Clone();
             interval.StartOffset = newStartOffset;
             interval.EndOffset = newEndOffset;
             OffsetToTime(interval);
@@ -451,6 +468,7 @@ namespace CMGWpf.View
             _bodyDragOffset = x;
             Debug.WriteLine($"drag body by {offsetChange} new interval {interval}");
             MoveTimeIntervalRectangle();
+            IsDirty = true;
             OnPropertyChanged(nameof(TimeLine));
         }
         public void TimeToOffset(TimeInterval interval)
@@ -458,8 +476,21 @@ namespace CMGWpf.View
             // convert the timeinterval start and end times to pixel offsets on the timeline, which allows the time interval to be displayed correctly on the timeline. This conversion is based on the current zoom level and the display width of the timeline, ensuring that the time interval is accurately represented in the UI.
             interval.StartOffset = (interval.StartTime - TimeLine.StartTime) / TimeLineScales[TimeLine.CurrentZoomLevel].Extent * SizeService.Instance.DisplayWidth;
             interval.EndOffset = (interval.EndTime - TimeLine.StartTime) / TimeLineScales[TimeLine.CurrentZoomLevel].Extent * SizeService.Instance.DisplayWidth;
-            interval.StartOffset = Math.Min(Math.Max(0D, interval.StartOffset), SizeService.Instance.DisplayWidth);
-            interval.EndOffset = Math.Min(Math.Max(0D, interval.EndOffset), SizeService.Instance.DisplayWidth);
+            interval.StartOffset = Math.Clamp(interval.StartOffset, 0, SizeService.Instance.DisplayWidth);
+            interval.EndOffset = Math.Clamp(interval.EndOffset, interval.StartOffset, SizeService.Instance.DisplayWidth);
+        }
+        // go through all of the generators and update their colors based on a new timeinterval.
+        private void UpdateGeneratorColors()
+        {
+            var trackviewmodels = TracksViewModel.Instance.Tracks;
+            foreach (var trackviewmodel in trackviewmodels)
+            {
+                var generatorViewModels = trackviewmodel.Generators;
+                foreach (var generatorViewModel in generatorViewModels)
+                {
+                    generatorViewModel.UpdateColor();
+                }
+            }
         }
         #endregion   
     }

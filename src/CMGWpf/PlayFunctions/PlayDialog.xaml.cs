@@ -25,6 +25,7 @@ namespace CMGWpf.PlayFunctions
         }
         private void PlayDialog_Loaded(object sender, RoutedEventArgs e)
         {
+            GlobalService.Instance.StatusMessages.Clear();
             double displayWidth = SizeService.Instance.DisplayWidth;
             double displayHeight = SizeService.Instance.BodyHeight;
             double totalDuration = PlayViewModel.Instance.PlayDuration;
@@ -32,27 +33,30 @@ namespace CMGWpf.PlayFunctions
             // Calculate base canvas width, then add viewport width so we can scroll until content reaches left edge
             double baseWidth = SoundRollBuilder.CalculateCanvasWidth(totalDuration, displayWidth);
             double viewportWidth = SoundRollScrollViewer.ViewportWidth;
-            ScrollRollCanvas.Width = baseWidth + viewportWidth; // Add viewport width for extra scroll space
+            SoundRollCanvas.Width = baseWidth + viewportWidth; // Add viewport width for extra scroll space
 
-            ScrollRollCanvas.Height = SoundRollBuilder.CalculateCanvasHeight(displayHeight);
+            SoundRollCanvas.Height = SoundRollBuilder.CalculateCanvasHeight(displayHeight);
             double canvasTime = 60 * baseWidth / displayWidth; // Use base width for time calculation
-            SoundRollBuilder.BuildGrid(ScrollRollCanvas, canvasTime);
-            PlayViewModel.Instance.ScrollRollWidth = baseWidth; // Store base width, not total width
-            //Debug.WriteLine($"PlayDialog_Loaded. Base Width: {baseWidth}, Canvas Width: {ScrollRollCanvas.Width}, ScrollRollHeight: {ScrollRollCanvas.Height}");
-            SoundRollBuilder.BuildFixedGrid(SoundRollFixedCanvas, ScrollRollCanvas.Height);
-            SoundRollBuilder.AddInstrumentsToCanvas(ScrollRollCanvas, PlayViewModel.Instance.PresetColors);
+            SoundRollBuilder.BuildGrid(SoundRollCanvas, canvasTime);
+            PlayViewModel.Instance.SoundRollWidth = baseWidth; // Store base width, not total width
+            SoundRollBuilder.BuildFixedGrid(SoundRollFixedCanvas, SoundRollCanvas.Height);
+            SoundRollBuilder.AddInstrumentsToCanvas(SoundRollCanvas, PlayViewModel.Instance.PresetColors);
 
             // Subscribe to scroll position changes
             PlayViewModel.Instance.PropertyChanged += (s, args) =>
             {
                 if (args.PropertyName == nameof(PlayViewModel.Instance.CurrentPlayPosition))
                 {
-                    UpdateScrollPosition();
+                    UpdateSoundRollPosition();
                 }
             };
+
+            // set the play/pause mode to not playing
+            if (DataContext is PlayViewModel vm) vm.IsPlaying = false;
+            
         }
 
-        private void UpdateScrollPosition()
+        private void UpdateSoundRollPosition()
         {
             double playPosition = PlayViewModel.Instance.CurrentPlayPosition;
 
@@ -60,14 +64,14 @@ namespace CMGWpf.PlayFunctions
             double scrollOffset = SoundRollBuilder.TimeToX(playPosition);
 
             // Clamp to valid range
-            double maxScroll = Math.Max(0, ScrollRollCanvas.Width - SoundRollScrollViewer.ViewportWidth);
+            double maxScroll = Math.Max(0, SoundRollCanvas.Width - SoundRollScrollViewer.ViewportWidth);
             scrollOffset = Math.Clamp(scrollOffset, 0, maxScroll);
 
             //Debug.WriteLine($"Position: {playPosition:F2}s, Offset: {scrollOffset:F0}, MaxScroll: {maxScroll:F0}");
             SoundRollScrollViewer.ScrollToHorizontalOffset(scrollOffset);
         }
 
-        private void ScrollRollCanvas_Initialized(object sender, EventArgs e)
+        private void SoundRollCanvas_Initialized(object sender, EventArgs e)
         {
         }
     }

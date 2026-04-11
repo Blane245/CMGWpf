@@ -12,6 +12,12 @@ namespace CMGWpf.Dialogs.Tools
         {
             InitializeComponent();
             DataContext = ToolsViewModel.Instance;
+            this.Loaded += MeasureDurationCalculatorDialog_Loaded;
+        }
+
+        private void MeasureDurationCalculatorDialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            Services.GlobalService.Instance.StatusMessages.Clear();
         }
     }
 }

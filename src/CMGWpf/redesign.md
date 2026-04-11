@@ -11,7 +11,7 @@ The CMG app is currently rather restrictive in regards to its ability address mu
 * make app have the look and fell of a normal windows app. The Chrome of the all windows should include a top bar with a CMG logo in the upper left-hand corner, a optional menu, a centered title (to be set by the caller), and the minimize, maximize and close button on the far right. All windows should look this way. Maybe creating a user-control would work best. (**done**)
 * maximimum size for any window takes into account windows taskbar. It should never overlap the task bar. (**done during taks level changes**)
 * within an instance of the app, a single file will be managed with a single list of tracks with their generators. (**done**) 
-* Each window will have a message area that has a scroll list of informative and/or error messages. This area is cleared each time the user performs a new interaction.
+* Each window will have a message area that has a scroll list of informative and/or error messages. This area is cleared each time the user performs a new interaction. (**done**)
 * all windows can be moved, resized, maximized, minimized, and exited at will. No blocking of other windows that are open. (**done**)
 * Most of the dialogs currently displayed will be turned into non-modals. One key feature is that mutiple tracks and generators can be editing at once allowing the user to coordinate their construction. In all cases, only a single non-modal for a function can be open for a given track or generator, e.g., one track volume per track, one generator edit per generator, etc. Only single comment editor and tools windows are allowed.
 	* Non-modals
@@ -32,7 +32,7 @@ The CMG app is currently rather restrictive in regards to its ability address mu
 			* Edit->preferences (because of its pervasive scope) (**done**)
 			* Edit->comment (but only one allowed) (**done**)
 			* Tools-> Align, stagger, Equal - these dialog cannot open if ther are any active generator dialogs (**need debugging**)
-			* Play->Play (changes cannot be made to the file while play is in progress. A popup is needed to tell the user that generators are being edited and give the option to continue or abort)
+			* Play->Play (changes cannot be made to the file while play is in progress. A popup is needed to tell the user that generators are being edited and give the option to continue or abort) (**done**)
 			* Play->Report (changes cannot be have to the file while report is in progress. Popup similar to play)
 		* Track
 			* Track->Add generator (opens a modal generator editor in Add mode to prevent additional simulataneous additions, which would cause nonunique generator names) (**done**)
@@ -41,7 +41,7 @@ The CMG app is currently rather restrictive in regards to its ability address mu
 			* Move/Copy - (prevent move/copy if edit is active) (**done**)
 			* Delete - (prevent is edit is active) messagebox for confirmation (**done*)
 		* Generator edit
-			* Play - the user can select Play while a generator is being edited. This will cause play to use the generator in a modified state before it is submitted for update to the track. 
+			* Play - the user can select Play while a generator is being edited. This will cause play to use the generator in a modified state before it is submitted for update to the track. (**done**) 
 ## Processing and interdepencencies
 * Each app instance must be aware of CMG files that are currently open to avoid having a file opened simulatneously by two different instances. This applies to File->Open and File->Recent. (**done**)
 * Track shifting will cause any open generators start and stop time change without user intervention. A message is displayed in the generator window to that affect.
@@ -50,7 +50,15 @@ The CMG app is currently rather restrictive in regards to its ability address mu
 * The Play function is the end result of all of the track and generator management by the user. It has its own special window that can be move, resized, minimized, maximized, and exited at will, but while it is active, no interaction with other CMG components is allowed. The app will appear to hang if the userminimizes the play window and tries to access other parts of the app instance.
 * Exception handling - should an instance of the app terminate unexpectedly, there needs to be a way to 'forget' that the file it was handling is now available for access. (**done**)
 
-# Side effects that need to be fixed
+# Major Achievements ✅
+* Custom window chrome with reusable UserControl
+* File locking with atomic replacement and stale lock cleanup
+* Window state persistence with taskbar-aware maximize
+* Dirty file checking on window close
+* Play system with active generator detection
+* Modal/non-modal dialog architecture
+* Timeline fixes and layout improvements
+* Jump List integration (ready for testing)
 	
 
 	

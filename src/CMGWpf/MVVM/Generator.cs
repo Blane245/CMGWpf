@@ -32,7 +32,9 @@ namespace CMGWpf.MVVM
                     }
                     else
                     {
-                        generator.Parent.Generators[index] = vm.UIGenerator.Clone(generator.Parent);
+                        Generator newGenerator = vm.UIGenerator.Clone(generator.Parent);
+                        newGenerator.Name = vm.NewGeneratorName;
+                        generator.Parent.Generators[index] = newGenerator;
                         vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated successfully.", Error = false });
                         vm.IsDirty = true;
                     }
@@ -40,7 +42,9 @@ namespace CMGWpf.MVVM
                 }
                 else if (vm.Mode == GeneratorEditMode.Add)
                 {
-                    generator.Parent.Generators.Add(vm.UIGenerator.Clone(generator.Parent));
+                    Generator newGenerator = vm.UIGenerator.Clone(generator.Parent);
+                    newGenerator.Name = vm.NewGeneratorName;
+                    generator.Parent.Generators.Add(newGenerator);
                     vm.IsDirty = true;
                     vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated added.", Error = false });
                     vm.ActiveGeneratorDialog!.Close();
@@ -57,6 +61,7 @@ namespace CMGWpf.MVVM
                 vm.NotifyTrackChanged();
                 vm.NotifyGeneratorChanged();
             }
+            
         }
         public void Delete()
         {
@@ -89,7 +94,7 @@ namespace CMGWpf.MVVM
         public void Mute()
         {
             if (generator == null) return;
-            vm.Status= [];
+            vm.Status = [];
             generator.Mute = !generator.Mute;
 
             // Find and update the generator in the parent track
@@ -172,7 +177,7 @@ namespace CMGWpf.MVVM
             Track? targetTrack = vm.SelectedTrack;
             if (targetTrack == null)
             {
-                _ = MessageBox.Show("No target track selected.", "Move/copy Error", MessageBoxButton.OK, MessageBoxImage.Error );
+                _ = MessageBox.Show("No target track selected.", "Move/copy Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 

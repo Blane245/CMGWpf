@@ -47,7 +47,7 @@ namespace CMGWpf.PlayFunctions.DSP
             RandomAlgorithm.Initialize(panAlgorithm);
             algorithmic.InitialSequence();
 
-            if (noteAlgorithm.GetType().Name != "Sequence")
+            if (noteAlgorithm.GetType().Name != "Sequencer")
             {
                 // loop through the time range and get the values from the algorithmic generator at each step, then generate the samples for each note and merge them into the audio buffer. The time step is determined by the speed value of the generator at each point in time, so that it can change over time according to the speed algorithm.
                 while (time < stopTime - 0.001)

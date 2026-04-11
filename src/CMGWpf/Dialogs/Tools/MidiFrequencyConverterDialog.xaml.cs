@@ -16,6 +16,12 @@ namespace CMGWpf.Dialogs.Tools
         {
             InitializeComponent();
             this.Closing += MidiFrequencyConverterDialog_Closing;
+            this.Loaded += MidiFrequencyConverterDialog_Loaded;
+        }
+
+        private void MidiFrequencyConverterDialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            Services.GlobalService.Instance.StatusMessages.Clear();
         }
 
         private void MidiFrequencyConverterDialog_Closing(object? sender, System.ComponentModel.CancelEventArgs e)

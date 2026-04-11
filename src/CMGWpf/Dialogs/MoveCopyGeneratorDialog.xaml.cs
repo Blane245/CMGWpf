@@ -12,6 +12,12 @@ namespace CMGWpf.Dialogs
         {
             InitializeComponent();
             this.Closing += MoveCopyGeneratorDialog_Closing;
+            this.Loaded += MoveCopyGeneratorDialog_Loaded;
+        }
+
+        private void MoveCopyGeneratorDialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            Services.GlobalService.Instance.StatusMessages.Clear();
         }
 
         private void MoveCopyGeneratorDialog_Closing(object? sender, System.ComponentModel.CancelEventArgs e)

@@ -18,13 +18,21 @@
                 <MenuItem Header="_Open..." Command="{Binding FileOpenCommand}" InputGestureText="Ctrl+O" ToolTip="Open an existing CMG file."/>
                 <MenuItem Header="_Save" Command="{Binding FileSaveCommand}" InputGestureText="Ctrl+S" ToolTip="Save the currently open CMG file."/>
                 <MenuItem Header="Save _As..." Command="{Binding FileSaveAsCommand}" InputGestureText="Ctrl+A" ToolTip="Save the currently opened CMG file and another CMG file."/>
-                <MenuItem Header="_Recent" ItemsSource="{Binding RecentFiles}" InputGestureText="Ctrl+R" ToolTip="Open a recently edited CMG file.">
-                    <!-- TODO Add Ctrl+n to the input gesture text for each item in the list, from 0 to 9-->
-                    <MenuItem.ItemTemplate>
-                        <DataTemplate>
-                            <MenuItem Header="{Binding}" Command="{Binding DataContext.FileOpenRecentCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
-                        </DataTemplate>
-                    </MenuItem.ItemTemplate>
+                <MenuItem Header="_Recent" ItemsSource="{Binding RecentFiles}" InputGestureText="Ctrl+0-9" ToolTip="Open a recently edited CMG file." AlternationCount="10">
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="MenuItem">
+                            <Setter Property="Header" Value="{Binding}"/>
+                            <Setter Property="Command" Value="{Binding DataContext.FileOpenRecentCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            <Setter Property="CommandParameter" Value="{Binding}"/>
+                            <Setter Property="InputGestureText">
+                                <Setter.Value>
+                                    <MultiBinding StringFormat="Ctrl+{0}">
+                                        <Binding Path="(ItemsControl.AlternationIndex)" RelativeSource="{RelativeSource Self}"/>
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="E_xit" Command="{Binding ExitFileCommand}"/>
@@ -66,7 +74,7 @@
                 </MenuItem>
                 <MenuItem Header="_Play">
                 <MenuItem Header="_Play..." Command="{Binding PlayCommand}"
-                              ToolTip="Play the audio and view the scroll rool of the active generators."
+                              ToolTip="Play the audio and view the sound roll of the active generators."
                               InputGestureText="Ctrl+Shift+P"
                               />
                 <MenuItem Header="_Report..." Command="{Binding ReportCommand}"

@@ -1,14 +1,11 @@
 ﻿using CMGWpf.Model.Generators;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
-using Microsoft.Xaml.Behaviors.Core;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Windows.Input;
 using System.Xml;
-using System.Xml.Linq;
 using static CMGWpf.Types.DBTypes;
 
 namespace CMGWpf.Model
@@ -59,7 +56,7 @@ namespace CMGWpf.Model
         }
         public abstract Algorithm Clone();
         public virtual bool Equals(Generator value) => base.Equals(value);
-        public abstract double GetCurrentValue(double time);
+        public abstract double GetCurrentValue(double time, double beat);
         public abstract void AppendXML(XmlDocument doc, XmlElement elem);
         public abstract void LoadXML(XmlElement algorithmElem);
         public virtual ObservableCollection<Message> Validate()
@@ -109,7 +106,7 @@ namespace CMGWpf.Model
             Value = XMLFunctions.GetAttributeDouble(elem, "value", 0);
         }
         public override ObservableCollection<Message> Validate() => [];
-        public override double GetCurrentValue(double _time) => Value;
+        public override double GetCurrentValue(double _time, double _beat) => Value;
         public override string ToString() => "Constant";
     }
     public class Oscillator : Algorithm
@@ -239,7 +236,7 @@ namespace CMGWpf.Model
             if (Phase < 0 || Phase > 360) errors.Add(new Message() { Text = "Phase must be between 0 and 360.", Error = true });
             return errors;
         }
-        public override double GetCurrentValue(double time)
+        public override double GetCurrentValue(double time, double _beat)
         {
             return Modulator switch
             {
@@ -448,7 +445,7 @@ namespace CMGWpf.Model
             return errors;
         }
 
-        public override double GetCurrentValue(double time)
+        public override double GetCurrentValue(double time, double _beat)
         {
             // transition the current state to the next state based on the transition probabilities
             double randomValue = Random.NextDouble();
@@ -632,7 +629,7 @@ namespace CMGWpf.Model
             return errors;
         }
 
-        public override double GetCurrentValue(double time)
+        public override double GetCurrentValue(double time, double _beat)
         {
             double x = GaussianNoise.Get(Random, 0, Dispersion * Math.Sqrt(time));
             double value = Math.Max(Math.Min(Initial + Trend * time + Dispersion * (time) * x, Hi), Lo);
@@ -673,14 +670,15 @@ namespace CMGWpf.Model
         }
         public double GetCurrentValue(double time)
         {
+            double speedHz = Speed / 1000;
             double value = WaveForm switch
             {
-                MODULATORTYPE.NoModulator => ModulatorFunctions.NoModulator(time, 0, Speed, Depth, 0),
-                MODULATORTYPE.Sine => ModulatorFunctions.Sine(time, 0, Speed, Depth, 0),
-                MODULATORTYPE.Square => ModulatorFunctions.Square(time, 0, Speed, Depth, 0),
-                MODULATORTYPE.Triangle => ModulatorFunctions.Triangle(time, 0, Speed, Depth, 0),
-                MODULATORTYPE.AscendingSawTooth => ModulatorFunctions.AscendingSawTooth(time, 0, Speed, Depth, 0),
-                MODULATORTYPE.DescendingSawTooth => ModulatorFunctions.DescendingSawTooth(time, 0, Speed, Depth, 0),
+                MODULATORTYPE.NoModulator => ModulatorFunctions.NoModulator(time, 0, speedHz, Depth, 0),
+                MODULATORTYPE.Sine => ModulatorFunctions.Sine(time, 0, speedHz, Depth, 0),
+                MODULATORTYPE.Square => ModulatorFunctions.Square(time, 0, speedHz, Depth, 0),
+                MODULATORTYPE.Triangle => ModulatorFunctions.Triangle(time, 0, speedHz, Depth, 0),
+                MODULATORTYPE.AscendingSawTooth => ModulatorFunctions.AscendingSawTooth(time, 0, speedHz, Depth, 0),
+                MODULATORTYPE.DescendingSawTooth => ModulatorFunctions.DescendingSawTooth(time, 0, speedHz, Depth, 0),
                 _ => 0,
             };
             return value;
@@ -748,7 +746,7 @@ namespace CMGWpf.Model
             if (Sigma < 0) errors.Add(new Message() { Text = "Autoregressive Sigma must be positive.", Error = true });
             return errors;
         }
-        public override double GetCurrentValue(double time)
+        public override double GetCurrentValue(double time, double _beat)
         {
             if (time == 0) { _currentValue = Initial; return _currentValue; }
             double epsilon = Sigma * (Random.NextDouble() - 0.5);
@@ -761,31 +759,7 @@ namespace CMGWpf.Model
     public class Sequencer : Algorithm
     {
         private string _name = "";
-        // when the sequence name changes , we need to load the sequence items from the CMG DB based on the new name. This is done in the setter of the Name property.
-        private async void LoadSequenceItems(string name)
-        {
-            if (!string.IsNullOrEmpty(name))
-            {
-                Sequencer sequence = await NoteSequenceUtilities.GetNoteSequenceAsync(name);
-                _items = [.. sequence.Items];
-            }
-            else
-            {
-                _items = [];
-            }
-            OnPropertyChanged(nameof(Items));
-        }
-        public string Name
-        {
-            get => _name;
-            set
-            {
-                if (_name != value)
-                {
-                    _name = value; LoadSequenceItems(_name); OnPropertyChanged();
-                }
-            }
-        }
+        public string Name { get => _name; set { if (_name != value) { _name = value; OnPropertyChanged(); } } }
         private double _transpose = 0;
         public double Transpose { get => _transpose; set { if (_transpose != value) { _transpose = value; OnPropertyChanged(); } } }
         private ObservableCollection<SequenceItem> _items = [];
@@ -870,19 +844,19 @@ namespace CMGWpf.Model
             double beatSum = 0;
             for (int i = 0; i < items.Length; i++)
             {
-                if (items[i].beats + beatSum >= beat - 1) return i;
+                if (items[i].beats + beatSum >= beat) return i;
                 beatSum += items[i].beats;
                 if (i == items.Length - 1) return i;
             }
             return -1;
         }
-        public override double GetCurrentValue(double time)
+        public override double GetCurrentValue(double time, double beat)
         {
-            int itemIndex = BeatsToIndex(time, [.. Items]);
+            int itemIndex = BeatsToIndex(beat, [.. Items]);
             double value = itemIndex < 0 ? 0 : Items[itemIndex].value;
             return value + Transpose;
         }
-        public override string ToString() => "Sequence";
+        public override string ToString() => "Sequencer";
 
     }
 }

@@ -13,6 +13,12 @@ namespace CMGWpf.Dialogs.TrackTools
         {
             InitializeComponent();
             this.Closing += TrackVolume_Closing;
+            this.Loaded += TrackVolume_Loaded;
+        }
+
+        private void TrackVolume_Loaded(object sender, RoutedEventArgs e)
+        {
+            Services.GlobalService.Instance.StatusMessages.Clear();
         }
 
         private void TrackVolume_Closing(object? sender, System.ComponentModel.CancelEventArgs e)

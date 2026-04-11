@@ -14,6 +14,12 @@ namespace CMGWpf.Dialogs
         {
             InitializeComponent();
             this.Closing += RenameTrack_Closing;
+            this.Loaded += RenameTrack_Loaded;
+        }
+
+        private void RenameTrack_Loaded(object sender, RoutedEventArgs e)
+        {
+            Services.GlobalService.Instance.StatusMessages.Clear();
         }
 
         private void RenameTrack_Closing(object? sender, CancelEventArgs e)

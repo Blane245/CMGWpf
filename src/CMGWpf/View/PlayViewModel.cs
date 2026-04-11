@@ -28,7 +28,7 @@ namespace CMGWpf.View
             set { playGenerators = value; OnPropertyChanged(); }
         }
         private double scrollRollWidth = 0;
-        public double ScrollRollWidth
+        public double SoundRollWidth
         {
             get { return scrollRollWidth; }
             set { scrollRollWidth = value; OnPropertyChanged(); }
@@ -57,7 +57,7 @@ namespace CMGWpf.View
                     provider.SetPosition(TimeSpan.FromSeconds(value));
                 }
 
-                currentScrollPosition = -value / PlayDuration * ScrollRollWidth; // Update scroll position based on play position
+                currentScrollPosition = -value / PlayDuration * SoundRollWidth; // Update scroll position based on play position
                 OnPropertyChanged(nameof(CurrentScrollPosition));
                 OnPropertyChanged(nameof(CurrentPlayTime));
                 OnPropertyChanged();
@@ -160,7 +160,7 @@ namespace CMGWpf.View
             currentPlayPosition = position;
             OnPropertyChanged(nameof(CurrentPlayPosition));
             OnPropertyChanged(nameof(CurrentPlayTime));
-            currentScrollPosition = -position / PlayDuration * ScrollRollWidth; // Update scroll position based on play position
+            currentScrollPosition = -position / PlayDuration * SoundRollWidth; // Update scroll position based on play position
             OnPropertyChanged(nameof(CurrentScrollPosition));
             isUpdatingPosition = false;
         }

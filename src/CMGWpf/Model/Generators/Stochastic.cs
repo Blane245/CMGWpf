@@ -257,6 +257,14 @@ namespace CMGWpf.Model.Generators
             var clone = (Stochastic)this.MemberwiseClone();
             clone.Parent = parent;
 
+            // Deep copy the Ensemble
+            clone.Ensemble = new Ensemble
+            {
+                Name = this.Ensemble.Name,
+                Description = this.Ensemble.Description,
+                Voices = this.Ensemble.Voices
+            };
+
             // Deep copy the voices so changes don't affect the original
             clone.Voices = [];
             foreach (var voice in this.Voices)
@@ -289,6 +297,22 @@ namespace CMGWpf.Model.Generators
                     clone.Composition[i] = (int[])this.Composition[i].Clone();
                 }
             }
+
+            // Create new Random instances
+            clone.CompositionRn = new Random();
+            clone.DynamicsRn = new Random();
+
+            // Deep copy IntensityParameters
+            clone.IntensityParameters = new IntensityParameters
+            {
+                CycleTime = this.IntensityParameters.CycleTime
+            };
+
+            // Deep copy PanParameters
+            clone.PanParameters = new PanParameters
+            {
+                CycleTime = this.PanParameters.CycleTime
+            };
 
             return clone;
         }

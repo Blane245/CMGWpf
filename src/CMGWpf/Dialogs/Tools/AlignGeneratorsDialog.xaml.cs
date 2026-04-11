@@ -22,6 +22,7 @@ namespace CMGWpf.Dialogs.Tools
             if (DataContext is ToolsViewModel vm)
             {
                 ListBoxHelper.BindSelectedItems(SecondaryGeneratorsListBox, vm.SecondaryGeneratorNames);
+                Services.GlobalService.Instance.StatusMessages.Clear();
             }
         }
 

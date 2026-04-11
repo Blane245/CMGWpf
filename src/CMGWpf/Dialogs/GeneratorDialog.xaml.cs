@@ -13,7 +13,15 @@ namespace CMGWpf.Dialogs
         {
             InitializeComponent();
             this.Closing += Generator_Closing;
+            this.Loaded += GeneratorDialog_Loaded;
         }
+
+        private void GeneratorDialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            Services.GlobalService.Instance.StatusMessages.Clear();
+            if (DataContext is GeneratorViewModel vm) vm.Messages.Clear();
+        }
+
         private void Generator_Closing(object? sender, CancelEventArgs e)
         {
             if (DataContext is GeneratorViewModel vm) vm.ActiveGeneratorDialog = null;

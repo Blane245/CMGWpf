@@ -1,4 +1,5 @@
 ﻿using CMGWpf.Services;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -78,6 +79,7 @@ namespace CMGWpf.Utilities
 
         public static async Task<string> FetchAsync(string uri, string method, object? body = null)
         {
+            Debug.WriteLine($"Starting fetch for uri={uri}");
             string server = GlobalService.Instance.DbServer;
             string port = GlobalService.Instance.DbPort;
 
