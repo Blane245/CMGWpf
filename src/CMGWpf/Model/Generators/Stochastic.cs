@@ -52,6 +52,18 @@ namespace CMGWpf.Model.Generators
         {
             public double CycleTime { get; set; }
         }
+        public enum REVERBOPTION
+        {
+            none,
+            composition,
+            voice,
+            cloud
+        }
+        public class ReverbParameters
+        {
+            public double Delay { get; set; } // mseconds of delay
+            public double Decay { get; set; } // decay level (dB)
+        }
         public class Ensemble
         {
             public string Name { get; set; } = "";
@@ -186,7 +198,7 @@ namespace CMGWpf.Model.Generators
         public double Lambda { get => lambda; set { if (value != lambda) { Composition = []; lambda = value; }; } } // The average number of events per time cell. If it changes, clear the composition
         private string compositionSeed = string.Empty;
         public string CompositionSeed { get => compositionSeed; set { if (value != compositionSeed) { Composition = []; compositionSeed = value; }; } } // the seed for the random number generator used to determine the timing of events in the composition. The seed is provided by the user and can be changed during the composition process. If it changes, clear the composition
-        public Random CompositionRn = new(); // the random number generator used to determine the timing of events in the composition. The random number generator is initialized with the composition seed provided by the user. If no seed is provided, the random number generator is initialized with a seed determiend from the curren time.
+        public FastRandom CompositionRn = MathUtilities.StartFastRandom(null); // the random number generator used to determine the timing of events in the composition. The random number generator is initialized with the composition seed provided by the user. If no seed is provided, the random number generator is initialized with a seed determiend from the curren time.
         private ObservableCollection<Voice> voices = [];
         public ObservableCollection<Voice> Voices
         {
@@ -197,13 +209,15 @@ namespace CMGWpf.Model.Generators
         public double Delta { get; set; } = 0; // The average number of sounds/second for each voice. This is determined by the user and can be changed during the composition process.
         public bool Microtones { get; set; } = false; // whether microtones are allowed in the composition. This is determined by the user and can be changed during the composition process.
         public string DynamicsSeed { get; set; } = String.Empty; // the seed for the random number generator used to determine the dynamics of events in the composition. The seed is provided by the user and can be changed during the composition process.
-        public Random DynamicsRn = new Random(); // the random number generator used to determine the dynamics of events in the composition. The random number generator is initialized with the dynamics seed provided by the user. If no seed is provided, the random number generator is initialized with a seed determiend from the curren time.
+        public FastRandom DynamicsRn = MathUtilities.StartFastRandom(null); // the random number generator used to determine the dynamics of events in the composition. The random number generator is initialized with the dynamics seed provided by the user. If no seed is provided, the random number generator is initialized with a seed determiend from the curren time.
         public INTENSITYOPTION IntensityOption { get; set; } = INTENSITYOPTION.none; // the option for determining the intensity of events in the composition. The intensity of events can be determined by the composition, by the voice, or by a cloud of events. This is determined by the user and can be changed during the composition process.
         public INTENSITYTRANSITIONOPTION IntensityTransitionOption { get; set; } = INTENSITYTRANSITIONOPTION.none; // the option for determining the transition of intensity of events in the composition. The transition of intensity can be random, persistent, or none. This is determined by the user and can be changed during the composition process.
         public IntensityParameters IntensityParameters { get; set; } = new() { CycleTime = 0 }; // the parameters for determining the intensity of events in the composition. The parameters are used to determine the cycle time for changing the intensity of events in the composition. This is determined by the user and can be changed during the composition process.
         public PANOPTION PanOption { get; set; } = PANOPTION.none; // the option for determining the pan of events in the composition. The pan of events can be determined by the composition, by the voice, or by a cloud of events. This is determined by the user and can be changed during the composition process.
         public PANALGORITHM PanAlgorithm { get; set; } = PANALGORITHM.none; // the option for determining the algorithm for changing the pan of events in the composition. The algorithm for changing the pan can be glide, walk, or none. This is determined by the user and can be changed during the composition process.
         public PanParameters PanParameters { get; set; } = new() { CycleTime = 0 }; // the parameters for determining the pan of events in the composition. The parameters are used to determine the cycle time for changing the pan of events in the composition. This is determined by the user and can be changed during the composition process.
+        public ReverbParameters ReverbParameters { get; set; } = new() { Delay = 0, Decay = 1 }; // the parameters for determining the reverb of events in the composition. The parameters are used to determine the delay and decay for the reverb effect. This is determined by the user and can be changed during the composition process.
+
         // The Composition part
         private Composition composition = [];
         public Composition Composition { get => composition; set { composition = value; OnPropertyChanged(); } } // the composition is a two dimensional array that has the number of clouds in each cell. There is one cell for each voice for each time. If any of the composition parameters are changed, except voice UI parameters, a new composition is generated. The composition is generated by the GenerateComposition method, which is called whenever any of the composition parameters are changed. The composition is generated by iterating through each time cell and each voice, and determining whether an event occurs based on the lambda parameter and the random number generator. If an event occurs, the intensity and pan of the event are determined based on the intensity and pan options and parameters.
@@ -212,14 +226,14 @@ namespace CMGWpf.Model.Generators
         {
             if (!string.IsNullOrEmpty(CompositionSeed))
             {
-                CompositionRn = new Random(CompositionSeed.GetHashCode());
+                CompositionRn = MathUtilities.StartFastRandom(CompositionSeed);
             }
         }
         public void InitializeDynamics()
         {
             if (!string.IsNullOrEmpty(DynamicsSeed))
             {
-                DynamicsRn = new Random(DynamicsSeed.GetHashCode());
+                DynamicsRn = MathUtilities.StartFastRandom(DynamicsSeed);
             }
         }
 
@@ -299,8 +313,8 @@ namespace CMGWpf.Model.Generators
             }
 
             // Create new Random instances
-            clone.CompositionRn = new Random();
-            clone.DynamicsRn = new Random();
+            clone.CompositionRn = MathUtilities.StartFastRandom(CompositionSeed);
+            clone.DynamicsRn = MathUtilities.StartFastRandom(DynamicsSeed);
 
             // Deep copy IntensityParameters
             clone.IntensityParameters = new IntensityParameters
@@ -337,7 +351,7 @@ namespace CMGWpf.Model.Generators
                 voicesElem.AppendChild(voiceElem);
                 voiceElem.SetAttribute("name", voice.Name);
                 voiceElem.SetAttribute("description", voice.Description);
-                voiceElem.SetAttribute("soundFontFileName", voice.SoundFontFileName);
+                voiceElem.SetAttribute("soundFontFile", voice.SoundFontFileName);
                 voiceElem.SetAttribute("presetName", voice.PresetName);
                 voiceElem.SetAttribute("timbre", voice.Timbre.ToString());
                 voiceElem.SetAttribute("registerLo", voice.RegisterLo.ToString());
@@ -384,8 +398,9 @@ namespace CMGWpf.Model.Generators
         {
             Name = XMLFunctions.GetAttributeString(generatorElem, "name", "");
             Parent = parent;
+            double readStopTime = XMLFunctions.GetAttributeDouble(generatorElem, "stopTime", 0);
             StartTime = XMLFunctions.GetAttributeDouble(generatorElem, "startTime", 0);
-            StopTime = XMLFunctions.GetAttributeDouble(generatorElem, "stopTime", 0);
+            StopTime = readStopTime; // override the calculation doen when starttime is read
             Position = XMLFunctions.GetAttributeInt(generatorElem, "position", 0);
             Mute = XMLFunctions.GetAttributeBool(generatorElem, "mute", false);
 
@@ -409,7 +424,7 @@ namespace CMGWpf.Model.Generators
                         {
                             Name = XMLFunctions.GetAttributeString(voiceElem, "name", ""),
                             Description = XMLFunctions.GetAttributeString(voiceElem, "description", ""),
-                            SoundFontFileName = XMLFunctions.GetAttributeString(voiceElem, "soundFontFileName", ""),
+                            SoundFontFileName = XMLFunctions.GetAttributeString(voiceElem, "soundFontFile", ""),
                             PresetName = XMLFunctions.GetAttributeString(voiceElem, "presetName", ""),
                             Timbre = Enum.Parse<TIMBRE>(XMLFunctions.GetAttributeString(voiceElem, "timbre", "Sustained")),
                             RegisterLo = XMLFunctions.GetAttributeDouble(voiceElem, "registerLo", 0),
@@ -448,19 +463,13 @@ namespace CMGWpf.Model.Generators
                 NumberOfTimeCells = XMLFunctions.GetAttributeInt(generatorElem, "Nt", 0);
                 Lambda = XMLFunctions.GetAttributeDouble(generatorElem, "lambda", 0);
                 CompositionSeed = XMLFunctions.GetAttributeString(generatorElem, "compositionSeed", "");
-                if (CompositionSeed != "")
-                    CompositionRn = new Random(CompositionSeed.GetHashCode());
-                else
-                    CompositionRn = new Random();
+                CompositionRn = MathUtilities.StartFastRandom(CompositionSeed);
 
                 // Load signal processing parameters
                 Delta = XMLFunctions.GetAttributeDouble(generatorElem, "delta", 0);
                 Microtones = XMLFunctions.GetAttributeBool(generatorElem, "microtones", false);
                 DynamicsSeed = XMLFunctions.GetAttributeString(generatorElem, "dynamicsSeed", "");
-                if (DynamicsSeed != "")
-                    DynamicsRn = new Random(DynamicsSeed.GetHashCode());
-                else
-                    DynamicsRn = new Random();
+                DynamicsRn = MathUtilities.StartFastRandom(DynamicsSeed);
 
                 // Load intensity parameters
                 XmlElement? intensityElem = generatorElem.GetElementsByTagName("intensity").Cast<XmlElement?>().FirstOrDefault();
@@ -490,23 +499,58 @@ namespace CMGWpf.Model.Generators
                 if (!string.IsNullOrEmpty(compositionString))
                 {
                     string[] rows = compositionString.Split(';', StringSplitOptions.RemoveEmptyEntries);
-                    Composition = new int[rows.Length][];
-                    for (int i = 0; i < rows.Length; i++)
+                    if (rows.Length == NumberOfTimeCells)
                     {
-                        string[] values = rows[i].Split(',', StringSplitOptions.RemoveEmptyEntries);
-                        Composition[i] = new int[values.Length];
-                        for (int j = 0; j < values.Length; j++)
+                        // New format with semicolons separating rows
+                        Composition = new int[rows.Length][];
+                        for (int i = 0; i < rows.Length; i++)
                         {
-                            if (int.TryParse(values[j], out int val))
-                                Composition[i][j] = val;
+                            string[] values = rows[i].Split(',', StringSplitOptions.RemoveEmptyEntries);
+                            Composition[i] = new int[values.Length];
+                            for (int j = 0; j < values.Length; j++)
+                            {
+                                if (int.TryParse(values[j], out int val))
+                                    Composition[i][j] = val;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Old format: flat comma-separated list that needs reshaping
+                        // Expected format: [time0_voice0, time0_voice1, ..., time1_voice0, time1_voice1, ...]
+                        string[] values = compositionString.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                        int numVoices = Voices.Count;
+                        if (numVoices > 0 && values.Length > 0)
+                        {
+                            int numTimeCells = values.Length / numVoices;
+                            Composition = new int[numTimeCells][];
+                            for (int i = 0; i < numTimeCells; i++)
+                            {
+                                Composition[i] = new int[numVoices];
+                                for (int j = 0; j < numVoices; j++)
+                                {
+                                    int index = i * numVoices + j;
+                                    if (index >= values.Length)
+                                    {
+                                        // incompatibility between number of voices, number of times, or both and the data in the file. Clear the composition and quit.
+                                        Composition = [];
+                                        return Task.CompletedTask;
+                                    }
+                                    if (index < values.Length && int.TryParse(values[index], out int val))
+                                        Composition[i][j] = val;
+                                }
+                            }
                         }
                     }
                 }
             }
             return Task.CompletedTask;
         }
-
-        // CMG does not use CurrentValues from the Stocastic class. Rather, values calculations are done in the GetSourcesFrom Stochastic routine.
+        public override double GetEndTime()
+        {
+            return StopTime + CompositionDuration / numberOfTimeCells; // add one time cells to provide for cloud overflows
+        }
+        // CMG does not use CurrentValues from the Stocastic class. Rather, values calculations are done in the GetSourcesFromStochastic routine.
         public override CurrentValues GetCurrentValues(double time, double beats)
         {
             return new CurrentValues

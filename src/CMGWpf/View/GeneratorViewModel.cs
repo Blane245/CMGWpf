@@ -74,6 +74,7 @@ namespace CMGWpf.View
                 if (value.GetType() == typeof(Algorithmic))
                 {
                     OnPropertyChanged(nameof(AlgorithmicGenerator));
+                    OnPropertyChanged(nameof(SequencerName));
                     // Reset cached Algorithmic attribute descriptors so they get recreated with new generator
                     _noteAttribute = null;
                     _attackAttribute = null;
@@ -309,7 +310,7 @@ namespace CMGWpf.View
         public RelayCommand<Model.Generators.Generator> GeneratorPlayCommand =>
             _generatorPlayCommand ??= new RelayCommand<Model.Generators.Generator>(generator =>
             {
-                PlayFunctions.PlayEngine.StartUp(generator, true);
+                PlayFunctions.PlayEngine.StartUp(generator, true, true);
             });
         private RelayCommand<Model.Generators.Generator>? _generatorSubmitCommand;
         public RelayCommand<Model.Generators.Generator> GeneratorSubmitCommand =>
@@ -443,6 +444,30 @@ namespace CMGWpf.View
         #region Algorithmic Generator Specific Properties and Commands
         // the following is specific to the algorithmic generator as it has one soundfont and one list of presets. The stochastic generator will have multiple soundfonts and preset lists 
         public Algorithmic? AlgorithmicGenerator => UIgenerator as Algorithmic;
+
+        /// <summary>
+        /// Gets or sets the name of the sequence when NoteAlgorithm is a Sequencer
+        /// </summary>
+        public string SequencerName
+        {
+            get
+            {
+                if (AlgorithmicGenerator?.NoteAlgorithm is Sequencer sequencer)
+                {
+                    return sequencer.Name;
+                }
+                return string.Empty;
+            }
+            set
+            {
+                if (AlgorithmicGenerator?.NoteAlgorithm is Sequencer sequencer && sequencer.Name != value)
+                {
+                    // Fire and forget the async load
+                    _ = LoadSequenceAsync(value);
+                }
+            }
+        }
+
         public ObservableCollection<string> SoundFontFileNames { get => GlobalService.Instance.SoundFontFileNames; set { GlobalService.Instance.SoundFontFileNames = value; OnPropertyChanged(); } }
 
         private string algorithmicSoundFontFileName = string.Empty;
@@ -638,7 +663,7 @@ namespace CMGWpf.View
                         Minimum = 0,
                         Maximum = 127,
                         Increment = 0.01,
-                        Algorithm = AlgorithmicGenerator.NoteAlgorithm
+                        Algorithm = AlgorithmicGenerator.NoteAlgorithm,
                     };
                     _noteAttribute.PropertyChanged += (s, e) =>
                     {
@@ -646,6 +671,7 @@ namespace CMGWpf.View
                         {
                             AlgorithmicGenerator.NoteAlgorithm = _noteAttribute.Algorithm;
                             OnPropertyChanged(nameof(AlgorithmicGenerator));
+                            OnPropertyChanged(nameof(SequencerName));
                         }
                     };
                 }
@@ -671,7 +697,7 @@ namespace CMGWpf.View
                         Minimum = 0,
                         Maximum = 127,
                         Increment = 1,
-                        Algorithm = AlgorithmicGenerator.AttackAlgorithm
+                        Algorithm = AlgorithmicGenerator.AttackAlgorithm,
                     };
                     _attackAttribute.PropertyChanged += (s, e) =>
                     {
@@ -704,7 +730,7 @@ namespace CMGWpf.View
                         Minimum = 1,
                         Maximum = 10000,
                         Increment = 1,
-                        Algorithm = AlgorithmicGenerator.SpeedAlgorithm
+                        Algorithm = AlgorithmicGenerator.SpeedAlgorithm,
                     };
                     _speedAttribute.PropertyChanged += (s, e) =>
                     {
@@ -737,7 +763,7 @@ namespace CMGWpf.View
                         Minimum = 1,
                         Maximum = 100,
                         Increment = 1,
-                        Algorithm = AlgorithmicGenerator.DurationAlgorithm
+                        Algorithm = AlgorithmicGenerator.DurationAlgorithm,
                     };
                     _durationAttribute.PropertyChanged += (s, e) =>
                     {
@@ -770,7 +796,7 @@ namespace CMGWpf.View
                         Minimum = -10,
                         Maximum = 10,
                         Increment = 1,
-                        Algorithm = AlgorithmicGenerator.VolumeAlgorithm
+                        Algorithm = AlgorithmicGenerator.VolumeAlgorithm,
                     };
                     _volumeAttribute.PropertyChanged += (s, e) =>
                     {
@@ -803,7 +829,7 @@ namespace CMGWpf.View
                         Minimum = -1,
                         Maximum = 1,
                         Increment = 0.1,
-                        Algorithm = AlgorithmicGenerator.PanAlgorithm
+                        Algorithm = AlgorithmicGenerator.PanAlgorithm,
                     };
                     _panAttribute.PropertyChanged += (s, e) =>
                     {
@@ -821,22 +847,22 @@ namespace CMGWpf.View
         #region Stochastic Generator Specific Properties and Commands
         public ObservableCollection<string> EnsembleNames { get => GlobalService.Instance.EnsembleNames; set { GlobalService.Instance.EnsembleNames = value; OnPropertyChanged(); } }
         public ObservableCollection<string> NoteSequenceNames { get => GlobalService.Instance.NoteSequenceNames; set { GlobalService.Instance.NoteSequenceNames = value; OnPropertyChanged(); } }
-        private string _newSequenceName = "";
-        public string NewSequenceName 
-        { 
-            get => _newSequenceName; 
-            set 
-            {
-                if (AlgorithmicGenerator == null || AlgorithmicGenerator.NoteAlgorithm == null) return;
-                if (_newSequenceName == value) return; // Avoid redundant calls
+        //private string _newSequenceName = "";
+        //public string NewSequenceName 
+        //{ 
+        //    get => _newSequenceName; 
+        //    set 
+        //    {
+        //        if (AlgorithmicGenerator == null || AlgorithmicGenerator.NoteAlgorithm == null) return;
+        //        if (_newSequenceName == value) return; // Avoid redundant calls
 
-                _newSequenceName = value;
-                OnPropertyChanged();
+        //        _newSequenceName = value;
+        //        OnPropertyChanged();
 
-                // Fire and forget the async load - use discard to indicate intentional non-await
-                _ = LoadSequenceAsync(value);
-            }
-        }
+        //        // Fire and forget the async load - use discard to indicate intentional non-await
+        //        _ = LoadSequenceAsync(value);
+        //    }
+        //}
 
         private async Task LoadSequenceAsync(string sequenceName)
         {
@@ -855,6 +881,7 @@ namespace CMGWpf.View
 
                     // Notify that the sequencer has been updated
                     OnPropertyChanged(nameof(AlgorithmicGenerator));
+                    OnPropertyChanged(nameof(SequencerName));
                     Messages.Clear(); 
                     Messages.Add(new Message { Text = $"Sequence '{sequenceName}' loaded with {sequence.Items.Count} items.", Error = false });
                 }
@@ -1014,6 +1041,7 @@ namespace CMGWpf.View
         public static ObservableCollection<INTENSITYTRANSITIONOPTION> IntensityTransitionOptionTypes => new(Enum.GetValues<INTENSITYTRANSITIONOPTION>());
         public static ObservableCollection<PANOPTION> PanOptionTypes => new(Enum.GetValues<PANOPTION>());
         public static ObservableCollection<PANALGORITHM> PanAlgorithmTypes => new(Enum.GetValues<PANALGORITHM>());
+        public static ObservableCollection<REVERBOPTION> ReverbOptionTypes => new(Enum.GetValues<REVERBOPTION>());
         public record struct StochasticCompositionRow
         {
             public StochasticCompositionRow() { }
@@ -1195,7 +1223,7 @@ namespace CMGWpf.View
                     // Sequence algorithm only makes sense for Note (pitch) attribute
                     if (Name == "Note")
                     {
-                        return AlgorithmTypes; // All algorithm types including Sequence
+                        return AlgorithmTypes; // All algorithm types including Sequencer
                     }
                     else
                     {

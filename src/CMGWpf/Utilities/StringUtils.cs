@@ -2,7 +2,7 @@
 {
     public static class StringUtils
     {
-        private static readonly Random random = new();
+        private static readonly FastRandom random = MathUtilities.StartFastRandom(null);
         public static string GenerateRandomString(int length = 10)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

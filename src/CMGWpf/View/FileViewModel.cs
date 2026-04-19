@@ -176,7 +176,7 @@ namespace CMGWpf.View
             _playCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).Play(null));
         private RelayCommand<object>? _reportCommand;
         public RelayCommand<object> ReportCommand =>
-            _reportCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).Report());
+            _reportCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).Report(null));
         #endregion
     }
 }

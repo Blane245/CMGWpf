@@ -1,0 +1,39 @@
+<Window x:Class="CMGWpf.PlayFunctions.ProgressWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Processing Generators" 
+        Height="150" 
+        Width="400"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow"
+        ShowInTaskbar="False">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <TextBlock Grid.Row="0" 
+                   Text="{Binding StatusMessage}" 
+                   FontSize="14"
+                   TextWrapping="Wrap"/>
+        
+        <ProgressBar Grid.Row="2" 
+                     Height="25"
+                     Minimum="0"
+                     Maximum="{Binding TotalGenerators}"
+                     Value="{Binding CompletedGenerators}"
+                     IsIndeterminate="{Binding IsIndeterminate}"/>
+        
+        <Button Grid.Row="4" 
+                Content="Cancel" 
+                Width="80"
+                Height="30"
+                HorizontalAlignment="Center"
+                Click="CancelButton_Click"/>
+    </Grid>
+</Window>

@@ -34,7 +34,7 @@ namespace CMGWpf.Utilities
             return (Xi, Pi);
         }
         // the continuous probabilty second law
-        public static double Interval(double length, Random Rn)
+        public static double Interval(double length, FastRandom Rn)
         {
             return length * (1 - Math.Sqrt(1 - Rn.NextDouble()));
         }
@@ -49,12 +49,12 @@ namespace CMGWpf.Utilities
             return x[index];
         }
         // Standard Normal variate using Box-Muller transform.
-        public static double GaussianRandom(double mean, double stdev, Random rN)
+        public static double GaussianRandom(double mean, double stdev, FastRandom rN)
         {
             if (stdev == 0) return mean;
             double u = 1 - rN.NextDouble(); // Converting [0,1) to (0,1]
             double v = rN.NextDouble();
-            double z = Math.Sqrt(-2.0 * Math.Log(u)) * Math.Cos(2.0 * Math.PI * v);
+            double z = MathUtilities.Sqrt(-2.0 * MathUtilities.Log(u)) * MathUtilities.Cos(2.0 * MathUtilities.PI * v);
             // Transform to the desired mean and standard deviation:
             return z * stdev + mean;
         }

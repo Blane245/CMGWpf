@@ -37,8 +37,9 @@ namespace CMGWpf.Model.Generators
         {
             Name = XMLFunctions.GetAttributeString(elem, "name", "");
             Parent = parent;
+            double readStopTime = XMLFunctions.GetAttributeDouble(elem, "stopTime", 0);
             StartTime = XMLFunctions.GetAttributeDouble(elem, "startTime", 0);
-            StopTime = XMLFunctions.GetAttributeDouble(elem, "stopTime", 0);
+            StopTime = readStopTime; // override the calculation doen when starttime is read
             Position = XMLFunctions.GetAttributeInt(elem, "position", 0);
             Mute = XMLFunctions.GetAttributeBool(elem, "mute", false);
             return Task.CompletedTask;
@@ -47,6 +48,7 @@ namespace CMGWpf.Model.Generators
         {
             return base.Validate();
         }
+        public override double GetEndTime () { return StopTime; }
         public override CurrentValues GetCurrentValues(double time, double beat)
         {
             return new CurrentValues()

@@ -1,28 +1,28 @@
-﻿namespace CMGWpf.Model
+﻿using CMGWpf.Utilities;
+
+namespace CMGWpf.Model
 {
     public enum MODULATORTYPE
     {
-        NoModulator,
-        Sine,
-        Square,
-        Triangle,
-        AscendingSawTooth,
-        DescendingSawTooth,
+        NOMODULATOR,
+        SINE,
+        SQUARE,
+        TRIANGLE,
+        ASCENDINGSAWTOOTH,
+        DESCENDINGSAWTOOTH,
     }
     public static class ModulatorFunctions
     {
         private const double TWO_PI = 2 * Math.PI;
         public static double NoModulator(double time, double center, double frequency, double amplitude, double phase)
         {
-            if (frequency == 0) return center;
-            if (double.IsNaN(frequency) || double.IsInfinity(frequency) ) return double.NaN;
-            return center + amplitude * (double)Math.Sin(TWO_PI * frequency * time + phase);
+            return center;
         }
         public static double Sine(double time, double center, double frequency, double amplitude, double phase)
         {
             if (frequency == 0) return center;
             if (double.IsNaN(frequency) || double.IsInfinity(frequency)) return double.NaN;
-            return center + amplitude * (double)Math.Sin(TWO_PI * frequency * time + phase);
+            return center + amplitude * (double)MathUtilities.Sin(TWO_PI * frequency * time + phase);
         }
         public static double Square(double time, double center, double frequency, double amplitude, double phase)
         {

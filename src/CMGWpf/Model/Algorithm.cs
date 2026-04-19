@@ -111,79 +111,23 @@ namespace CMGWpf.Model
     }
     public class Oscillator : Algorithm
     {
-        private MODULATORTYPE _modulator = MODULATORTYPE.NoModulator;
-        public MODULATORTYPE Modulator
-        {
-            get => _modulator;
-            set
-            {
-                if (_modulator != value)
-                {
-                    _modulator = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        private MODULATORTYPE _modulator = MODULATORTYPE.NOMODULATOR;
+        public MODULATORTYPE Modulator { get => _modulator; set { if (_modulator != value) { _modulator = value; OnPropertyChanged(); } } }
 
         private double _center = 0;
-        public double Center
-        {
-            get => _center;
-            set
-            {
-                if (_center != value)
-                {
-                    _center = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Center { get => _center; set { if (_center != value) { _center = value; OnPropertyChanged(); } } }
 
         private double _frequency = 0;
-        public double Frequency
-        {
-            get => _frequency;
-            set
-            {
-                if (_frequency != value)
-                {
-                    _frequency = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Frequency { get => _frequency; set { if (_frequency != value) { _frequency = value; OnPropertyChanged(); } } }
 
         private double _amplitude = 0;
-        public double Amplitude
-        {
-            get => _amplitude;
-            set
-            {
-                if (_amplitude != value)
-                {
-                    _amplitude = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Amplitude { get => _amplitude; set { if (_amplitude != value) { _amplitude = value; OnPropertyChanged(); } } }
 
         private double _phase = 0;
-        public double Phase
-        {
-            get => _phase;
-            set
-            {
-                if (_phase != value)
-                {
-                    _phase = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
+        public double Phase { get => _phase; set { if (_phase != value) { _phase = value; OnPropertyChanged(); } } }
         public Oscillator()
         {
-            Modulator = MODULATORTYPE.NoModulator;
+            Modulator = MODULATORTYPE.NOMODULATOR;
             Center = 0;
             Frequency = 0;
             Amplitude = 0;
@@ -220,7 +164,7 @@ namespace CMGWpf.Model
         }
         public override void LoadXML(XmlElement elem)
         {
-            string modulatorString = XMLFunctions.GetAttributeString(elem, "type", MODULATORTYPE.NoModulator.ToString());
+            string modulatorString = XMLFunctions.GetAttributeString(elem, "type", MODULATORTYPE.NOMODULATOR.ToString());
             if (Enum.TryParse<MODULATORTYPE>(modulatorString, out MODULATORTYPE modulator)) Modulator = modulator;
             Center = XMLFunctions.GetAttributeDouble(elem, "center", 0);
             Frequency = XMLFunctions.GetAttributeDouble(elem, "frequency", 0);
@@ -240,12 +184,12 @@ namespace CMGWpf.Model
         {
             return Modulator switch
             {
-                MODULATORTYPE.NoModulator => ModulatorFunctions.NoModulator(time, Center, Frequency / 1000, Amplitude, Phase),
-                MODULATORTYPE.Sine => ModulatorFunctions.Sine(time, Center, Frequency / 1000, Amplitude, Phase),
-                MODULATORTYPE.Square => ModulatorFunctions.Square(time, Center, Frequency / 1000, Amplitude, Phase),
-                MODULATORTYPE.Triangle => ModulatorFunctions.Triangle(time, Center, Frequency / 1000, Amplitude, Phase),
-                MODULATORTYPE.AscendingSawTooth => ModulatorFunctions.AscendingSawTooth(time, Center, Frequency / 1000, Amplitude, Phase),
-                MODULATORTYPE.DescendingSawTooth => ModulatorFunctions.DescendingSawTooth(time, Center, Frequency / 1000, Amplitude, Phase),
+                MODULATORTYPE.NOMODULATOR => ModulatorFunctions.NoModulator(time, Center, Frequency / 1000, Amplitude, Phase),
+                MODULATORTYPE.SINE => ModulatorFunctions.Sine(time, Center, Frequency / 1000, Amplitude, Phase),
+                MODULATORTYPE.SQUARE => ModulatorFunctions.Square(time, Center, Frequency / 1000, Amplitude, Phase),
+                MODULATORTYPE.TRIANGLE => ModulatorFunctions.Triangle(time, Center, Frequency / 1000, Amplitude, Phase),
+                MODULATORTYPE.ASCENDINGSAWTOOTH => ModulatorFunctions.AscendingSawTooth(time, Center, Frequency / 1000, Amplitude, Phase),
+                MODULATORTYPE.DESCENDINGSAWTOOTH => ModulatorFunctions.DescendingSawTooth(time, Center, Frequency / 1000, Amplitude, Phase),
                 _ => 0,
             };
         }
@@ -261,27 +205,10 @@ namespace CMGWpf.Model
     public class Markovian : Algorithm
     {
         private string _seed = "";
-        public string Seed
-        {
-            get => _seed;
-            set
-            {
-                if (_seed != value)
-                {
-                    _seed = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        public Random Random { get; set; } = new();
+        public string Seed { get => _seed; set { if (_seed != value) { _seed = value; OnPropertyChanged(); } } }
+        public FastRandom Random { get; set; } = new();
 
-        public void InitializeRandom()
-        {
-            if (!string.IsNullOrEmpty(Seed))
-            {
-                Random = new Random(Seed.GetHashCode());
-            }
-        }
+        public void InitializeRandom() => Random = MathUtilities.StartFastRandom(Seed);
         private MARKOVSTATE CurrentState { get; set; } = MARKOVSTATE.SAME;
         private double CurrentValue { get; set; } = 0;
         private double _start = 0;
@@ -309,24 +236,17 @@ namespace CMGWpf.Model
         public Markovian() { }
         public override Markovian Clone()
         {
-            Markovian n = new()
-            {
-                Seed = this.Seed,
-                Random = this.Seed != "" ? new Random(Seed.GetHashCode()) : new Random(),
-                CurrentState = this.CurrentState,
-                CurrentValue = this.CurrentValue,
-                Start = this.Start,
-                Lo = this.Lo,
-                Hi = this.Hi,
-                Step = this.Step,
-                TransitionProbabilities = (double[,])this.TransitionProbabilities.Clone(),
-                TransitionRows =
+            Markovian n = (Markovian)MemberwiseClone();
+            n.Random = MathUtilities.StartFastRandom(Seed);
+            n.CurrentState = this.CurrentState;
+            n.CurrentValue = this.CurrentValue;
+            n.TransitionProbabilities = (double[,])this.TransitionProbabilities.Clone();
+            n.TransitionRows =
             [
                 new TransitionRow("Same", [TransitionProbabilities[0, 0].ToString(), TransitionProbabilities[0, 1].ToString(), TransitionProbabilities[0, 2].ToString()]),
                 new TransitionRow("Up", [TransitionProbabilities[1, 0].ToString(), TransitionProbabilities[1, 1].ToString(), TransitionProbabilities[1, 2].ToString()]),
                 new TransitionRow("Down", [TransitionProbabilities[2, 0].ToString(), TransitionProbabilities[2, 1].ToString(), TransitionProbabilities[2, 2].ToString()])
-            ]
-            };
+            ];
             return n;
         }
 
@@ -375,7 +295,7 @@ namespace CMGWpf.Model
         public override void LoadXML(XmlElement elem)
         {
             Seed = XMLFunctions.GetAttributeString(elem, "seed", string.Empty);
-            Random = (Seed == string.Empty) ? new Random() : new Random(Seed.GetHashCode());
+            Random = MathUtilities.StartFastRandom(Seed);
             Start = XMLFunctions.GetAttributeDouble(elem, "start", 0);
             CurrentValue = Start;
             CurrentState = MARKOVSTATE.SAME;
@@ -483,110 +403,31 @@ namespace CMGWpf.Model
     public class Wiener() : Algorithm
     {
         private string _seed = "";
-        public string Seed
-        {
-            get => _seed;
-            set
-            {
-                if (_seed != value)
-                {
-                    _seed = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        public Random Random { get; set; } = new();
+        public string Seed { get => _seed; set { if (_seed != value) { _seed = value; OnPropertyChanged(); } } }
+        public FastRandom Random { get; set; } = MathUtilities.StartFastRandom(null);
 
-        public void InitializeRandom()
-        {
-            if (!string.IsNullOrEmpty(Seed))
-            {
-                Random = new Random(Seed.GetHashCode());
-            }
-        }
+        public void InitializeRandom() => 
+                Random = MathUtilities.StartFastRandom(Seed);
 
         private double _initial = 0;
-        public double Initial
-        {
-            get => _initial;
-            set
-            {
-                if (_initial != value)
-                {
-                    _initial = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Initial { get => _initial; set { if (_initial != value) { _initial = value; OnPropertyChanged(); } } }
 
         private double _trend = 0;
-        public double Trend
-        {
-            get => _trend;
-            set
-            {
-                if (_trend != value)
-                {
-                    _trend = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Trend { get => _trend; set { if (_trend != value) { _trend = value; OnPropertyChanged(); } } }
 
         private double _dispersion = 0;
-        public double Dispersion
-        {
-            get => _dispersion;
-            set
-            {
-                if (_dispersion != value)
-                {
-                    _dispersion = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Dispersion { get => _dispersion; set { if (_dispersion != value) { _dispersion = value; OnPropertyChanged(); } } }
 
         private double _lo = 0;
-        public double Lo
-        {
-            get => _lo;
-            set
-            {
-                if (_lo != value)
-                {
-                    _lo = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Lo { get => _lo; set { if (_lo != value) { _lo = value; OnPropertyChanged(); } } }
 
         private double _hi = 0;
-        public double Hi
-        {
-            get => _hi;
-            set
-            {
-                if (_hi != value)
-                {
-                    _hi = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public double Hi { get => _hi; set { if (_hi != value) { _hi = value; OnPropertyChanged(); } } }
 
         public override Wiener Clone()
         {
-            Wiener n = new()
-            {
-                Seed = this.Seed,
-                Random = (Seed == string.Empty) ? new Random() : new Random(Seed.GetHashCode()),
-                Initial = this.Initial,
-                Trend = this.Trend,
-                Dispersion = this.Dispersion,
-                Lo = Lo,
-                Hi = Hi,
-            };
+            Wiener n = (Wiener)MemberwiseClone();
+            n.Random = MathUtilities.StartFastRandom(Seed);
             return n;
         }
         public bool Equals(Algorithm value)
@@ -603,19 +444,19 @@ namespace CMGWpf.Model
         public override void AppendXML(XmlDocument doc, XmlElement elem)
         {
             elem.SetAttribute("seed", Seed);
-            elem.SetAttribute("initial", Initial.ToString());
-            elem.SetAttribute("trend", Trend.ToString());
-            elem.SetAttribute("dispersion", Dispersion.ToString());
+            elem.SetAttribute("initialValue", Initial.ToString());
+            elem.SetAttribute("alpha", Trend.ToString());
+            elem.SetAttribute("sigma", Dispersion.ToString());
             elem.SetAttribute("lo", Lo.ToString());
             elem.SetAttribute("hi", Hi.ToString());
         }
         public override void LoadXML(XmlElement elem)
         {
             Seed = XMLFunctions.GetAttributeString(elem, "seed", string.Empty);
-            Random = (Seed == string.Empty) ? new Random() : new Random(Seed.GetHashCode());
-            Initial = XMLFunctions.GetAttributeDouble(elem, "initial", 0);
-            Trend = XMLFunctions.GetAttributeDouble(elem, "trend", 0);
-            Dispersion = XMLFunctions.GetAttributeDouble(elem, "dispersion", 0);
+            Random = MathUtilities.StartFastRandom(Seed);
+            Initial = XMLFunctions.GetAttributeDouble(elem, "initialValue", 0);
+            Trend = XMLFunctions.GetAttributeDouble(elem, "alpha", 0);
+            Dispersion = XMLFunctions.GetAttributeDouble(elem, "sigma", 0);
             Lo = XMLFunctions.GetAttributeDouble(elem, "lo", 0);
             Hi = XMLFunctions.GetAttributeDouble(elem, "hi", 0);
         }
@@ -631,8 +472,9 @@ namespace CMGWpf.Model
 
         public override double GetCurrentValue(double time, double _beat)
         {
+            if (time == 0 || (Trend == 0 && Dispersion == 0)) return Initial;
             double x = GaussianNoise.Get(Random, 0, Dispersion * Math.Sqrt(time));
-            double value = Math.Max(Math.Min(Initial + Trend * time + Dispersion * (time) * x, Hi), Lo);
+            double value = Math.Clamp(Initial + Trend * time + x, Lo, Hi);
             return value;
         }
         public override string ToString() => "Wiener";
@@ -642,7 +484,7 @@ namespace CMGWpf.Model
         public Tremolo() { }
         public double Speed { get; set; } = 0;
         public double Depth { get; set; } = 0;
-        public MODULATORTYPE WaveForm { get; set; } = MODULATORTYPE.NoModulator;
+        public MODULATORTYPE WaveForm { get; set; } = MODULATORTYPE.NOMODULATOR;
         public Tremolo Clone()
         {
             return (Tremolo)MemberwiseClone();
@@ -659,13 +501,13 @@ namespace CMGWpf.Model
         {
             elem.SetAttribute("speed", Speed.ToString());
             elem.SetAttribute("depth", Depth.ToString());
-            elem.SetAttribute("waveform", WaveForm.ToString());
+            elem.SetAttribute("waveForm", WaveForm.ToString());
         }
         public void LoadXML(XmlElement elem)
         {
             Speed = XMLFunctions.GetAttributeDouble(elem, "speed", 0);
             Depth = XMLFunctions.GetAttributeDouble(elem, "depth", 0);
-            string waveFormString = XMLFunctions.GetAttributeString(elem, "waveform", MODULATORTYPE.NoModulator.ToString());
+            string waveFormString = XMLFunctions.GetAttributeString(elem, "waveForm", MODULATORTYPE.NOMODULATOR.ToString());
             if (Enum.TryParse<MODULATORTYPE>(waveFormString, out var waveForm)) WaveForm = waveForm;
         }
         public double GetCurrentValue(double time)
@@ -673,12 +515,12 @@ namespace CMGWpf.Model
             double speedHz = Speed / 1000;
             double value = WaveForm switch
             {
-                MODULATORTYPE.NoModulator => ModulatorFunctions.NoModulator(time, 0, speedHz, Depth, 0),
-                MODULATORTYPE.Sine => ModulatorFunctions.Sine(time, 0, speedHz, Depth, 0),
-                MODULATORTYPE.Square => ModulatorFunctions.Square(time, 0, speedHz, Depth, 0),
-                MODULATORTYPE.Triangle => ModulatorFunctions.Triangle(time, 0, speedHz, Depth, 0),
-                MODULATORTYPE.AscendingSawTooth => ModulatorFunctions.AscendingSawTooth(time, 0, speedHz, Depth, 0),
-                MODULATORTYPE.DescendingSawTooth => ModulatorFunctions.DescendingSawTooth(time, 0, speedHz, Depth, 0),
+                MODULATORTYPE.NOMODULATOR => ModulatorFunctions.NoModulator(time, 0, speedHz, Depth, 0),
+                MODULATORTYPE.SINE => ModulatorFunctions.Sine(time, 0, speedHz, Depth, 0),
+                MODULATORTYPE.SQUARE => ModulatorFunctions.Square(time, 0, speedHz, Depth, 0),
+                MODULATORTYPE.TRIANGLE => ModulatorFunctions.Triangle(time, 0, speedHz, Depth, 0),
+                MODULATORTYPE.ASCENDINGSAWTOOTH => ModulatorFunctions.AscendingSawTooth(time, 0, speedHz, Depth, 0),
+                MODULATORTYPE.DESCENDINGSAWTOOTH => ModulatorFunctions.DescendingSawTooth(time, 0, speedHz, Depth, 0),
                 _ => 0,
             };
             return value;
@@ -723,6 +565,7 @@ namespace CMGWpf.Model
         public override void AppendXML(XmlDocument doc, XmlElement elem)
         {
             elem.SetAttribute("seed", Seed);
+            elem.SetAttribute("InitialValue", Initial.ToString(CultureInfo.InvariantCulture));
             elem.SetAttribute("alpha", Alpha.ToString(CultureInfo.InvariantCulture));
             elem.SetAttribute("sigma", Sigma.ToString(CultureInfo.InvariantCulture));
             elem.SetAttribute("lo", Lo.ToString(CultureInfo.InvariantCulture));
@@ -732,6 +575,7 @@ namespace CMGWpf.Model
         {
             Seed = XMLFunctions.GetAttributeString(elem, "seed", string.Empty);
             Random = (Seed == string.Empty) ? new Random() : new Random(Seed.GetHashCode());
+            Initial = XMLFunctions.GetAttributeDouble(elem, "InitialValue", 0);
             Alpha = XMLFunctions.GetAttributeDouble(elem, "alpha", 0);
             Sigma = XMLFunctions.GetAttributeDouble(elem, "sigma", 0);
             Lo = XMLFunctions.GetAttributeDouble(elem, "lo", 0);

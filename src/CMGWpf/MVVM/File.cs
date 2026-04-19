@@ -288,13 +288,21 @@ namespace CMGWpf.MVVM
             vm.StatusMessages = [new Message { Text = $"new Track named T{uid} added.", Error = false }];
             vm.IsDirty = true;
         }
+        /// <summary>
+        /// Run the PlayEngine for playing the file. If a generator is provided, the PlayEngine will start up with that generator selected and the UI will be in play mode. If no generator is provided, the PlayEngine will start up with active generators and the UI will not be in play mode.
+        /// </summary>
+        /// <param name="generator"></param>
         public void Play(Generator? generator)
         {
-            PlayFunctions.PlayEngine.StartUp(generator, false);
+            PlayFunctions.PlayEngine.StartUp(generator, true, false);
         }
-        public void Report()
+        /// <summary>
+        /// Run the PlayEngine for reporting the file. If a generator is provided, the PlayEngine will start up with that generator selected and the UI will be in report mode. If no generator is provided, the PlayEngine will start up with active generators and the UI will not be in report mode.
+        /// </summary>
+        /// <param name="generator"></param>
+        public void Report(Generator? generator)
         {
-            // TODO
+            PlayFunctions.PlayEngine.StartUp(generator, false, false);
         }
         #endregion
     }

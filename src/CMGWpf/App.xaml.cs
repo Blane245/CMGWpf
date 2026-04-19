@@ -1,6 +1,8 @@
 ﻿using CMGWpf.Services;
 using CMGWpf.MVVM;
 using CMGWpf.View;
+using FFMpegCore;
+using System.IO;
 using System.Windows;
 
 namespace CMGWpf
@@ -110,6 +112,9 @@ namespace CMGWpf
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            // Configure FFmpeg path (check common installation locations)
+            ConfigureFFmpeg();
+
             // Initialize Jump List for recent files
             JumpListService.Instance.Initialize();
 
@@ -152,6 +157,50 @@ namespace CMGWpf
                     }
                 }
             };
+        }
+
+        private void ConfigureFFmpeg()
+        {
+            // Check common FFmpeg installation locations
+            string[] commonPaths = [
+                @"C:\ffmpeg\bin",
+                @"C:\Program Files\ffmpeg\bin",
+                @"C:\ProgramData\chocolatey\bin",
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-*\bin")
+            ];
+
+            foreach (var path in commonPaths)
+            {
+                // Handle wildcard in winget path
+                if (path.Contains('*'))
+                {
+                    var directory = Path.GetDirectoryName(path);
+                    if (directory != null && Directory.Exists(directory))
+                    {
+                        var pattern = Path.GetFileName(path);
+                        var matchingDirs = Directory.GetDirectories(directory, pattern.Replace("\\bin", ""));
+                        if (matchingDirs.Length > 0)
+                        {
+                            var ffmpegPath = Path.Combine(matchingDirs[0], "bin");
+                            if (Directory.Exists(ffmpegPath) && File.Exists(Path.Combine(ffmpegPath, "ffmpeg.exe")))
+                            {
+                                GlobalFFOptions.Configure(new FFOptions { BinaryFolder = ffmpegPath });
+                                System.Diagnostics.Debug.WriteLine($"FFmpeg found at: {ffmpegPath}");
+                                return;
+                            }
+                        }
+                    }
+                }
+                else if (Directory.Exists(path) && File.Exists(Path.Combine(path, "ffmpeg.exe")))
+                {
+                    GlobalFFOptions.Configure(new FFOptions { BinaryFolder = path });
+                    System.Diagnostics.Debug.WriteLine($"FFmpeg found at: {path}");
+                    return;
+                }
+            }
+
+            // If not found in common locations, assume it's in PATH
+            System.Diagnostics.Debug.WriteLine("FFmpeg not found in common locations, assuming it's in system PATH");
         }
     }
 

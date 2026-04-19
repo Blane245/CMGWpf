@@ -25,11 +25,6 @@ namespace CMGWpf.Panels.Algorithmic
             }
         }
 
-        public Func<double, string>? ValueUnits
-        {
-            get => (Func<double, string>?)GetValue(ValueUnitsProperty);
-            set => SetValue(ValueUnitsProperty, value);
-        }
 
         public static readonly DependencyProperty AmplitudeUnitsProperty = DependencyProperty.Register(
             nameof(AmplitudeUnits), typeof(Func<double, string>), typeof(SequencerPanel), new PropertyMetadata(null));
@@ -59,6 +54,11 @@ namespace CMGWpf.Panels.Algorithmic
             nameof(AmplitudeFormat), typeof(string), typeof(SequencerPanel), new PropertyMetadata(null));
         public string AmplitudeFormat { get => (string)GetValue(AmplitudeFormatProperty); set => SetValue(AmplitudeFormatProperty, value); }
 
+        public Func<double, string>? ValueUnits
+        {
+            get => (Func<double, string>?)GetValue(ValueUnitsProperty);
+            set => SetValue(ValueUnitsProperty, value);
+        }
         // Dependency properties for formatted values
         public string FormattedReflectPitch
         {

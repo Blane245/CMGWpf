@@ -167,8 +167,8 @@ namespace CMGWpf.PlayFunctions
                     Color = color
                 };
                 presetColors.Add(newOne);
+                i++;
             }
-            i++;
             return presetColors;
         }
 

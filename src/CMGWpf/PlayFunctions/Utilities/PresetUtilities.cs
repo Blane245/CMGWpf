@@ -6,6 +6,13 @@ namespace CMGWpf.PlayFunctions.Utilities
 {
     public static class PresetUtilities
     {
+        /// <summary>
+        /// Given a preset, a key (pitch), and a velocity (attack), get the SF generators for the voice (instrument) by merging the preset and instrument generators, taking into account globals, and additive versus absolute values. Only a subset of the generators are used by this application
+        /// </summary>
+        /// <param name="preset" type="Preset">A SF Preset</param>
+        /// <param name="key" type="int">The pitch to be selected (0-127)</param>
+        /// <param name="vel" type="int">The veoloity to be selected (1-127)</param>
+        /// <returns></returns>
         public static List<FinalVoice> BuildVoicesForPresetAtKeyVel(
             Preset preset,
             int key,
@@ -71,7 +78,6 @@ namespace CMGWpf.PlayFunctions.Utilities
 
                 final[op] = pv.Int16;
             }
-
             // merge instrument
             foreach (var (op, iv) in inst)
             {
@@ -93,7 +99,6 @@ namespace CMGWpf.PlayFunctions.Utilities
                     final[op] = iv.Int16; // instrument overrides
                 }
             }
-
             return final;
         }
 
@@ -131,6 +136,9 @@ namespace CMGWpf.PlayFunctions.Utilities
 
                 // Sample modes
                 GenOp.sampleModes => true,
+
+                // Pan
+                GenOp.pan => true,
 
                 _ => false
             };
@@ -305,18 +313,18 @@ namespace CMGWpf.PlayFunctions.Utilities
             GenOp.delayModEnv => true,
             GenOp.attackModEnv => true,
             GenOp.holdModEnv => true,
-            GenOp.decayModEnv => true,
+            GenOp.decayModEnv => false,   // Absolute (non-additive) per SF2 spec
             GenOp.sustainModEnv => true,
-            GenOp.releaseModEnv => true,
+            GenOp.releaseModEnv => false, // Absolute (non-additive) per SF2 spec
             GenOp.keyNumToModEnvHold => true,
             GenOp.keyNumToModEnvDecay => true,
 
             GenOp.delayVolEnv => true,
             GenOp.attackVolEnv => true,
             GenOp.holdVolEnv => true,
-            GenOp.decayVolEnv => true,
-            GenOp.sustainVolEnv => true,
-            GenOp.releaseVolEnv => true,
+            GenOp.decayVolEnv => false,   // Absolute (non-additive) per SF2 spec
+            GenOp.sustainVolEnv => false, // Absolute (non-additive) per SF2 spec - sustain LEVEL, not time
+            GenOp.releaseVolEnv => false, // Absolute (non-additive) per SF2 spec
             GenOp.keyNumToVolEnvHold => true,
             GenOp.keyNumToVolEnvDecay => true,
 

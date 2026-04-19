@@ -32,12 +32,23 @@ namespace CMGWpf.Model.Generators
         public string Name { get; set; } = "G" + uid;
         public Track Parent { get; set; } = parent;
         // when the starttime changes update the stop time to maintain the duration of the generator
-        public double StartTime { get; set; } = 0;
-        public double StopTime { get; set; } = 0;
+        private double startTime = 0;
+        public double StartTime { 
+            get => startTime; 
+            set {
+                double duration = StopTime - startTime;
+                StopTime = value + duration;
+                startTime = value;
+            }
+        }
+        private double stopTime = 0;
+        public double StopTime { 
+            get => stopTime; 
+            set => stopTime = value; 
+        }
         public bool Mute { get; set; } = false;
         public int Position { get; set; } = 0;
         public bool firstTime = true;
-        public double startTime = 0;
 
         public static class GeneratorFactory
         {
@@ -55,6 +66,7 @@ namespace CMGWpf.Model.Generators
         }
         public abstract Generator Clone(Track parent);
         public virtual bool Equals(Generator value) => base.Equals(value);
+        public abstract double GetEndTime();
         public abstract CurrentValues GetCurrentValues(double time, double beats);
         public abstract void AppendXML(XmlDocument doc, XmlElement elem);
         public abstract Task LoadXML(XmlElement generatorElem, Track parent);
@@ -85,6 +97,10 @@ namespace CMGWpf.Model.Generators
         public new ObservableCollection<Message> Validate()
         {
             return base.Validate();
+        }
+        public override double GetEndTime()
+        {
+            return StopTime;
         }
         public override CurrentValues GetCurrentValues(double time, double beats)
         {

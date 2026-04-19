@@ -46,18 +46,12 @@ namespace CMGWpf.PlayFunctions.DSP
 
     public static class InstrumentSample
     {
-        private readonly record struct GainEnvelope
-        {
-            public required double Gain { get; init; }
-            public required double Time { get; init; }
-        }
         /// <summary>
         /// Given a note with its instrument characteristics, build the audio sample
         /// </summary>
-        /// <param name="parameters">All parameters needed to generate the instrument sample</param>
-        /// <returns>Stereo audio sample [left channel, right channel]</returns>
-        // Set to true to enable debug output from PlayEngine, false to disable
-        public static double[] Get(InstrumentSampleParameters parameters)
+        /// <param name="parameters" type="InstrumentSampleParameters">All parameters needed to generate the instrument sample</param>
+        /// <returns>Mono audio sample and the instrument source data with real time information TBD </returns>
+        public static (double[], InstrumentSource) Get(InstrumentSampleParameters parameters)
         {
             // Deconstruct parameters into local variables for easier access
             var duration = parameters.Duration;
@@ -100,7 +94,7 @@ namespace CMGWpf.PlayFunctions.DSP
             DebugLog.Write($"Loop: {sampleStartLoop}-{sampleEndLoop}");
             DebugLog.Write($"SampleRate: {inputSampleRate}Hz, OriginalPitch: {sampleOriginalPitch}, PitchCorrection: {samplePitchCorrection} cents");
 
-            Random random = new();
+            FastRandom random = MathUtilities.StartFastRandom(null);
 
             // Get the actual sample data from the SoundFont
             var waveData = soundFont!.WaveData;
@@ -134,6 +128,11 @@ namespace CMGWpf.PlayFunctions.DSP
             short sampleModes = voice.Generators.GetValueOrDefault(GenOp.sampleModes, Sf2Defaults.GetDefault(GenOp.sampleModes));
 
             DebugLog.Write($"=== Generator Values ===");
+            DebugLog.Write($"Raw Generator Dictionary Contents:");
+            foreach (var gen in voice.Generators)
+            {
+                DebugLog.Write($"  {gen.Key} = {gen.Value}");
+            }
             DebugLog.Write($"Envelope (tc): Delay={delayTc}, Attack={attackTc}, Hold={holdTc}, Decay={decayTc}, Release={releaseTc}");
             DebugLog.Write($"Envelope (s): Delay={delaySeconds:F3}, Attack={attackSeconds:F3}, Hold={holdSeconds:F3}, Decay={decaySeconds:F3}, Release={releaseSeconds:F3}");
             DebugLog.Write($"Attenuation: {initialAttenuationCb}cB -> {initialAttenuationGain:F3} gain");
@@ -157,7 +156,7 @@ namespace CMGWpf.PlayFunctions.DSP
             if (sampleModes == 1)
             {
                 loopStart = sampleStartLoop + startAddrsCoarseOffset * 32768 + startAddrOffset - sampleStart;
-                loopEnd = sampleEndLoop + endAddrsCoarseOffset * 32768 + endAddrOffset - sampleStart;
+                loopEnd = Math.Clamp(sampleEndLoop + endAddrsCoarseOffset * 32768 + endAddrOffset - sampleStart, loopStart, instrumentSample.Length);
                 loop = loopEnabled;
                 loopLength = loopEnd - loopStart;
             }
@@ -184,9 +183,14 @@ namespace CMGWpf.PlayFunctions.DSP
                 return gain * Math.Pow(10, -dB / 20.0);
             }
             ;
+            // Calculate sustain gain with clamped attenuation to handle extreme SoundFont values
+            // SustainVolEnv is in centibels (cB): 10 cB = 1 dB attenuation from peak
+            // Clamp to max 10 dB attenuation to prevent effectively silent sustain levels
+            //double sustainAttenuationDb = Math.Min(sustainVolEnv / 10.0, 10.0);
             double sustainGain = Attenuate(volumeGain * initialAttenuationGain, sustainVolEnv / 10.0);
 
             DebugLog.Write($"=== Calculated Gains ===");
+            DebugLog.Write($"SustainVolEnv: {sustainVolEnv} cB ({sustainVolEnv / 10.0:F1} dB raw");
             DebugLog.Write($"Cents: Start: {startCents:F2} End: {endCents:F4}");
             DebugLog.Write($"Loop: {loop}, Start: {loopStart} End: {loopEnd}, Sample End: {sampleEnd - sampleStart}");
             DebugLog.Write($"VolumeDb: {volumeDb:F2}dB -> VolumeGain: {volumeGain:F4}");
@@ -195,14 +199,14 @@ namespace CMGWpf.PlayFunctions.DSP
             DebugLog.Write($"Sustain Gain: {sustainGain:F4}");
             DebugLog.Write($"Envelope times - Delay end:{delayEnd:F3}, Attack end:{attackEnd:F3}, Hold end:{holdEnd:F3}, Decay end:{decayEnd:F3}, NoteEnd:{noteEnd:F3}, ReleaseEnd:{releaseEnd:F3}");
 
-            GainEnvelope[] envelope;
+            GainEnvelope[] envelope = [];
             // there are several special case based on when the note ends relative to the other parts of the envelope
             double noteEndGain;
             // the envelope always starts at 0,0
             envelope = [
                 new GainEnvelope { Gain = 0, Time = 0 },
                 ];
-            if (noteEnd < delayEnd) return []; // the output will be all 0s, which is silence
+            if (noteEnd < delayEnd) return ([], new InstrumentSource()); // the output will be all 0s, which is silence
             else if (noteEnd < attackEnd)  // there is a delay and a partial attack phase and maybe a release
             {
                 noteEndGain = Interpolation.Linear(noteEnd, delayEnd, attackEnd, 0, 1) * volumeGain * initialAttenuationGain;
@@ -237,9 +241,10 @@ namespace CMGWpf.PlayFunctions.DSP
                 }
             }
 
-            // the sample will entend from 0 to releaseEnd
+            // the sample will extend from 0 to releaseEnd
             int totalSamples = (int)Math.Ceiling(outputSampleRate * releaseEnd);
             double[] finalSamples = new double[totalSamples]; // Single channel output.
+            for (int i = 0; i < finalSamples.Length; i++) finalSamples[i] = 0; // initialize to silence
             DebugLog.Write($"Total samples={totalSamples}, base resampling ratio={baseRatio}, startcents={startCents}, endcents={endCents}");
 
             DebugLog.Write($"=== Gain Envelope ({envelope.Length} points) ===");
@@ -248,7 +253,28 @@ namespace CMGWpf.PlayFunctions.DSP
                 DebugLog.Write($"  [{idx}] Time: {envelope[idx].Time:F3}s, Gain: {envelope[idx].Gain:F4}");
             }
 
-            // we should now have a complete gain envelope
+            // we should now have a complete gain envelope. Build the Instrument Source
+            InstrumentSource source = new InstrumentSource();
+            // NOTE: start and stop times must be set by the caller as this routine has no knowledge of them
+            source.Generator = null; // deferred to caller
+            source.StartTime = 0; // deferred to caller
+            source.StopTime= 0; // deferred to caller
+            source.SoundFontName = ""; // deferred to caller
+            source.PresetName = ""; // deferred to caller
+            source.Name = ""; // deferred to caller
+            source.StartPitch = startPitch;
+            source.EndPitch = endPitch;
+            source.LoopEnabled = loop;
+            source.LoopStart = loopStart;
+            source.LoopEnd = loopEnd;
+            source.RootKey = rootKey;
+            source.StartCents = startCents;
+            source.EndCents = endCents;
+            source.SampleRate = inputSampleRate;
+            source.SampleCount = totalSamples;
+            source.AttackEnabled = attackEnabled;
+            source.Envelope = envelope;
+
 
             // Now we are ready to starting processing the instrument sample. The main loop here is through the output samples. At each step, it is necessary to determine which instrument sample is being addressed. That is determined based on factors including the base sample ratio, tone tuning, application of glissando and vibrato, and looping.
 
@@ -267,6 +293,7 @@ namespace CMGWpf.PlayFunctions.DSP
                 double currentVibrato = vibrato.GetCurrentValue(t);
                 double pitchRatio = Math.Pow(2, (currentCents + currentVibrato) / 1200.0); // the time cents to seconds function in double precision
                 double effectiveRatio = (pitchRatio / baseRatio);
+                //double effectiveRatio = (baseRatio * pitchRatio);
 
                 // now we can calculate the current position in the instrument sample data based on the effective ratio and the previous position. The effective ratio will determine how quickly we move through the instrument sample data, which will affect the pitch of the output. If the effective ratio is greater than 1, we will move through the instrument sample data faster, which will result in a higher pitch. If it is less than 1, we will move through the instrument sample data slower, which will result in a lower pitch.
                 instrumentSampleIndex += effectiveRatio;
@@ -278,7 +305,7 @@ namespace CMGWpf.PlayFunctions.DSP
                     instrumentSampleIndex = inputPosition;
                     //DebugLog.Write($"Looping at time={t}, instrument sample index={instrumentSampleIndex}, inputPosition={inputPosition}, excess={excess}, loopLength={loopLength}");
                 }
-                else if (!loop && inputPosition >= instrumentSample.Length) return finalSamples; // if we are not looping and the current index is greater than the sample end, we need to stop processing samples because we have reached the end of the sample data. The rest of the output samples will remain 0, which is silence.
+                else if (!loop && inputPosition >= instrumentSample.Length) return (finalSamples, source); // if we are not looping and the current index is greater than the sample end, we need to stop processing samples because we have reached the end of the sample data. The rest of the output samples will remain 0, which is silence.
 
                 // for better precision, use linear interpolation to get the sample value from the instrument sample data based on the current position. This will help to reduce artifacts and create a smoother sound, especially when the effective ratio is not an integer and we are reading between samples in the instrument sample data. The interpolation will be done between the two samples that are closest to the current position, which are determined by taking the floor of the current position to get the index of the first sample, and then using the fractional part of the current position to interpolate between that sample and the next one. If we are looping and we need to read beyond the loop end, we will wrap around to the loop start for both samples used in interpolation.
                 int index = (int)Math.Floor(inputPosition);
@@ -295,7 +322,7 @@ namespace CMGWpf.PlayFunctions.DSP
                 if (noiseEnabled && noiseFrequency > 0 && noiseAmplitude > 0)
                 {
                     double noise = GaussianNoise.Get(random, 0, noiseFrequency);
-                    sample += noiseAmplitude * Math.Sin(2 * Math.PI * (noiseFrequency + noise) * t) / (1 + noiseAmplitude);
+                    sample += noiseAmplitude * MathUtilities.Sin(2 * Math.PI * (noiseFrequency + noise) * t) / (1 + noiseAmplitude);
                 }
                 if (t >= envelope[iEnvelope].Time && iEnvelope < maxEnvelope)
                 {
@@ -310,7 +337,7 @@ namespace CMGWpf.PlayFunctions.DSP
             }
 
             // oh my gosh, I think I got it all. 
-            return finalSamples;
+            return (finalSamples, source);
         }
     }
 }

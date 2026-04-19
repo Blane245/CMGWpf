@@ -13,47 +13,47 @@ namespace CMGWpf.PlayFunctions
         {
             InitializeComponent();
             Loaded += PlayDialog_Loaded;
-            Closing += PlayDialog_Closing;
-        }
-
-        private void PlayDialog_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
-        {
         }
         private void Cancel_Click(object? sender, RoutedEventArgs e)
         {
+            FileViewModel.Instance.StatusMessages = [new Types.Message() { Text = "Play complete.", Error = false }];
             Close();
         }
         private void PlayDialog_Loaded(object sender, RoutedEventArgs e)
         {
-            GlobalService.Instance.StatusMessages.Clear();
-            double displayWidth = SizeService.Instance.DisplayWidth;
-            double displayHeight = SizeService.Instance.BodyHeight;
-            double totalDuration = PlayViewModel.Instance.PlayDuration;
-
-            // Calculate base canvas width, then add viewport width so we can scroll until content reaches left edge
-            double baseWidth = SoundRollBuilder.CalculateCanvasWidth(totalDuration, displayWidth);
-            double viewportWidth = SoundRollScrollViewer.ViewportWidth;
-            SoundRollCanvas.Width = baseWidth + viewportWidth; // Add viewport width for extra scroll space
-
-            SoundRollCanvas.Height = SoundRollBuilder.CalculateCanvasHeight(displayHeight);
-            double canvasTime = 60 * baseWidth / displayWidth; // Use base width for time calculation
-            SoundRollBuilder.BuildGrid(SoundRollCanvas, canvasTime);
-            PlayViewModel.Instance.SoundRollWidth = baseWidth; // Store base width, not total width
-            SoundRollBuilder.BuildFixedGrid(SoundRollFixedCanvas, SoundRollCanvas.Height);
-            SoundRollBuilder.AddInstrumentsToCanvas(SoundRollCanvas, PlayViewModel.Instance.PresetColors);
-
-            // Subscribe to scroll position changes
-            PlayViewModel.Instance.PropertyChanged += (s, args) =>
+            if (DataContext is PlayViewModel vm)
             {
-                if (args.PropertyName == nameof(PlayViewModel.Instance.CurrentPlayPosition))
-                {
-                    UpdateSoundRollPosition();
-                }
-            };
+                vm.Messages = [];
+                GlobalService.Instance.StatusMessages.Clear();
+                double displayWidth = SizeService.Instance.DisplayWidth;
+                double displayHeight = SizeService.Instance.BodyHeight;
+                double totalDuration = PlayViewModel.Instance.PlayDuration;
 
-            // set the play/pause mode to not playing
-            if (DataContext is PlayViewModel vm) vm.IsPlaying = false;
-            
+                // Calculate base canvas width, then add viewport width so we can scroll until content reaches left edge
+                double baseWidth = SoundRollBuilder.CalculateCanvasWidth(totalDuration, displayWidth);
+                double viewportWidth = SoundRollScrollViewer.ViewportWidth;
+                SoundRollCanvas.Width = baseWidth + viewportWidth; // Add viewport width for extra scroll space
+
+                SoundRollCanvas.Height = SoundRollBuilder.CalculateCanvasHeight(displayHeight);
+                double canvasTime = 60 * baseWidth / displayWidth; // Use base width for time calculation
+                SoundRollBuilder.BuildGrid(SoundRollCanvas, canvasTime);
+                PlayViewModel.Instance.SoundRollWidth = baseWidth; // Store base width, not total width
+                SoundRollBuilder.BuildFixedGrid(SoundRollFixedCanvas, SoundRollCanvas.Height);
+                SoundRollBuilder.AddInstrumentsToCanvas(SoundRollCanvas, PlayViewModel.Instance.PresetColors);
+
+                // Subscribe to scroll position changes
+                PlayViewModel.Instance.PropertyChanged += (s, args) =>
+                {
+                    if (args.PropertyName == nameof(PlayViewModel.Instance.CurrentPlayPosition))
+                    {
+                        UpdateSoundRollPosition();
+                    }
+                };
+
+                // set the play/pause mode to not playing
+                vm.IsPlaying = false;
+            }
+
         }
 
         private void UpdateSoundRollPosition()

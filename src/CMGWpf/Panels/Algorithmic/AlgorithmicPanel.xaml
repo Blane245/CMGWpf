@@ -26,69 +26,69 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         </Grid.ColumnDefinitions>
             <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="SoundFont:"/>
-                <ComboBox ItemsSource="{Binding SoundFontFileNames}" SelectedValue="{Binding AlgorithmicSoundFontFileName, Mode=TwoWay}" />
+                <ComboBox ItemsSource="{Binding SoundFontFileNames}" SelectedValue="{Binding AlgorithmicSoundFontFileName, Mode=TwoWay}" ToolTip="Select a SoundFont file" />
                 <Label Content="Preset:"/>
-                <ComboBox ItemsSource="{Binding AlgorithmicPresetNames}" SelectedItem="{Binding AlgorithmicPresetName, Mode=TwoWay}" />
+                <ComboBox ItemsSource="{Binding AlgorithmicPresetNames}" SelectedItem="{Binding AlgorithmicPresetName, Mode=TwoWay}" ToolTip="Select a preset from the chosen SoundFont" />
             </StackPanel>
             <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
                 <Label Content="Looping?:"/>
-            <CheckBox Content="" IsChecked="{Binding AlgorithmicGenerator.IsLooping}" />
+            <CheckBox Content="" IsChecked="{Binding AlgorithmicGenerator.IsLooping}" ToolTip="Enable or disable looping for the algorithmic generator" />
             <Label Content="Attack?:"/>
-            <CheckBox Content=""  IsChecked="{Binding AlgorithmicGenerator.AttackEnabled}" />
+            <CheckBox Content=""  IsChecked="{Binding AlgorithmicGenerator.AttackEnabled}" ToolTip="Enable or disable attack for the algorithmic generator" />
             <Label Content="Microtones?:"/>
-            <CheckBox Content=""  IsChecked="{Binding AlgorithmicGenerator.MicrotonesEnabled}" />
+            <CheckBox Content=""  IsChecked="{Binding AlgorithmicGenerator.MicrotonesEnabled}" ToolTip="Enable or disable microtones for the algorithmic generator" />
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="Noise:"/>
                 <Label Content="Seed:"/>
-                <TextBox TextWrapping="NoWrap" Text="{Binding AlgorithmicGenerator.NoiseSeed}" />
-                <Button Content="New Seed" Background="Green" Foreground="White" Command="{Binding NoiseSeedCommand}" CommandParameter="{Binding AlgorithmicGenerator}"/>
+                <TextBox TextWrapping="NoWrap" Text="{Binding AlgorithmicGenerator.NoiseSeed}" ToolTip="Enter the seed for the noise generator" />
+                <Button Content="New Seed" Background="Green" Foreground="White" Command="{Binding NoiseSeedCommand}" CommandParameter="{Binding AlgorithmicGenerator}" ToolTip="Generate a new seed for the noise generator"/>
                 <Label Content="Level (+-10dB):"/>
-                <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="-10" Maximum="10" Increment="1" Value="{Binding AlgorithmicGenerator.NoiseAmplitude}"/>
+                <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="-10" Maximum="10" Increment="1" Value="{Binding AlgorithmicGenerator.NoiseAmplitude}" ToolTip="Set the amplitude level for the noise generator relative to the current volume"/>
                 <Label Content="Frequency(Hz):"/>
-                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="1000" Increment="0.001" Value="{Binding AlgorithmicGenerator.NoiseFrequency}" />
+                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="1000" Increment="0.001" Value="{Binding AlgorithmicGenerator.NoiseFrequency}" ToolTip="Set the frequency for the noise generator"/>
             </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                 <Label Content="Reverb:" FontStyle="Italic"/>
-                <Label Content="Duration (sec)"/>
-                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.01" Value="{Binding AlgorithmicGenerator.ReverbDuration}"/>
-                <Label Content="Decay (sec)"/>
-                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.01" Value="{Binding AlgorithmicGenerator.ReverbDecay}"/>
+                <Label Content="Delay (msec)"/>
+                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="1" Value="{Binding AlgorithmicGenerator.ReverbDelay}" ToolTip="Set the delay time for the reverb effect. Zero means no reverb"/>
+                <Label Content="Decay (1-10 dB)"/>
+                <xctk:IntegerUpDown Margin="5,0,0,0" Minimum="1" Maximum="10" Value="{Binding AlgorithmicGenerator.ReverbDecay}" ToolTip="Set the decay level for the reverb effect"/>
             </StackPanel>
 
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="Tremolo:" FontStyle="Italic"/>
                 <Label Content="Speed (Mhz)"/>
-                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding AlgorithmicGenerator.Tremolo.Speed}"/>
+                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding AlgorithmicGenerator.Tremolo.Speed}" ToolTip="Set the speed for the tremolo effect"/>
                 <Label Content="Depth (dB)"/>
-                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.1" Value="{Binding AlgorithmicGenerator.Tremolo.Depth}"/>
+                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.1" Value="{Binding AlgorithmicGenerator.Tremolo.Depth}" ToolTip="Set the depth for the tremolo effect"/>
                 <Label Content="Modulator"/>
-                <ComboBox ItemsSource="{Binding ModulatorTypes}" SelectedItem="{Binding AlgorithmicGenerator.Tremolo.WaveForm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True"/>
+                <ComboBox ItemsSource="{Binding ModulatorTypes}" SelectedItem="{Binding AlgorithmicGenerator.Tremolo.WaveForm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="Select the modulator waveform for the tremolo effect"/>
             </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
                 <Label Content="Vibrato:" FontStyle="Italic"/>
                 <Label Content="Speed (Mhz)"/>
-                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding AlgorithmicGenerator.Vibrato.Speed}"/>
+                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding AlgorithmicGenerator.Vibrato.Speed}" ToolTip="Set the speed for the vibrato effect"/>
                 <Label Content="Depth (cents)"/>
-                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="0.1" Value="{Binding AlgorithmicGenerator.Vibrato.Depth}"/>
+                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="0.1" Value="{Binding AlgorithmicGenerator.Vibrato.Depth}" ToolTip="Set the depth for the vibrato effect"/>
                 <Label Content="Modulator"/>
-                <ComboBox ItemsSource="{Binding ModulatorTypes}" SelectedItem="{Binding AlgorithmicGenerator.Vibrato.WaveForm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <ComboBox ItemsSource="{Binding ModulatorTypes}" SelectedItem="{Binding AlgorithmicGenerator.Vibrato.WaveForm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Select the modulator waveform for the vibrato effect"/>
             </StackPanel>
             <StackPanel Grid.Row="3" Grid.Column="0"  Orientation="Horizontal">
                 <Label Content="Measure:" FontStyle="Italic"/>
                 <Label Content="Length (beats)"/>
-                <xctk:IntegerUpDown Minimum="2" Maximum="100" Increment="1" Value="{Binding AlgorithmicGenerator.MeasureLength}"/>
+                <xctk:IntegerUpDown Minimum="2" Maximum="100" Increment="1" Value="{Binding AlgorithmicGenerator.MeasureLength}" ToolTip="Set the length of the measure in beats"/>
                 <Label Content="On Beats (beats)"/>
-                <xctk:IntegerUpDown Minimum="2" Maximum="{Binding AlgorithmicGenerator.MeasureLength}" Increment="1" Value="{Binding AlgorithmicGenerator.BeatCount}"/>
-                <Label Content="Beat Shift (beats)"/>
-                <xctk:IntegerUpDown Minimum="0" Maximum="{Binding AlgorithmicGenerator.MeasureLength}" Increment="1" Value="{Binding AlgorithmicGenerator.OffsetSequence}"/>
+            <xctk:IntegerUpDown Minimum="2" Maximum="{Binding AlgorithmicGenerator.MeasureLength}" Increment="1" Value="{Binding AlgorithmicGenerator.BeatCount}" ToolTip="Set the number of beats that are active in the measure [1 - Measure Length]"/>
+            <Label Content="Beat Shift (beats)"/>
+                <xctk:IntegerUpDown Minimum="0" Maximum="{Binding AlgorithmicGenerator.MeasureLength}" Increment="1" Value="{Binding AlgorithmicGenerator.OffsetSequence}" ToolTip="Set the beat shift for the active notes of the measure"/>
             </StackPanel>
             <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
                 <Label Content="Octave:" FontStyle="Italic"/>
                 <Label Content="Note Count (1-12)"/>
-                <xctk:IntegerUpDown Minimum="1" Maximum="12" Increment="1" Value="{Binding AlgorithmicGenerator.NoteCount}"/>
+                <xctk:IntegerUpDown Minimum="1" Maximum="12" Increment="1" Value="{Binding AlgorithmicGenerator.NoteCount}" ToolTip="Set the number of active notes in the octave"/>
                 <Label Content="Shift (tones)"/>
-                <xctk:IntegerUpDown Minimum="1" Maximum="11" Increment="1" Value="{Binding AlgorithmicGenerator.OffsetNotes}"/>
+                <xctk:IntegerUpDown Minimum="1" Maximum="11" Increment="1" Value="{Binding AlgorithmicGenerator.OffsetNotes}" ToolTip="Set the note shift of the active octave notes"/>
             </StackPanel>
         <Border Grid.Row="4" Grid.ColumnSpan="2" Height="1" Background="Black"/>
         <ScrollViewer Grid.Row="5" Grid.ColumnSpan="2"  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">

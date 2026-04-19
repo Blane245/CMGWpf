@@ -15,7 +15,7 @@
         WindowState="Maximized"
         ResizeMode="NoResize"
         AllowsTransparency="False"
-        Title="Play" Height="450" Width="800"
+        Title="Play" Height="450" Width="1000"
         >
     <Window.Resources>
         <ResourceDictionary Source="/Styles/PlayDialogStyles.xaml"/>
@@ -32,6 +32,7 @@
             <RowDefinition Height="40"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="150"/>
         </Grid.RowDefinitions>
         <panels:CustomWindowChrome Grid.Row="0"
                                      WindowTitle="{Binding PlayTitle}"
@@ -97,6 +98,16 @@
                     <Line X1="{Binding MaxSignalLevelPixels[1]}" Y1="0" X2="{Binding MaxSignalLevelPixels[1]}" Y2="30" Stroke="Black" StrokeThickness="1" />
                 </Grid>
             </Border>
+            <Button Content="{materialIcons:MaterialIconExt Kind=MicrophoneOutline}" 
+                    Command="{Binding RecordAudioCommand}" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    ToolTip="Record Audio"
+                    Margin="5"/>
+            <Button Content="{materialIcons:MaterialIconExt Kind=VideoOutline}" 
+                    Command="{Binding RecordVideoCommand}" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    ToolTip="Record Video (Audio + Soundroll)"
+                    Margin="5"/>
         </StackPanel>
         <Grid Grid.Row="2" Background="LightGray" Margin="10,0,0,0">
             <ScrollViewer x:Name="SoundRollScrollViewer"
@@ -112,5 +123,6 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"/>
         </Grid>
+        <panels:MessagePanel Grid.Row="3" Source="{Binding Messages}"/>
     </Grid>
 </Window>

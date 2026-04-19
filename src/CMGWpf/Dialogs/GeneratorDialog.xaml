@@ -7,6 +7,7 @@
         xmlns:local="clr-namespace:CMGWpf.Dialogs"
         xmlns:panels="clr-namespace:CMGWpf.Panels"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
+        xmlns:services="clr-namespace:CMGWpf.Services"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         d:DataContext="{d:DesignInstance Type=viewmodel:GeneratorViewModel, IsDesignTimeCreatable=False}"
         mc:Ignorable="d"
@@ -26,42 +27,50 @@
     </shell:WindowChrome.WindowChrome>
     <Grid Margin="0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
             <!-- chrome -->
+            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=ChromeHeight}"/>
+            <!-- scrollable content -->
             <RowDefinition Height="Auto"/>
-            <!-- name, start and stop time -->
+            <!-- buttons and message area -->
             <RowDefinition Height="Auto"/>
-            <!-- generator-specific panel -->
-            <RowDefinition Height="Auto"/>
-            <!-- messages -->
         </Grid.RowDefinitions>
         <panels:CustomWindowChrome Grid.Row="0"
                                      WindowTitle="{Binding GeneratorDialogTitle}"
                                    ChromeBackground="DarkCyan"
-                                    >
-        </panels:CustomWindowChrome>
-        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Name: "/>
-                <TextBox x:Name="GeneratorName" Text="{Binding NewGeneratorName}" ToolTip="Enter a new unique name for the generator."/>
-                <Label Content="Start Time (sec): "/>
-                <xctk:DoubleUpDown x:Name="StartTime" FormatString="F2" Value="{Binding NewStartTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the start time of the generator. TBD A change to this will cause the stop time to change maintaing the generator's duration."/>
-                <Label Content="Stop Time (sec): "/>
-                <xctk:DoubleUpDown x:Name="StopTime" FormatString="F2" Value="{Binding UIGenerator.StopTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the stop time of the generator."/>
-            </StackPanel>
-        </Border>
-        <Border Grid.Row="2" BorderBrush="Black" BorderThickness="1" Padding="5">
-            <ContentControl x:Name="GeneratorSpecificPanel" Content="{Binding GeneratorPanel}" />
-        </Border>
-        <Border Grid.Row="3" BorderBrush="Black" BorderThickness="1" Padding="5">
-            <StackPanel Orientation="Vertical">
-            <StackPanel Orientation="Horizontal">
-                <Button Width="50" Content="OK" Command="{Binding GeneratorSubmitCommand}" Margin="0"/>
-                <Button Width="50" Content="Play" Command="{Binding GeneratorPlayCommand}" CommandParameter="{Binding UIGenerator}" Margin="5,0,0,0"/>
-                <Button Width="50" Content="Cancel" Click="Cancel_Click" Margin="5,0,0,0"/>
-            </StackPanel>
-                <panels:GeneratorErrorsPanel/>
-            </StackPanel>
-        </Border>
-    </Grid>
+                                    />
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" 
+                      MaxHeight="{Binding Source={x:Static services:SizeService.Instance}, Path=DialogHeight}">
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <!-- name, start and stop time -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- generator-specific panel -->
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Padding="0">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Name: "/>
+                        <TextBox x:Name="GeneratorName" Text="{Binding NewGeneratorName}" ToolTip="Enter a new unique name for the generator."/>
+                        <Label Content="Start Time (sec): "/>
+                        <xctk:DoubleUpDown x:Name="StartTime" FormatString="F2" Value="{Binding UIGenerator.StartTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the start time of the generator. A change to this will cause the stop time to change maintaing the generator's duration."/>
+                        <Label Content="Stop Time (sec): "/>
+                        <xctk:DoubleUpDown x:Name="StopTime" FormatString="F2" Value="{Binding UIGenerator.StopTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the stop time of the generator."/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="0">
+                    <ContentControl x:Name="GeneratorSpecificPanel" Content="{Binding GeneratorPanel}" />
+                </Border>
+            </Grid>
+        </ScrollViewer>
+        <Border Grid.Row="2" BorderBrush="Black" BorderThickness="1" Padding="0">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Width="50" Content="OK" Command="{Binding GeneratorSubmitCommand}" Margin="0"/>
+                        <Button Width="50" Content="Play" Command="{Binding GeneratorPlayCommand}" CommandParameter="{Binding UIGenerator}" Margin="5,0,0,0"/>
+                        <Button Width="50" Content="Cancel" Click="Cancel_Click" Margin="5,0,0,0"/>
+                    </StackPanel>
+                    <panels:GeneratorErrorsPanel/>
+                </StackPanel>
+            </Border>
+            </Grid>
 </Window>

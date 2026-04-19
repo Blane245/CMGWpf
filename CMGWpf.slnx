@@ -1,8 +1,3 @@
 <Solution>
-  <Folder Name="/src/" />
-  <Folder Name="/tests/">
-    <Project Path="tests/CMGWpf.UITests/CMGWpf.UITests.csproj" />
-  </Folder>
   <Project Path="src\CMGWpf\CMGWpf.csproj" />
-  <Project Path="tests\CMGWpf.UnitTests\CMGWpf.UnitTests.csproj" />
 </Solution>

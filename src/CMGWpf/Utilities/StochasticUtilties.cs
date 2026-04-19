@@ -1,7 +1,5 @@
 ﻿using CMGWpf.Model.Generators;
 using System.Diagnostics;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace CMGWpf.Utilities
 {
@@ -11,7 +9,7 @@ namespace CMGWpf.Utilities
         public static Composition BuildComposition(Stochastic generator)
         {
             generator.InitializeComposition();
-            Random rN = generator.CompositionRn;
+            FastRandom rN = generator.CompositionRn;
             generator.CompositionRn = rN;
             int nColumns = generator.Voices.Count;
             int nRows = generator.NumberOfTimeCells;
@@ -166,7 +164,7 @@ namespace CMGWpf.Utilities
         }
 
         // create an array of the integerfrom 0 to n-1 and randomize it
-        private static int[] RandomizeIntegers(int n, Random rN)
+        private static int[] RandomizeIntegers(int n, FastRandom rN)
         {
             int[] arr = new int[n]; for (int i = 0; i < n; i++) { arr[i] = i; }
             for (int i = arr.Length - 1; i > 0; i--)
@@ -178,7 +176,7 @@ namespace CMGWpf.Utilities
         }
 
         // randomize an existing array of integers
-        private static int[] RandomizeIntegers(int[] arr, Random rN)
+        private static int[] RandomizeIntegers(int[] arr, FastRandom rN)
         {
             int[] result = (int[])arr.Clone();
             for (int i = result.Length - 1; i > 0; i--)

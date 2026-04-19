@@ -69,7 +69,8 @@
                 Maximum="{Binding DataContext.Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
                 Increment="{Binding DataContext.Increment, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 ValueFormat="{Binding DataContext.ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                AmplitudeFormat="{Binding DataContext.AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                AmplitudeFormat="{Binding DataContext.AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                />
         </DataTemplate>
     </UserControl.Resources>
     <Grid>

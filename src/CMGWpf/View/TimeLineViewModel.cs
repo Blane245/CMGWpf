@@ -139,11 +139,27 @@ namespace CMGWpf.View
             }
 
             // draw the major tick labels
+            TimeFormat timeFormat = TimeFormats[scale.Format];
             for (int i = 0; i <= ticks.majorTickCount; i++)
             {
+                double timeValue = startTime + i * ticks.scaleExtent / ticks.majorTickCount;
+                string labelText;
+
+                if (timeFormat.Type == TIMEFORMATTYPE.Number)
+                {
+                    // Format as a number (seconds with decimal places)
+                    labelText = timeValue.ToString(timeFormat.Value);
+                }
+                else
+                {
+                    // Format as time (convert seconds to TimeSpan and format)
+                    TimeSpan ts = TimeSpan.FromSeconds(timeValue);
+                    labelText = FormatTimeSpan(ts, timeFormat.Value);
+                }
+
                 TextBlock label = new()
                 {
-                    Text = (startTime + i * ticks.scaleExtent / ticks.majorTickCount).ToString(ticks.labelFormat),
+                    Text = labelText,
                     FontSize = 10,
                     Foreground = Brushes.Black,
                     Width = ticks.labelSize,
@@ -491,6 +507,26 @@ namespace CMGWpf.View
                     generatorViewModel.UpdateColor();
                 }
             }
+        }
+
+        /// <summary>
+        /// Formats a TimeSpan according to custom time format strings
+        /// Supports formats: "0:00" (m:ss), "00:00" (mm:ss), "0:00:00" (h:mm:ss), "000:00:00" (hhh:mm:ss)
+        /// </summary>
+        private static string FormatTimeSpan(TimeSpan ts, string format)
+        {
+            int totalHours = (int)ts.TotalHours;
+            int minutes = ts.Minutes;
+            int seconds = ts.Seconds;
+
+            return format switch
+            {
+                "0:00" => $"{(int)ts.TotalMinutes}:{seconds:D2}",           // m:ss
+                "00:00" => $"{(int)ts.TotalMinutes:D2}:{seconds:D2}",       // mm:ss
+                "0:00:00" => $"{totalHours}:{minutes:D2}:{seconds:D2}",     // h:mm:ss
+                "000:00:00" => $"{totalHours:D3}:{minutes:D2}:{seconds:D2}", // hhh:mm:ss
+                _ => ts.ToString(@"hh\:mm\:ss")                              // fallback
+            };
         }
         #endregion   
     }

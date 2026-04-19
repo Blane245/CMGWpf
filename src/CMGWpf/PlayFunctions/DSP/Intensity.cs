@@ -8,13 +8,14 @@ namespace CMGWpf.PlayFunctions.DSP
 {
     public static class Intensity
     {
-        public static void Apply(double[] sample, INTENSITYTRANSITIONOPTION option, IntensityParameters parameters, Random Rn)
+        public static void Apply(double[] sample, INTENSITYTRANSITIONOPTION option, IntensityParameters parameters, FastRandom Rn)
         {
             double cycleTime = parameters.CycleTime;
             double deltaT = 1.0D / PlayTypes.SampleRate;
-            int sampleLength = sample.Length / 2;
-            double sampleDuration = sample.Length / sampleLength;
+            double sampleLength = sample.Length / 2;
+            double sampleDuration = sample.Length / PlayTypes.SampleRate;
             int nPoints = (int)Math.Round(sampleDuration / cycleTime);
+            if (nPoints == 0) return; // not enough sound duration to make one cycle
             // build the continuous probabilty arrays
             (var Nd, var Pd) = Probability.Continuous(nPoints, sampleDuration, sampleDuration / StochasticConstants.UNIT);
             if (Pd.Length <= 1) return; // duration or nPoints is probabilty too small

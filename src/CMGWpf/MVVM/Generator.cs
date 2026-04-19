@@ -34,6 +34,7 @@ namespace CMGWpf.MVVM
                     {
                         Generator newGenerator = vm.UIGenerator.Clone(generator.Parent);
                         newGenerator.Name = vm.NewGeneratorName;
+                        //newGenerator.StartTime = vm.NewStartTime;
                         generator.Parent.Generators[index] = newGenerator;
                         vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated successfully.", Error = false });
                         vm.IsDirty = true;
@@ -44,24 +45,26 @@ namespace CMGWpf.MVVM
                 {
                     Generator newGenerator = vm.UIGenerator.Clone(generator.Parent);
                     newGenerator.Name = vm.NewGeneratorName;
+                    //newGenerator.StartTime = vm.NewStartTime;
                     generator.Parent.Generators.Add(newGenerator);
                     vm.IsDirty = true;
                     vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated added.", Error = false });
-                    vm.ActiveGeneratorDialog!.Close();
-                    vm.ActiveGeneratorDialog = null;
                 }
                 else // this should not happen, but if it does, display an error
                 {
                     vm.Messages.Add(new Message { Text = $"SYSTEM ERROR: Invalid generator edit mode '{vm.Mode}'.", Error = true });
                     return;
                 }
+                if (vm.ActiveGeneratorDialog is GeneratorDialog gd) gd.userCancel = false;
                 vm.ActiveGeneratorDialog?.Close();
                 vm.ActiveGeneratorDialog = null;
+                vm.UIGenerator.Name = vm.NewGeneratorName;
+                //vm.UIGenerator.StartTime = vm.NewStartTime;
                 vm.UpdateGenerator(vm.UIGenerator);
+                //vm.NotifyGeneratorChanged(nameof(vm.Generator));
                 vm.NotifyTrackChanged();
-                vm.NotifyGeneratorChanged();
             }
-            
+
         }
         public void Delete()
         {
@@ -198,7 +201,7 @@ namespace CMGWpf.MVVM
         // This command causes the PlayEngine to startup with the current generator
         public void Play()
         {
-            PlayEngine.StartUp(generator, false);
+            PlayEngine.StartUp(generator, true, false);
         }
         #endregion
     }

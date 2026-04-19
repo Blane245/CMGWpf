@@ -2,8 +2,10 @@
 using CMGWpf.MVVM;
 using CMGWpf.PlayFunctions;
 using CMGWpf.Services;
+using CMGWpf.Types;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Windows;
 using static CMGWpf.Types.PlayTypes;
 
 namespace CMGWpf.View
@@ -151,6 +153,8 @@ namespace CMGWpf.View
                 return [MaxSignalLevels[0] * 75, MaxSignalLevels[1] * 75]; // Use left channel for visualization
             }
         }
+        private ObservableCollection<Message> messages = [];
+        public ObservableCollection<Message> Messages { get => messages; set { messages = value; OnPropertyChanged(); } }
         /// <summary>
         /// Call this from timer to update position without triggering seek
         /// </summary>
@@ -200,6 +204,9 @@ namespace CMGWpf.View
             set { audioProvider = value; OnPropertyChanged(); }
         }
         #endregion
+        #region Report Dialog Properties
+        public ObservableCollection<InstrumentSource> InstrumentSources { get; set; } = [];
+        #endregion
         #region Play Dialog Commands
         private RelayCommand<object>? _rewindCommand;
         public RelayCommand<object> RewindCommand =>
@@ -210,6 +217,12 @@ namespace CMGWpf.View
         private RelayCommand<PlayDialog>? _showVoicesCommand;
         public RelayCommand<PlayDialog> ShowVoicesCommand =>
             _showVoicesCommand ??= new RelayCommand<PlayDialog>(dialog => new PlayCommands(this).ShowVoicesToggle(dialog));
+        private RelayCommand<Window>? _recordAudioCommand;
+        public RelayCommand<Window> RecordAudioCommand =>
+            _recordAudioCommand ??= new RelayCommand<Window>(window => new PlayCommands(this).RecordAudio(window), canExecute => !IsPlaying);
+        private RelayCommand<Window>? _recordVideoCommand;
+        public RelayCommand<Window> RecordVideoCommand =>
+            _recordVideoCommand ??= new RelayCommand<Window>(window => new PlayCommands(this).RecordVideo(window), canExecute => !IsPlaying);
         #endregion
 
     }

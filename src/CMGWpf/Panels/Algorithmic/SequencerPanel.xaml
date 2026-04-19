@@ -41,7 +41,7 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1">
             <Button Content="Reload Sequences" Command="{Binding DataContext.ReloadSequencesCommand, RelativeSource={RelativeSource AncestorType=Window}}" Background="Green" Foreground="White"/>
-            <ComboBox ItemsSource="{Binding DataContext.NoteSequenceNames, RelativeSource={RelativeSource AncestorType=Window}}"  SelectedItem="{Binding DataContext.NewSequenceName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,0,0"/>
+            <ComboBox ItemsSource="{Binding DataContext.NoteSequenceNames, RelativeSource={RelativeSource AncestorType=Window}}"  SelectedItem="{Binding DataContext.SequencerName, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,0,0"/>
             <Button Content="View Sequence" Command="{Binding DataContext.ViewSequenceCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding }" Background="Green" Foreground="White"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="1">

@@ -1,7 +1,4 @@
-﻿using CMGWpf.View;
-using System.Windows;
-
-namespace CMGWpf.Services
+﻿namespace CMGWpf.Services
 {
     public class SizeService : ServiceBase
     {
@@ -28,6 +25,7 @@ namespace CMGWpf.Services
                 windowHeight = value; OnPropertyChanged();
                 bodyHeight = WindowHeight - ChromeHeight - TimeLineHeight - FooterHeight;
                 OnPropertyChanged(nameof(BodyHeight));
+                OnPropertyChanged(nameof(DialogHeight));
             }
         }
 
@@ -50,5 +48,10 @@ namespace CMGWpf.Services
         public double DisplayWidth { get => displayWidth; }
         private double bodyHeight = 0;
         public double BodyHeight { get => bodyHeight; }
+
+        /// <summary>
+        /// Gets the available height for dialog content (WindowHeight - ChromeHeight)
+        /// </summary>
+        public double DialogHeight => WindowHeight - ChromeHeight;
     }
 }

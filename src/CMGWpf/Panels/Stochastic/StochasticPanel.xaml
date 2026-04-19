@@ -25,7 +25,7 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Vertical">
-                <Label Content="Composition Parameters" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left"/>
+                <Label Content="Composition Parameters" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Ensemble:"/>
                     <ComboBox ItemsSource="{Binding Source={x:Static services:GlobalService.Instance}, Path=EnsembleNames}" SelectedValue="{Binding StochasticEnsembleName, Mode=TwoWay}" MinWidth="150" ToolTip="The name of the ensemble"/>
@@ -52,7 +52,7 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         <!-- The dynamics parameters -->
         <Grid Grid.Row="1">
             <StackPanel Orientation="Vertical">
-                <Label Content="Dynamics Parameters" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left"/>
+                <Label Content="Dynamics Parameters" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Sounds/sec:" VerticalAlignment="Center"/>
                     <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.01" Value="{Binding StochasticGenerator.Delta}" ToolTip="How many sounds each instrument section can play in a second" VerticalAlignment="Center"/>
@@ -61,36 +61,91 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                     <Label Content="Dynamics Seed:"/>
                     <Button Content="New Seed" Background="Green" Foreground="White" Command="{Binding DynamicsSeedCommand}" CommandParameter="{Binding StochasticGenerator}" VerticalAlignment="Center" ToolTip="Generate a new seed for the dynamics parameters to use"/>
                     <TextBox TextWrapping="NoWrap" Text="{Binding StochasticGenerator.DynamicsSeed}" MinWidth="100" VerticalAlignment="Center" ToolTip="The seed to use by dynamics algorithms. Blank will cause a new seed to be generatd each time the sounds are created for the composition." />
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="0" Grid.Column="0">
                             <Label Content="Intensity"/>
-                            <Label Content="Option:"/>
-                            <ComboBox ItemsSource="{Binding IntensityOptionTypes}" SelectedItem="{Binding StochasticGenerator.IntensityOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="The level at which intensity transition occurs"/>
-                            <Label Content="Transition"/>
-                            <ComboBox ItemsSource="{Binding IntensityTransitionOptionTypes}" SelectedItem="{Binding StochasticGenerator.IntensityOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="How transitions are made"/>
-                            <Label Content="Cycle Time(sec)"/>
-                            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100" Increment="0.1" Value="{Binding StochasticGenerator.IntensityParameters.CycleTime}" ToolTip="The average time that intensity transitions occur."/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1">
+                            <StackPanel Orientation="Horizontal">
+                            <Label Content="Scope Option: "/>
+                                <ComboBox ItemsSource="{Binding IntensityOptionTypes}" SelectedItem="{Binding StochasticGenerator.IntensityOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="The level at which intensity transition occurs"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="2">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Transition Option"/>
+                                <ComboBox ItemsSource="{Binding IntensityTransitionOptionTypes}" SelectedItem="{Binding StochasticGenerator.IntensityTransitionOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="How transitions are made"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="3">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Cycle Time (sec): "/>
+                                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100" Increment="0.1" Value="{Binding StochasticGenerator.IntensityParameters.CycleTime}" ToolTip="The average time that intensity transitions occur."/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="1" Grid.Column="0">
                             <Label Content="Pan"/>
-                            <Label Content="Option:"/>
-                            <ComboBox ItemsSource="{Binding PanOptionTypes}" SelectedItem="{Binding StochasticGenerator.PanOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="The level at which panning occurs"/>
-                            <Label Content="Method"/>
-                            <ComboBox ItemsSource="{Binding PanAlgorithmTypes}" SelectedItem="{Binding StochasticGenerator.PanAlgorithm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="How panning is done"/>
-                            <Label Content="Period(sec)"/>
-                            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100" Increment="1" Value="{Binding StochasticGenerator.PanParameters.CycleTime}" ToolTip="The period of the panning modulator"/>
-                        </StackPanel>
-                    </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="1" Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
+                                <Label Content="Option:"/>
+                                <ComboBox ItemsSource="{Binding PanOptionTypes}" SelectedItem="{Binding StochasticGenerator.PanOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="The level at which panning occurs"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="1" Grid.Column="2">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Method"/>
+                                <ComboBox ItemsSource="{Binding PanAlgorithmTypes}" SelectedItem="{Binding StochasticGenerator.PanAlgorithm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="How panning is done"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="1" Grid.Column="3">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Period(sec)"/>
+                                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100" Increment="1" Value="{Binding StochasticGenerator.PanParameters.CycleTime}" ToolTip="The period of the panning modulator"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="2" Grid.Column="0">
+                            <Label Content="Reverb"/>
+                        </Grid>
+                        <Grid Grid.Row="2" Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
+                                <Label Content="Option:"/>
+                                <ComboBox ItemsSource="{Binding ReverbOptionTypes}" SelectedItem="{Binding StochasticGenerator.ReverbOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="The level at which reverb occurs"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="2" Grid.Column="2">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Delay (msec)"/>
+                                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="1" Value="{Binding StochasticGenerator.ReverbParameters.Delay}" ToolTip="The delay time of the reverb effect"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="2" Grid.Column="3">
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Decay (dB)"/>
+                                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="1" Maximum="10" Increment="1" Value="{Binding StochasticGenerator.ReverbParameters.Decay}" ToolTip="The decay level of the reverb effect"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
                 </StackPanel>
                 <Border BorderBrush="Black" BorderThickness="1" Margin="5"/>
             </StackPanel>
         </Grid>
         <!-- The Voices data area -->
         <StackPanel Grid.Row="2" Orientation="Vertical">
-                <StackPanel Orientation="Vertical">
                     <Label Content="Voices" HorizontalAlignment="Center" FontSize="16" FontWeight="Bold" />
                     <!-- the voice data table showing the headers and voice properties -->
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="200">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
                     <DataGrid ItemsSource="{Binding StochasticGenerator.Voices}" AutoGenerateColumns="False" CanUserAddRows="False" Margin="5">
                         <DataGrid.Columns>
                             <DataGridCheckBoxColumn Header="Mute" Binding="{Binding Muted, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged }" IsReadOnly="False" ToolTipService.ToolTip="Mute the voice in the composition"/>
@@ -119,12 +174,12 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                         </DataGrid.Columns>
                     </DataGrid>
                 </ScrollViewer>
-            </StackPanel>
+            <Border BorderBrush="Black" BorderThickness="1" Margin="5"/>
         </StackPanel>
         <!-- The Composition displaying only the unmuted voices -->
         <StackPanel Grid.Row="3" Orientation="Vertical">
             <Label Content="Composition" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Height="400">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="300">
             <DataGrid x:Name="CompositionDataGrid" 
                       ItemsSource="{Binding StochasticComposition}" 
                       AutoGenerateColumns="False" 

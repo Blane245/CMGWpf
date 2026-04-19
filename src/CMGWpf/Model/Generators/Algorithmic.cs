@@ -17,21 +17,20 @@ namespace CMGWpf.Model.Generators
         public bool IsLooping { get; set; } = true;
         public int MeasureLength { get; set; } = 4;
         public int BeatCount { get; set; } = 4;
-        public int BeatShift { get; set; } = 0;
         public int OffsetSequence { get; set; } = 0;
         public int NoteCount { get; set; } = 12;
         public int NoteShift { get; set; } = 0;
         public int OffsetNotes { get; set; }
         private int[] activeNotes = EuclideanRhythm.Get(12, 12, 0);
         public string NoiseSeed { get; set; } = "";
-        public Random Random { get; set; } = new Random();
+        public FastRandom Random { get; set; } = MathUtilities.StartFastRandom(null);
         public double NoiseFrequency { get; set; } = 0;
         public double NoiseAmplitude { get; set; } = 0;
         public bool NoiseEnabled { get; set; } = false;
         public bool AttackEnabled { get; set; } = true;
         public bool MicrotonesEnabled { get; set; } = true;
-        public double ReverbDuration { get; set; } = 0;
-        public double ReverbDecay { get; set; } = 0;
+        public double ReverbDelay { get; set; } = 0;
+        public int ReverbDecay { get; set; } = 1;
         public Tremolo Tremolo { get; set; } = new Tremolo();
         public Tremolo Vibrato { get; set; } = new Tremolo();
         public Algorithm NoteAlgorithm { get; set; } = new Constant(60);
@@ -85,7 +84,7 @@ namespace CMGWpf.Model.Generators
             n.PanAlgorithm = PanAlgorithm.Clone();
             n.Tremolo = Tremolo.Clone();  // Clone Tremolo
             n.Vibrato = Vibrato.Clone();  // Clone Vibrato
-            n.Random = new Random();  // Create new Random instance
+            n.Random = MathUtilities.StartFastRandom(NoiseSeed);  // Create new FastRandom instance
             n.activeNotes = (int[])activeNotes.Clone();  // Clone array
             n.beatSequence = (int[])beatSequence.Clone();  // Clone array
             return n;
@@ -131,7 +130,10 @@ namespace CMGWpf.Model.Generators
             // return with the fractional note applied
             return pitch + midiFraction;
         }
-        
+        public override double GetEndTime()
+        {
+            return StopTime;
+        }
         public override CurrentValues GetCurrentValues(double time, double beats)
         {
             int entry = currentRhythmEntry;
@@ -215,16 +217,17 @@ namespace CMGWpf.Model.Generators
             generatorElem.AppendChild(vibratoAlgorithmElem);
         }
         private struct AlgorithmDesignator(string name, Algorithm type)
-    {
-        public string Name = name;
-        public Algorithm Type = type;
+        {
+            public string Name = name;
+            public Algorithm Type = type;
         }
         public override async Task LoadXML(XmlElement elem, Track parent)
         {
             Name = XMLFunctions.GetAttributeString(elem, "name", "");
             Parent = parent;
+            double readStopTime = XMLFunctions.GetAttributeDouble(elem, "stopTime", 0);
             StartTime = XMLFunctions.GetAttributeDouble(elem, "startTime", 0);
-            StopTime = XMLFunctions.GetAttributeDouble(elem, "stopTime", 0);
+            StopTime = readStopTime; // override the calculation doen when starttime is read
             Position = XMLFunctions.GetAttributeInt(elem, "position", 0);
             Mute = XMLFunctions.GetAttributeBool(elem, "mute", false);
             SoundFontFileName = XMLFunctions.GetAttributeString(elem, "soundFontFile", "");
@@ -292,6 +295,7 @@ namespace CMGWpf.Model.Generators
                             ALGORITHMTYPE.Wiener => new Wiener(),
                             ALGORITHMTYPE.Oscillator => new Oscillator(),
                             ALGORITHMTYPE.Sequencer => new Sequencer(),
+                            ALGORITHMTYPE.Autoregressive => new Autoregressive(),
                             _ => new Constant(),
                         };
                         a.LoadXML(aElem);

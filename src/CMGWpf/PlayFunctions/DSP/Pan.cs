@@ -7,7 +7,7 @@ namespace CMGWpf.PlayFunctions.DSP
 {
     public static class Pan
     {
-        public static void Apply (double[] sample, PANALGORITHM algorithm, PanParameters parameters, Random Rn)
+        public static void Apply (double[] sample, PANALGORITHM algorithm, PanParameters parameters, FastRandom Rn)
         {
             switch (algorithm)
             {
@@ -35,7 +35,7 @@ namespace CMGWpf.PlayFunctions.DSP
             return ((1 - pan) / 2, (1 + pan) / 2);
         }
         // pan is a random walk where each step is of DELTAPN size (tuned by experiment). A change is made at each CycleTime
-        private static void PanWalk(double[] sample, PanParameters parameters, Random Rn)
+        private static void PanWalk(double[] sample, PanParameters parameters, FastRandom Rn)
         {
             double deltaT = 1.0 / PlayTypes.SampleRate;
             double interval = parameters.CycleTime;
@@ -60,11 +60,9 @@ namespace CMGWpf.PlayFunctions.DSP
             }
         }
         // apply the pan glaide algorithm to the smaple. Pan seqment durations are defined by the parameter cyctime. The number of point on this time line is 10. Pan glides from one point to the next
-        private static void PanGlide(double[] sample, PanParameters parameters, Random rN)
+        private static void PanGlide(double[] sample, PanParameters parameters, FastRandom rN)
         {
             double deltaT = 1.0 / PlayTypes.SampleRate;
-            double interval = parameters.CycleTime;
-            double walk = Math.Sign(rN.NextDouble() - 0.5) * StochasticConstants.DELTAPAN;
             (var Nd, var Pd) = Probability.Continuous(10, parameters.CycleTime, 0.01); 
             double currentInterval = 0;
             // random first pan

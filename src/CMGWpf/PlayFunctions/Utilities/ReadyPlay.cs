@@ -2,7 +2,7 @@
 using CMGWpf.View;
 using static CMGWpf.Types.PlayTypes;
 using System.Collections.ObjectModel;
-using System.Diagnostics.Eventing.Reader;
+using CMGWpf.Types;
 
 namespace CMGWpf.PlayFunctions.Utilities
 {
@@ -20,17 +20,18 @@ namespace CMGWpf.PlayFunctions.Utilities
                 {
                     Generators = [],
                     Duration = 0,
-                    ErrorMessage = "No file or timeline loaded."
+                    ErrorMessages = [new() { Text = "No file or timeline loaded.", Error = true }]
                 };
             }
             // filter the selected generators. First, if the generator parameter is not null, the return that generator. Second, if there is a Time Interval include only those genertors that are within its bounds. Third, in all other cases, process track solo and mute and generator mute settings
             else if (generator != null)
             {
+                var errors = generator.Validate();
                 return new ReadyPlayOutput
                 {
                     Generators = [generator],
-                    Duration = generator.StopTime - generator.StartTime,
-                    ErrorMessage = ""
+                    Duration = generator.GetEndTime(),
+                    ErrorMessages = errors
                 };
             }
             // if there is a time interval, select all generators whoes start and stop times are within the interval
@@ -38,19 +39,21 @@ namespace CMGWpf.PlayFunctions.Utilities
             {
                 TimeInterval interval = timeLine.TimeInterval;
                 ObservableCollection<Model.Generators.Generator> generators = [];
+                var errors = new ObservableCollection<Message>();
                 foreach (var track in file.Tracks)
                 {
                     foreach (var gen in track.Generators)
                     {
-                        if (gen.StartTime >= interval.StartTime && gen.StopTime <= interval.EndTime)
+                        foreach (var error in gen.Validate()) { errors.Add(error); }
+                        if (errors.Count == 0 && gen.StartTime >= interval.StartTime && gen.StopTime <= interval.EndTime) // timinterval selection is based on stop time not end time for stochastic generators
                             generators.Add(gen);
                     }
                 }
                 return new ReadyPlayOutput()
                 {
                     Generators = generators,
-                    Duration = generators.Count > 0 ? generators.Max(g => g.StopTime) : 0,
-                    ErrorMessage = generators.Count > 0 ? "" : "No generators to play."
+                    Duration = generators.Count > 0 ? generators.Max(g => g.GetEndTime()) : 0,
+                    ErrorMessages = errors
                 };
             }
             else // filter for track solo, mute, and generator solo. Track solo takes precedence. A muted track that is also soloed, will be skipped. Generators on selected tracks will be included unless muted
@@ -63,21 +66,27 @@ namespace CMGWpf.PlayFunctions.Utilities
                     if (track.Solo && !track.Mute) soloedTracks.Add(track);
                 }
                 // if no soloed tracks, inlcude all tracks
-                List<Track> selectedTracks = soloedTracks.Count == 0? file.Tracks : soloedTracks;
+                List<Track> selectedTracks = soloedTracks.Count == 0 ? file.Tracks : soloedTracks;
 
                 // pick up all non-muted generators on the selected tracks
-                foreach(var track in selectedTracks)
+                var errors = new ObservableCollection<Message>();
+                foreach (var track in selectedTracks)
                 {
-                    foreach(var gen in track.Generators)
+                    foreach (var gen in track.Generators)
                     {
-                        if (!gen.Mute) generators.Add(gen); 
+                        if (!gen.Mute)
+                        {
+                            foreach (var error in gen.Validate()) { errors.Add(error); }
+                            if (errors.Count == 0) generators.Add(gen);
+                        }
                     }
                 }
+                if (generators.Count == 0) errors.Add(new Message { Text = "No valid generators selected for playback.", Error = true });
                 ReadyPlayOutput output = new()
                 {
                     Generators = generators,
-                    Duration = generators.Count > 0 ? generators.Max(g => g.StopTime) : 0,
-                    ErrorMessage = generators.Count > 0 ? "" : "No generators to play."
+                    Duration = generators.Count > 0 ? generators.Max(g => g.GetEndTime()) : 0,
+                    ErrorMessages = errors
                 };
                 return output;
             }
