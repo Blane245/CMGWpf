@@ -119,18 +119,12 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                             <Label Content="Reverb"/>
                         </Grid>
                         <Grid Grid.Row="2" Grid.Column="1">
-                                <StackPanel Orientation="Horizontal">
-                                <Label Content="Option:"/>
-                                <ComboBox ItemsSource="{Binding ReverbOptionTypes}" SelectedItem="{Binding StochasticGenerator.ReverbOption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="The level at which reverb occurs"/>
-                            </StackPanel>
-                        </Grid>
-                        <Grid Grid.Row="2" Grid.Column="2">
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="Delay (msec)"/>
                                 <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="1" Value="{Binding StochasticGenerator.ReverbParameters.Delay}" ToolTip="The delay time of the reverb effect"/>
                             </StackPanel>
                         </Grid>
-                        <Grid Grid.Row="2" Grid.Column="3">
+                        <Grid Grid.Row="2" Grid.Column="2">
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="Decay (dB)"/>
                                 <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="1" Maximum="10" Increment="1" Value="{Binding StochasticGenerator.ReverbParameters.Decay}" ToolTip="The decay level of the reverb effect"/>

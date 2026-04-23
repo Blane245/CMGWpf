@@ -2,6 +2,7 @@
 using CMGWpf.View;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using static CMGWpf.View.ToolsViewModel;
 
 namespace CMGWpf.Dialogs.Tools
 {
@@ -29,10 +31,22 @@ namespace CMGWpf.Dialogs.Tools
         private void StaggerGeneratorsStartTimeDialog_Loaded(object sender, RoutedEventArgs e)
         {
             Services.GlobalService.Instance.StatusMessages.Clear();
-            // Bind the ListBox multi-selection to the ViewModel's SecondaryGeneratorNames collection
+            // Initialize the source of the listview 
             if (DataContext is ToolsViewModel vm)
             {
-                ListBoxHelper.BindSelectedItems(SecondaryGeneratorsListBox, vm.SecondaryGeneratorNames);
+                ObservableCollection<StaggerGeneratorsSelection> tempList = [];
+                tempList.Clear();
+                vm.PrimaryGeneratorName = "";
+                vm.StaggerAmount = 0;
+                vm.StaggerGeneratorList.Clear();
+                foreach (var track in FileViewModel.Instance.File.Tracks)
+                {
+                    foreach (var generator in track.Generators)
+                    {
+                        tempList.Add(new StaggerGeneratorsSelection() { TrackName = track.Name, GeneratorName = generator.Name, IsSelected = false });
+                    }
+                }
+                vm.StaggerGeneratorList = tempList;
             }
         }
 

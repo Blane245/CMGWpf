@@ -1,12 +1,6 @@
-﻿using CMGWpf.Types;
-using CMGWpf.Utilities;
+﻿using CMGWpf.Utilities;
 using CMGWpf.View;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 namespace CMGWpf.Dialogs.Tools
 {
     /// <summary>
@@ -27,7 +21,11 @@ namespace CMGWpf.Dialogs.Tools
             // Bind the ListBox multi-selection to the ViewModel's SecondaryGeneratorNames collection
             if (DataContext is ToolsViewModel vm)
             {
+                vm.PrimaryGeneratorName = "";
+                vm.AlignTimeOption = "Start Time";
+                vm.SecondaryGeneratorNames.Clear();
                 ListBoxHelper.BindSelectedItems(SecondaryGeneratorsListBox, vm.SecondaryGeneratorNames);
+                Services.GlobalService.Instance.StatusMessages.Clear();
             }
         }
 

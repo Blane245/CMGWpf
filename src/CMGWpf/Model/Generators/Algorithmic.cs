@@ -24,12 +24,12 @@ namespace CMGWpf.Model.Generators
         private int[] activeNotes = EuclideanRhythm.Get(12, 12, 0);
         public string NoiseSeed { get; set; } = "";
         public FastRandom Random { get; set; } = MathUtilities.StartFastRandom(null);
-        public double NoiseFrequency { get; set; } = 0;
+        public double NoiseFrequency { get; set; } = 0; // Hz
         public double NoiseAmplitude { get; set; } = 0;
         public bool NoiseEnabled { get; set; } = false;
         public bool AttackEnabled { get; set; } = true;
         public bool MicrotonesEnabled { get; set; } = true;
-        public double ReverbDelay { get; set; } = 0;
+        public double ReverbDelay { get; set; } = 0; //msec
         public int ReverbDecay { get; set; } = 1;
         public Tremolo Tremolo { get; set; } = new Tremolo();
         public Tremolo Vibrato { get; set; } = new Tremolo();
@@ -225,9 +225,8 @@ namespace CMGWpf.Model.Generators
         {
             Name = XMLFunctions.GetAttributeString(elem, "name", "");
             Parent = parent;
-            double readStopTime = XMLFunctions.GetAttributeDouble(elem, "stopTime", 0);
             StartTime = XMLFunctions.GetAttributeDouble(elem, "startTime", 0);
-            StopTime = readStopTime; // override the calculation doen when starttime is read
+            StopTime = XMLFunctions.GetAttributeDouble(elem, "stopTime", 0);
             Position = XMLFunctions.GetAttributeInt(elem, "position", 0);
             Mute = XMLFunctions.GetAttributeBool(elem, "mute", false);
             SoundFontFileName = XMLFunctions.GetAttributeString(elem, "soundFontFile", "");

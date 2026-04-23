@@ -164,7 +164,7 @@ namespace CMGWpf.MVVM
             generatorViewModel.GeneratorPanel = generatorType switch
             {
                 "Algorithmic" => new Panels.Algorithmic.AlgorithmicPanel(),
-                "Silent" => null, // Silent has no additional controls
+                //"Silent" => null, // Silent has no additional controls
                 "Stochastic" => new Panels.Stochastic.StochasticPanel(),
                 _ => null
             };

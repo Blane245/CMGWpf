@@ -136,10 +136,6 @@ namespace CMGWpf.PlayFunctions.Utilities
 
                 // Sample modes
                 GenOp.sampleModes => true,
-
-                // Pan
-                GenOp.pan => true,
-
                 _ => false
             };
         }
@@ -351,7 +347,6 @@ namespace CMGWpf.PlayFunctions.Utilities
             // semantic clamps (you can extend this list as needed)
             sum = op switch
             {
-                GenOp.pan => Math.Clamp(sum, -500, 500),
                 GenOp.initialAttenuation => Math.Clamp(sum, 0, 1440),
                 GenOp.sustainVolEnv => Math.Clamp(sum, 0, 1000),
                 GenOp.sustainModEnv => Math.Clamp(sum, 0, 1000),
@@ -362,7 +357,7 @@ namespace CMGWpf.PlayFunctions.Utilities
         }
     }
 
-    //TODO need to routine to converb SF generator values to standard units for processing (eg centibels to gain, volenv to seconds, etc) for the DSP engine. This routine would be used to aide in development of the intensity envelope and playback rate. Each GenOp that is in the final voice will be converted to a standard unit and then the DSP engine can use those standard units to determine how to apply the various effects and envelopes to the sample. This routine would also apply the appropriate tuning adjustments to determine the final pitch of the sample for playback.
+    //TODO need to routine to convert SF generator values to standard units for processing (eg centibels to gain, volenv to seconds, etc) for the DSP engine. This routine would be used to aide in development of the intensity envelope and playback rate. Each GenOp that is in the final voice will be converted to a standard unit and then the DSP engine can use those standard units to determine how to apply the various effects and envelopes to the sample. This routine would also apply the appropriate tuning adjustments to determine the final pitch of the sample for playback.
     // 
     public static class Sf2Defaults
     {
@@ -379,7 +374,7 @@ namespace CMGWpf.PlayFunctions.Utilities
 
             switch (op)
             {
-                // Envelope/LFO timecents defaults (~0 seconds)
+                // Envelope/LFO time cents defaults (~0 seconds)
                 case GenOp.delayModLFO:
                 case GenOp.delayVibLFO:
                 case GenOp.delayModEnv:

@@ -5,6 +5,7 @@ using CMGWpf.View;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
+using static CMGWpf.View.ToolsViewModel;
 
 namespace CMGWpf.MVVM
 {
@@ -60,19 +61,34 @@ namespace CMGWpf.MVVM
             public string TrackName = "";
             public string GeneratorName = "";
         }
-        private static ObservableCollection<TrackGeneratorName> ExtractNames (ObservableCollection<string> list)
+        private static ObservableCollection<TrackGeneratorName> ExtractNames(ObservableCollection<string> list)
         {
             ObservableCollection<TrackGeneratorName> result = [];
             foreach (var item in list)
             {
                 string[] split = item.Split(":");
-                if (split.Length == 2) {
+                if (split.Length == 2)
+                {
                     result.Add(new TrackGeneratorName()
                     {
                         TrackName = split[0],
                         GeneratorName = split[1]
                     });
                 }
+            }
+            return result;
+        }
+        private static ObservableCollection<TrackGeneratorName> ExtractStaggerNames(ObservableCollection<StaggerGeneratorsSelection> list)
+        {
+            ObservableCollection<TrackGeneratorName> result = [];
+            foreach (var item in list)
+            {
+                if (item.IsSelected)
+                    result.Add(new TrackGeneratorName()
+                    {
+                        TrackName = item.TrackName,
+                        GeneratorName = item.GeneratorName
+                    });
             }
             return result;
         }
@@ -123,6 +139,18 @@ namespace CMGWpf.MVVM
             }
             return false;
         }
+        private bool isPrimaryinSecondaryList(TrackGeneratorName primaryName, ObservableCollection<TrackGeneratorName> secondaryNames)
+        {
+            try
+            {
+                _ = secondaryNames.First((s) => (s.TrackName == primaryName.TrackName && s.GeneratorName == primaryName.GeneratorName));
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         public void AlignGenerators()
         {
             if (CheckActiveGenerators())
@@ -156,7 +184,7 @@ namespace CMGWpf.MVVM
         {
             if (CheckActiveGenerators())
             {
-                _ = MessageBox.Show("Tracks cannot be stagger while any generators are being added or edited.", "Stagger Generators Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                _ = MessageBox.Show("Tracks cannot be set equal while any generators are being added or edited.", "Set Generators Duration Equal Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             vm.ActiveSetGeneratorsDurationEqualDialog = new SetGeneratorsDurationEqualDialog
@@ -166,20 +194,42 @@ namespace CMGWpf.MVVM
             };
             vm.ActiveSetGeneratorsDurationEqualDialog.ShowDialog();
         }
-        private bool isPrimaryinSecondaryList (TrackGeneratorName primaryName, ObservableCollection<TrackGeneratorName> secondaryNames)
+        public void MoveStaggerUp(StaggerGeneratorsSelection item)
         {
-            try
+            // find the selected item in the stagger generator list and move it up one position
+            int selected = vm.StaggerGeneratorList.IndexOf(item);
+            if (selected >= 1)
             {
-                _ = secondaryNames.First((s) => (s.TrackName == primaryName.TrackName && s.GeneratorName == primaryName.GeneratorName));
-                return true;
-            } catch
+                ObservableCollection<StaggerGeneratorsSelection> tempList = vm.StaggerGeneratorList;
+                tempList.Move(selected, selected - 1);
+                vm.NotifyStaggerListChanged(tempList);
+
+            }
+        }
+        public void MoveStaggerDown(StaggerGeneratorsSelection item)
+        {
+            // find the selected item in the stagger generator list and move it down one position
+            int selected = vm.StaggerGeneratorList.IndexOf(item);
+            if (selected < vm.StaggerGeneratorList.Count - 1 && selected >= 0)
             {
-                return false;
+                ObservableCollection<StaggerGeneratorsSelection> tempList = vm.StaggerGeneratorList;
+                tempList.Move(selected, selected + 1);
+                vm.NotifyStaggerListChanged(tempList);
             }
         }
         public void SetEqual()
         {
             TrackGeneratorName primaryName = ExtractName(vm.PrimaryGeneratorName);
+            if (vm.PrimaryGeneratorName == "")
+            {
+                _ = MessageBox.Show($"No primary generator has been selected", "Generator Selection Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (vm.SecondaryGeneratorNames.Count == 0)
+            {
+                _ = MessageBox.Show($"No secondary generators have need selected", "Generator Selection Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             ObservableCollection<TrackGeneratorName> secondaryNames = ExtractNames(vm.SecondaryGeneratorNames);
             if (isPrimaryinSecondaryList(primaryName, secondaryNames)) {
                 _ = MessageBox.Show($"The primary generator cannot appear in the secondary list", "Generator Selection Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -203,6 +253,8 @@ namespace CMGWpf.MVVM
             }
             // signal that the tracks have changed
             FileViewModel.Instance.NotifyTracksChanged(file.Tracks);
+            FileViewModel.Instance.StatusMessages = [new Types.Message() { Text = $"Set {secondaryNames.Count} generators to have the generator {vm.PrimaryGeneratorName} duration {duration} leaving {option} fixed.", Error = false }];
+            FileViewModel.Instance.IsDirty = true;
             vm.ActiveSetGeneratorsDurationEqualDialog?.Close();
             vm.ActiveSetGeneratorsDurationEqualDialog = null;
         }
@@ -210,7 +262,17 @@ namespace CMGWpf.MVVM
         public void Stagger()
         {
             TrackGeneratorName primaryName = ExtractName(vm.PrimaryGeneratorName);
-            ObservableCollection<TrackGeneratorName> secondaryNames = ExtractNames(vm.SecondaryGeneratorNames);
+            if (vm.PrimaryGeneratorName == "")
+            {
+                _ = MessageBox.Show($"No primary generator has been selected", "Generator Selection Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            ObservableCollection<TrackGeneratorName> secondaryNames = ExtractStaggerNames(vm.StaggerGeneratorList);
+            if (secondaryNames.Count == 0)
+            {
+                _ = MessageBox.Show($"No secondary generators have need selected", "Generator Selection Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             if (isPrimaryinSecondaryList(primaryName, secondaryNames))
             {
                 _ = MessageBox.Show($"The primary generator cannot appear in the secondary list", "Generator Selection Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -220,16 +282,21 @@ namespace CMGWpf.MVVM
             (var primaryTrack, var primaryGenerator) = Locate(primaryName);
             if (primaryTrack == null || primaryGenerator == null) { PopError(primaryName); return; }
             double staggerSum = 0;
+
+            // stagger the selected generators based on the primary generators start time maintain the secondary generator duration
             foreach (var secondaryName in secondaryNames)
             {
                 (var secondaryTrack, var secondaryGenerator) = Locate(secondaryName);
                 if (secondaryTrack == null || secondaryGenerator == null) { PopError(secondaryName); return; }
                 staggerSum += staggerAmount;
+                double duration = secondaryGenerator.StopTime - secondaryGenerator.StartTime;
                 secondaryGenerator.StartTime = primaryGenerator.StartTime + staggerSum;
-                secondaryGenerator.StopTime = primaryGenerator.StopTime + staggerSum;
+                secondaryGenerator.StopTime = secondaryGenerator.StartTime + duration;
             }
             // signal that the secondary tracks have changed
             FileViewModel.Instance.NotifyTracksChanged(file.Tracks);
+            FileViewModel.Instance.StatusMessages = [new Types.Message() { Text = $"Staggered {secondaryNames.Count} generators from generator {vm.PrimaryGeneratorName} by {staggerAmount} seconds.", Error = false }];
+            FileViewModel.Instance.IsDirty = true;
             vm.ActiveStaggerGeneratorsStartTimeDialog?.Close();
             vm.ActiveStaggerGeneratorsStartTimeDialog = null;
         }
@@ -237,6 +304,16 @@ namespace CMGWpf.MVVM
         public void Align()
         {
             TrackGeneratorName primaryName = ExtractName(vm.PrimaryGeneratorName);
+            if (vm.PrimaryGeneratorName == "")
+            {
+                _ = MessageBox.Show($"No primary generator has been selected", "Generator Selection Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (vm.SecondaryGeneratorNames.Count == 0)
+            {
+                _ = MessageBox.Show($"No secondary generators have need selected", "Generator Selection Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             ObservableCollection<TrackGeneratorName> secondaryNames = ExtractNames(vm.SecondaryGeneratorNames);
             if (isPrimaryinSecondaryList(primaryName, secondaryNames))
             {
@@ -278,6 +355,8 @@ namespace CMGWpf.MVVM
             }
             // signal that the secondary tracks have changed
             FileViewModel.Instance.NotifyTracksChanged(file.Tracks);
+            FileViewModel.Instance.StatusMessages = [new Types.Message() { Text = $"Aligned {secondaryNames.Count} generators to {vm.PrimaryGeneratorName} by {option}.", Error = false }];
+            FileViewModel.Instance.IsDirty = true;
             vm.ActiveAlignGeneratorsDialog?.Close();
             vm.ActiveAlignGeneratorsDialog = null;
         }

@@ -22,7 +22,10 @@ namespace CMGWpf.Dialogs
         private void GeneratorDialog_Loaded(object sender, RoutedEventArgs e)
         {
             Services.GlobalService.Instance.StatusMessages.Clear();
-            if (DataContext is GeneratorViewModel vm) vm.Messages.Clear();
+            if (DataContext is GeneratorViewModel vm)
+            {
+                vm.InitializeNewTimes(vm.UIGenerator.StartTime, vm.UIGenerator.StopTime);
+            }
         }
 
         private void GeneratorDialog_Closing(object? sender, CancelEventArgs e)
@@ -47,11 +50,11 @@ namespace CMGWpf.Dialogs
                     // the cloning occuring here will restore the UI generator stop time values
                     switch (vm.Generator.ToString())
                     {
-                        case "Silent":
-                            {
-                                vm.UIGenerator = (g as Silent)!.Clone(g.Parent);
-                                break;
-                            }
+                        //case "Silent":
+                        //    {
+                        //        vm.UIGenerator = (g as Silent)!.Clone(g.Parent);
+                        //        break;
+                        //    }
                         case "Algorithmic":
                             {
                                 vm.UIGenerator = (g as Algorithmic)!.Clone(g.Parent);

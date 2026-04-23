@@ -38,7 +38,7 @@
                     <Label Content="Secondary Generators: "/>
                     <ListBox x:Name="SecondaryGeneratorsListBox"
                              ItemsSource="{Binding GeneratorList}" 
-                             SelectionMode="Multiple" 
+                             SelectionMode="Multiple"
                              ToolTip="Select the generators whose durations will be set equal to the primary generator."/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">

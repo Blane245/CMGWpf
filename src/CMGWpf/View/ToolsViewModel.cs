@@ -1,5 +1,4 @@
 ﻿using CMGWpf.Dialogs.Tools;
-using CMGWpf.Dialogs.TrackTools;
 using CMGWpf.MVVM;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;
@@ -65,7 +64,7 @@ namespace CMGWpf.View
             set
             {
                 _amplitude = value; OnPropertyChanged();
-                _oscillatorFrequency = (_BPM * _amplitude) != 0 ? Math.Round(60_000 / (_BPM / _amplitude)) : 0;
+                _oscillatorFrequency = (_BPM * _amplitude) != 0 ? Math.Round(60_000 / (_BPM * _amplitude)) : 0;
                 OnPropertyChanged(nameof(OscillatorFrequency));
             }
         }
@@ -76,7 +75,7 @@ namespace CMGWpf.View
             set
             {
                 _BPM = value; OnPropertyChanged();
-                _oscillatorFrequency = (_BPM * _amplitude) != 0 ? Math.Round(60_000 / (_BPM / _amplitude)) : 0;
+                _oscillatorFrequency = (_BPM * _amplitude) != 0 ? Math.Round(60_000 / (_BPM * _amplitude)) : 0;
                 OnPropertyChanged(nameof(OscillatorFrequency));
             }
         }
@@ -97,6 +96,26 @@ namespace CMGWpf.View
                 return list;
             }
         }
+        public class StaggerGeneratorsSelection
+        {
+            public bool MoveUp { get; set; }
+            public bool MoveDown { get; set; }
+            public string TrackName { get; set; } = "";
+            public string GeneratorName { get; set; } = "";
+            public bool IsSelected { get; set; } = false;
+        }
+        private ObservableCollection<StaggerGeneratorsSelection> staggerGeneratorList = [];
+        public ObservableCollection<StaggerGeneratorsSelection> StaggerGeneratorList
+        {
+            get => staggerGeneratorList;
+            set { staggerGeneratorList = value; OnPropertyChanged(); }
+        }
+        public void NotifyStaggerListChanged(ObservableCollection<StaggerGeneratorsSelection> newList)
+        {
+            StaggerGeneratorList = newList;
+        }
+
+        public bool StaggerSelectAll { get; set; } = false;
 
         // active generator properties
         private MidiFrequencyConverterDialog? activeMidiFrequencyConverterDialog = null;
@@ -153,6 +172,12 @@ namespace CMGWpf.View
         public RelayCommand<object> AlignGeneratorsCommand =>
             _alignGeneratorsCommand ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).AlignGenerators());
 
+        private RelayCommand<StaggerGeneratorsSelection>? _moveStaggerUp;
+        public RelayCommand<StaggerGeneratorsSelection> MoveStaggerUp =>
+            _moveStaggerUp ??= new RelayCommand<StaggerGeneratorsSelection>(selection => new ToolsCommands(this, FileViewModel.Instance.File).MoveStaggerUp(selection));
+        private RelayCommand<StaggerGeneratorsSelection>? _moveStaggerDown;
+        public RelayCommand<StaggerGeneratorsSelection> MoveStaggerDown =>
+            _moveStaggerDown ??= new RelayCommand<StaggerGeneratorsSelection>(selection => new ToolsCommands(this, FileViewModel.Instance.File).MoveStaggerDown(selection));
         public RelayCommand<object> Align =>
             _align ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).Align());
 

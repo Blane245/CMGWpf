@@ -61,7 +61,7 @@ namespace CMGWpf.PlayFunctions.DSP
                     var durationPercent = currentValues.Duration;
                     var volumedB = currentValues.Volume;
                     var pan = currentValues.Pan;
-                    volumedB += parent.Volume;
+                    volumedB += Math.Clamp(parent.Volume, -10, 10);
                     double interval = Math.Min(60 / speed, stopTime - time);
                     double noteDuration = (interval * durationPercent) / 100;
                     if (hitBeat)
@@ -108,6 +108,7 @@ namespace CMGWpf.PlayFunctions.DSP
                                 panSamples[i * 2] = instrumentSample[i] * left;
                                 panSamples[i * 2 + 1] = instrumentSample[i] * right;
                             }
+                            Reverb.Apply(panSamples, algorithmic.ReverbDelay, algorithmic.ReverbDecay, PlayTypes.SampleRate);
                             // now add the pan samples into the stereo buffer
                             AudioBuffer.Add(panSamples, ref stereoBuffer, instrumentStartIndex);
                             SoundRollBuilder.AddInstrument(new TimeMidiLine
@@ -122,7 +123,7 @@ namespace CMGWpf.PlayFunctions.DSP
 
             } else
             {
-                // note sequencing is driven by the note item sequence and the spped of each beat. The note item sequence is a list of note items, each with a time and a note value. The speed algorithm determines the speed of the generator at each point in time, which affects the interval between notes. The attack, duration, pan, and volume algorithms determine the corresponding values for each note at each point in time.
+                // note sequencing is driven by the note item sequence and the speed of each beat. The note item sequence is a list of note items, each with a time and a note value. The speed algorithm determines the speed of the generator at each point in time, which affects the interval between notes. The attack, duration, pan, and volume algorithms determine the corresponding values for each note at each point in time.
                 DebugLog.Write($"Sequence algorithm voice generation");
                 Sequencer sequencer = (noteAlgorithm as Sequencer)!;
                 double beats = 1;
@@ -196,22 +197,13 @@ namespace CMGWpf.PlayFunctions.DSP
                             Reverb.Apply(panInstrumentSample, algorithmic.ReverbDelay, algorithmic.ReverbDecay, PlayTypes.SampleRate);
 
                             int instrumentStartIndex = (int)(time * PlayTypes.SampleRate) * 2; // in stereobuffer pointer space
-                            DebugLog.Write($"Generated sample for note {note} with {instrumentSample.Length} samples at 44100Hz. Pan is (left, right)=({left},{right}). Merging at t={time}(sec), index={instrumentStartIndex}");
-                            for (int i = 0; i < instrumentSample.Length; i++)
-                            {
-                                int bufferIndex = instrumentStartIndex + 2 * i;
-                                if (bufferIndex + 1 < stereoBuffer.Length)
-                                {
-                                    if (double.IsNaN(instrumentSample[i])) throw new Exception($"Instrument sample is not a number at location {i}, time={time}");
-                                    stereoBuffer[bufferIndex] += panInstrumentSample[i * 2];
-                                    stereoBuffer[bufferIndex + 1] += panInstrumentSample[i * 2 + 1];
-                                }
-                            }
-
+                            DebugLog.Write($"Generated sample for note {note} with {instrumentSample.Length} samples at {PlayTypes.SampleRate}Hz. Pan is (left, right)=({left},{right}). Merging at t={time}(sec), index={instrumentStartIndex}");
+                            AudioBuffer.Add(panInstrumentSample, ref stereoBuffer, instrumentStartIndex);
+                            double instrumentEndTime = time + (double)instrumentSample.Length / PlayTypes.SampleRate;
                             SoundRollBuilder.AddInstrument(new TimeMidiLine
                             {
                                 Start = new TimeMidiPoint { Time = time, Midi = (int)note },
-                                End = new TimeMidiPoint { Time = time + duration, Midi = (int)note }
+                                End = new TimeMidiPoint { Time = instrumentEndTime, Midi = (int)note }
                             }, soundFontName, preset.Name);
                         }
                     }

@@ -52,7 +52,7 @@
             Margin="0,0,0,0"
         >
             <MenuItem Header="{materialIcons:MaterialIconExt Kind=MusicNoteQuarter, HorizontalAlignment=Center, IconSize=18}" HorizontalAlignment="Center" BorderBrush="Transparent">
-                <MenuItem Header="Silent" Command="{Binding AddSilentCommand}"/>
+                <!--<MenuItem Header="Silent" Command="{Binding AddSilentCommand}"/>-->
                 <MenuItem Header="Algorithmic" Command="{Binding AddAlgorithmicCommand}"/>
                 <MenuItem Header="Stochastic" Command="{Binding AddStochasticCommand}"/>
             </MenuItem>

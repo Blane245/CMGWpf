@@ -118,6 +118,11 @@ namespace CMGWpf.View
             get { return newGeneratorName; }
             set { if (newGeneratorName != value) { newGeneratorName = value; OnPropertyChanged(); } }
         }
+        public void InitializeNewTimes(double start, double stop)
+        {
+            newStartTime = start;
+            newStopTime = stop;
+        }
         private double newStartTime = 0;
         public double NewStartTime
         {
@@ -125,10 +130,25 @@ namespace CMGWpf.View
             set
             {
                 if (newStartTime == value) return;
-                double duration = UIGenerator.StopTime - newStartTime;
-                UIGenerator.StartTime = newStartTime;
-                UIGenerator.StopTime = value + duration;
+                double shift = value - UIGenerator.StartTime;
                 newStartTime = value;
+                newStopTime = UIgenerator.StopTime += shift;
+                UIGenerator.StartTime = value;
+                UIGenerator.StopTime = newStopTime;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(NewStopTime));
+                OnPropertyChanged(nameof(UIgenerator));
+            }
+        }
+        private double newStopTime = 0;
+        public double NewStopTime
+        {
+            get => newStopTime;
+            set
+            {
+                if (newStopTime == value) return;
+                newStopTime = value;
+                UIgenerator.StopTime = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(UIgenerator));
             }
@@ -211,7 +231,7 @@ namespace CMGWpf.View
             bool selected = IsSelected();
             Brush brush = type switch
             {
-                "Silent" => selected ? Brushes.DarkGray : Brushes.LightGray,
+                //"Silent" => selected ? Brushes.DarkGray : Brushes.LightGray,
                 "Algorithmic" => selected ? Brushes.Cyan : Brushes.LightCyan,
                 "Stochastic" => selected ? Brushes.Coral : Brushes.LightCoral,
                 _ => Brushes.White

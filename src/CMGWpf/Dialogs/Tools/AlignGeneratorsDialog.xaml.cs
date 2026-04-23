@@ -21,6 +21,9 @@ namespace CMGWpf.Dialogs.Tools
             // Bind the ListBox multi-selection to the ViewModel's SecondaryGeneratorNames collection
             if (DataContext is ToolsViewModel vm)
             {
+                vm.PrimaryGeneratorName = "";
+                vm.AlignTimeOption = "Start Time";
+                vm.SecondaryGeneratorNames.Clear();
                 ListBoxHelper.BindSelectedItems(SecondaryGeneratorsListBox, vm.SecondaryGeneratorNames);
                 Services.GlobalService.Instance.StatusMessages.Clear();
             }

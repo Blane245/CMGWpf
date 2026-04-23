@@ -16,9 +16,9 @@ namespace CMGWpf.PlayFunctions.DSP
             double sampleDuration = sample.Length / PlayTypes.SampleRate;
             int nPoints = (int)Math.Round(sampleDuration / cycleTime);
             if (nPoints == 0) return; // not enough sound duration to make one cycle
-            // build the continuous probabilty arrays
+            // build the continuous probability arrays
             (var Nd, var Pd) = Probability.Continuous(nPoints, sampleDuration, sampleDuration / StochasticConstants.UNIT);
-            if (Pd.Length <= 1) return; // duration or nPoints is probabilty too small
+            if (Pd.Length <= 1) return; // duration or nPoints is probability too small
 
             // pick a random intensity
             int nTransitions = IntensityTransitions.Length;
@@ -30,7 +30,7 @@ namespace CMGWpf.PlayFunctions.DSP
             // get the end intensity for persistence
             INTENSITY endIntensity = transition.End;
 
-            // determine the duration for a probabilty lookup in the proability table. 
+            // determine the duration for a probability lookup in the probability table. 
             double duration = 0;
             while (duration == 0) duration = Probability.Lookup(Pd, Nd, Rn.NextDouble());
             double currentDuration = 0;
@@ -45,12 +45,12 @@ namespace CMGWpf.PlayFunctions.DSP
                     if (option == INTENSITYTRANSITIONOPTION.persistent)
                     {
                         int tIndex = Rn.Next(0, nTransitions - 1);
-                        while (endIntensity != IntensityTransitions[tIndex].Start) { tIndex = Rn.Next(0, nTransitions - 1); }
+                        while (endIntensity != IntensityTransitions[tIndex].Start) { tIndex = Math.Min(Rn.Next(0, nTransitions), nTransitions - 1); }
                         transition = IntensityTransitions[tIndex];
                     }
                     else // for random just pick any one that can be found
                     {
-                        transition = IntensityTransitions[Rn.Next(0, nTransitions - 1)];
+                        transition = IntensityTransitions[Math.Min(Rn.Next(0, nTransitions), nTransitions - 1)];
 
                     }
                     DebugLog.Write($"intensitypresist: apply intensity transition for option {option} -  ({transition.Start}, {transition.Middle}, {transition.End} at sample {i}");

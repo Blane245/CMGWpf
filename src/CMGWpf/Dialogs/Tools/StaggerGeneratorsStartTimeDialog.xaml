@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs.Tools"
         xmlns:panels="clr-namespace:CMGWpf.Panels"
+        xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
@@ -16,6 +17,27 @@
         SizeToContent="WidthAndHeight"
         Width="500" Height="112"
         Title="Stagger Generators Start Times" MinHeight="100" MinWidth="400">
+    <Window.Resources>
+        <DataTemplate x:Key="Select">
+            <StackPanel Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding Path=IsSelected}"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="Up">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="ModeUp" Command="{Binding DataContext.MoveStaggerUp, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}">
+                    <materialIcons:MaterialIcon Kind="ArrowUp"/>
+                </Button>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="Down">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="ModeDown" Command="{Binding DataContext.MoveStaggerDown, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}">
+                    <materialIcons:MaterialIcon Kind="ArrowDown"/>
+                </Button>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="40"
                            ResizeBorderThickness="5"
@@ -39,10 +61,23 @@
                     <Label Content="Primary Generator: "/>
                     <ComboBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding PrimaryGeneratorName, Mode=TwoWay}" ToolTip="Select the generator that will be used start the staggering."/>
                     <Label Content="Secondary Generators: "/>
+                    <ListView ItemsSource="{Binding StaggerGeneratorList}">
+                        <ListView.View>
+                            <GridView ColumnHeaderToolTip="Stagger generators in arranged order">
+                                <GridViewColumn CellTemplate="{StaticResource Up}" Header="Up"/>
+                                <GridViewColumn CellTemplate="{StaticResource Down}" Header="Down"/>
+                                <GridViewColumn CellTemplate="{StaticResource Select}" Header="Select"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=TrackName}" Header="Track"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=GeneratorName}" Header="Generator"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+<!--
                     <ListBox x:Name="SecondaryGeneratorsListBox"
                              ItemsSource="{Binding GeneratorList}" 
                              SelectionMode="Multiple" 
                              ToolTip="Select the generators whose durations will be set equal to the primary generator."/>
+-->
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Stagger Amount (sec): "/>

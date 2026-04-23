@@ -4,15 +4,25 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs.Tools"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
         d:DataContext="{d:DesignInstance Type=viewmodel:ToolsViewModel}"
         mc:Ignorable="d"
-        WindowStyle="ToolWindow"
-        Background="White"
+        WindowStyle="None"
         WindowStartupLocation="CenterOwner"
-        Title="Oscillator Frequency Calculator" Height="80" Width="800"
+                ResizeMode="CanResize"
+        Width="800" Height="100"
+        Background="White"
         >
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -20,8 +30,14 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="Oscillator Frequency Calculator"
+                                   ChromeBackground="DarkCyan"
+                                    >
+        </panels:CustomWindowChrome>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
             <Label Content="Amplitude (attribute units): "/>
             <xctk:DoubleUpDown Value="{Binding Amplitude, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="100" Increment="0.01" Width="70" ToolTip="The amplitude of the attribute."/>
             <Label Content="Beats/Minute [1,1000]: "/>
@@ -29,6 +45,6 @@
             <Label Content="Frequency to hit all values (mHz): "/>
             <Label Content="{Binding OscillatorFrequency}" Width="100"/>
         </StackPanel>
-        <Label Grid.Row="1" Content="Usually used for notes. This calculates the frequency of the oscillator needed to hit every note in the amplitude range." FontStyle="Italic"/>
+        <Label Grid.Row="2" Content="Usually used for notes. This calculates the frequency of the oscillator needed to hit every note in the amplitude range." FontStyle="Italic"/>
     </Grid>
 </Window>

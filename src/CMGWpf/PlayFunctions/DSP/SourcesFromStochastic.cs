@@ -47,7 +47,7 @@ namespace CMGWpf.PlayFunctions.DSP
             double reverbDelay = generator.ReverbParameters.Delay;
             double cloudDuration = generator.GetDeltaT();
 
-            // initialize the dynamcis portion of the genrator. 
+            // initialize the dynamics portion of the generator. 
             generator.InitializeDynamics();
             FastRandom Rn = generator.DynamicsRn;
 
@@ -55,14 +55,13 @@ namespace CMGWpf.PlayFunctions.DSP
             int voiceCount = (int)Math.Round(Tc * (1 + 1 / (double)Nt) * SampleRate); // the total number of samples in a voice (room added for cloud extensions)
             double[] compositionBuffer = new double[voiceCount * 2];
 
-            // build the samples from the composition and its charateristics by looping through each voice and then throug each time cell for the voice
-            // This is done in the order as voices may extend across time cells bounds based on thier calculated start and end times
+            // build the samples from the composition and its characteristics by looping through each voice and then through each time cell for the voice
+            // This is done in the order as voices may extend across time cells bounds based on their calculated start and end times
             foreach ((var voice, int iVoice) in voices.Select((v, i) => (v, i)))
             {
                 // skip muted voices
                 if (voice.Muted) continue;
                 if (voice.Preset == null) return $"Voice ${voice.Name} is missing its preset";
-                // initialize the random number generator for this voice
 
                 // create a stereo buffer to hold the voice's signal
                 double[] voiceBuffer = new double[voiceCount * 2];
@@ -118,7 +117,7 @@ namespace CMGWpf.PlayFunctions.DSP
             if (generator.PanOption == PANOPTION.composition) Pan.Apply(compositionBuffer, generator.PanAlgorithm, generator.PanParameters, generator.DynamicsRn);
             Reverb.Apply(compositionBuffer, reverbDelay, reverbDecay, sampleRate);
 
-            // now move the composition to the stereo buffer at the starttime of the composition
+            // now move the composition to the stereo buffer at the start time of the composition
             AudioBuffer.Add(compositionBuffer, ref stereoBuffer, (int)(generatorStartTime * sampleRate * 2));
             return "";
         }
@@ -145,7 +144,6 @@ namespace CMGWpf.PlayFunctions.DSP
             IntensityParameters intensityParameters = generator.IntensityParameters;
             double reverbDecay = generator.ReverbParameters.Decay;
             double reverbDelay = generator.ReverbParameters.Delay;
-            int sampleRate = PlayTypes.SampleRate;
             FastRandom rN = generator.DynamicsRn;
             double lo = voice.RegisterLo;
             double hi = voice.RegisterHi;
@@ -167,7 +165,7 @@ namespace CMGWpf.PlayFunctions.DSP
             // check that not all duration are 0
             if (Pd.Length <= 1) { DebugLog.Write($"buildcloud: duration table for timber={timbre}, deltaT={delta}, duration={cloudDuration} has no or only zero values"); return ([], new CloudState() { offset = -1, pitch = 0 }); }
 
-            // initialize the starting time and starting pitch based on the current cloud state and the microtones option
+            // initialize the starting time and starting pitch based on the current cloud state and the microtone option
             double t1 = cloudState.offset < 0 ?
                 Probability.Lookup(Pd, Nd, rN.NextDouble()) :
                 cloudState.offset;
@@ -191,7 +189,7 @@ namespace CMGWpf.PlayFunctions.DSP
             {
                 t2 = t1 + interval;
 
-                // get a glissando using a gaussian random speed and the current interval, or get a sustained pitch
+                // get a glissando using a Gaussian random speed and the current interval, or get a sustained pitch
                 if (timbre == TIMBRE.glissando)
                 {
                     double speed = Probability.GaussianRandom(0, delta * StochasticConstants.RMSFACTOR, rN);
@@ -227,9 +225,10 @@ namespace CMGWpf.PlayFunctions.DSP
                     });
 
                     // complete the source definition and add to the sources collection
+                    double instrumentEndTime = t1 + instrumentSample.Length / (double)SampleRate;
                     source.Generator = generator;
                     source.StartTime = generator.StartTime + cellTime + t1;
-                    source.StopTime = generator.StartTime + cellTime + t1 + duration;
+                    source.StopTime = generator.StartTime + cellTime + instrumentEndTime;
                     source.SoundFontName = voice.SoundFontFileName;
                     source.PresetName = voice.PresetName;
                     source.Name = instrument.InstrumentName;

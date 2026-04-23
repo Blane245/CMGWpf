@@ -167,6 +167,8 @@ namespace CMGWpf.PlayFunctions
                         });
                     };
                 }
+                // adjust the composition duration based on the length of the float buffer.
+                PlayViewModel.Instance.PlayDuration = (floatBuffer != null) ? (floatBuffer.Length / (float)(SampleRate * 2)) : 0; // divide by 2 for stereo
                 playDialog!.ShowDialog();
 
                 // Clean up when dialog closes
@@ -177,6 +179,8 @@ namespace CMGWpf.PlayFunctions
             }
             else
             {
+                // adjust the composition duration based on the length of the float buffer.
+                PlayViewModel.Instance.PlayDuration = (floatBuffer != null) ? (floatBuffer.Length / (float)(SampleRate * 2)) : 0; // divide by 2 for stereo
                 // Generate the report using the active generators and sources
                 ReportWriter.WriteReport(saveFileDialog!.FileName);
                 FileViewModel.Instance.StatusMessages = [new Types.Message() { Text = $"HTML report written to {saveFileDialog.FileName}." }];
@@ -213,8 +217,8 @@ namespace CMGWpf.PlayFunctions
 
                 switch (gen)
                 {
-                    case Silent:
-                        break;
+                    //case Silent:
+                    //    break;
                     case Algorithmic:
                         _ = SourcesFromAlgorithmic.Get(gen as Algorithmic, ref stereoBuffer, sF_Presets, sources);
                         break;

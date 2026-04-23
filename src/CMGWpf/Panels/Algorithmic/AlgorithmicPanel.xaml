@@ -45,20 +45,20 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                 <Button Content="New Seed" Background="Green" Foreground="White" Command="{Binding NoiseSeedCommand}" CommandParameter="{Binding AlgorithmicGenerator}" ToolTip="Generate a new seed for the noise generator"/>
                 <Label Content="Level (+-10dB):"/>
                 <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="-10" Maximum="10" Increment="1" Value="{Binding AlgorithmicGenerator.NoiseAmplitude}" ToolTip="Set the amplitude level for the noise generator relative to the current volume"/>
-                <Label Content="Frequency(Hz):"/>
-                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="1000" Increment="0.001" Value="{Binding AlgorithmicGenerator.NoiseFrequency}" ToolTip="Set the frequency for the noise generator"/>
+                <Label Content="Frequency (Hz):"/>
+                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="1000" Increment="0.001" Value="{Binding AlgorithmicGenerator.NoiseFrequency}" ToolTip="Set the frequency (Hz) for the noise generator"/>
             </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                 <Label Content="Reverb:" FontStyle="Italic"/>
                 <Label Content="Delay (msec)"/>
-                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="1" Value="{Binding AlgorithmicGenerator.ReverbDelay}" ToolTip="Set the delay time for the reverb effect. Zero means no reverb"/>
+                <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="1" Value="{Binding AlgorithmicGenerator.ReverbDelay}" ToolTip="Set the delay time (msec) for the reverb effect. Zero means no reverb"/>
                 <Label Content="Decay (1-10 dB)"/>
                 <xctk:IntegerUpDown Margin="5,0,0,0" Minimum="1" Maximum="10" Value="{Binding AlgorithmicGenerator.ReverbDecay}" ToolTip="Set the decay level for the reverb effect"/>
             </StackPanel>
 
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="Tremolo:" FontStyle="Italic"/>
-                <Label Content="Speed (Mhz)"/>
+                <Label Content="Speed (mHz)"/>
                 <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding AlgorithmicGenerator.Tremolo.Speed}" ToolTip="Set the speed for the tremolo effect"/>
                 <Label Content="Depth (dB)"/>
                 <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.1" Value="{Binding AlgorithmicGenerator.Tremolo.Depth}" ToolTip="Set the depth for the tremolo effect"/>

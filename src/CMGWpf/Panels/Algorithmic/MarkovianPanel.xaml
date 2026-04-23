@@ -104,35 +104,43 @@
                     Minimum="0"
                     Maximum="1"
                     Increment=".01"
-                                   FormatString="F2"
-                                   />
+                    FormatString="F2"
+                />
                 <xctk:DoubleUpDown Grid.Column="2" Grid.Row="1"
                     Value="{Binding TransitionRows[0].Values[1], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Minimum="0" Maximum="1" Increment=".01"/>
+                    Minimum="0" 
+                    Maximum="1" 
+                    Increment=".01"
+                    FormatString="F2"
+                />
                 <xctk:DoubleUpDown Grid.Column="3" Grid.Row="1"
                     Value="{Binding TransitionRows[0].Values[2], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Minimum="0" 
                     Maximum="1"
-                    Increment=".01"                                   FormatString="F2"
-/>
+                    Increment=".01"                                   
+                    FormatString="F2"
+                />
                 <Label Content="Up" Margin="5" Grid.Column="0" Grid.Row="2"/>
                 <xctk:DoubleUpDown Grid.Column="1" Grid.Row="2"
                     Value="{Binding TransitionRows[1].Values[0], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Minimum="0"
                     Maximum="1"
-                    Increment=".01"                                   FormatString="F2"
-/>
+                    Increment=".01"                                   
+                    FormatString="F2"
+                />
                 <xctk:DoubleUpDown Grid.Column="2" Grid.Row="2"
                     Value="{Binding TransitionRows[1].Values[1], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Minimum="0" 
                     Maximum="1" 
-                    Increment=".01"                                   FormatString="F2"
-/>
+                    Increment=".01"                                   
+                    FormatString="F2"
+                />
                 <xctk:DoubleUpDown Grid.Column="3" Grid.Row="2"
                     Value="{Binding TransitionRows[1].Values[2], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Minimum="0"
                     Maximum="1"
-                    Increment=".01"                                   FormatString="F2"
+                    Increment=".01"                                   
+                    FormatString="F2"
 />
                 <Label Content="Down" Margin="5" Grid.Column="0" Grid.Row="3"/>
                 <xctk:DoubleUpDown Grid.Column="1" Grid.Row="3"

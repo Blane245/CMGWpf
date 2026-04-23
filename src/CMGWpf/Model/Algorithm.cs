@@ -482,7 +482,7 @@ namespace CMGWpf.Model
     public class Tremolo
     {
         public Tremolo() { }
-        public double Speed { get; set; } = 0;
+        public double Speed { get; set; } = 0; // mHz
         public double Depth { get; set; } = 0;
         public MODULATORTYPE WaveForm { get; set; } = MODULATORTYPE.NOMODULATOR;
         public Tremolo Clone()

@@ -1,22 +1,30 @@
 <Window x:Class="CMGWpf.SplashScreen"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:properties="clr-namespace:CMGWpf.Properties"
         Title="CMG"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
         ResizeMode="NoResize"
+        Width="500" Height="282"
         WindowStartupLocation="CenterScreen"
         Topmost="True">
-    <Border BorderBrush="#2C3E50" BorderThickness="2" CornerRadius="10" Background="White">
-        <Grid Margin="0">
+    <Border BorderBrush="#2C3E50" BorderThickness="2" CornerRadius="10" Background="#2C3E50">
+        <Border.Clip>
+            <RectangleGeometry RadiusX="10" RadiusY="10" Rect="0,0,500,282"/>
+        </Border.Clip>
+        <Grid Margin="2" Background="White">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Image Grid.Row="0" Source="Assets/CMG Splash.png" 
                    Stretch="Uniform"
                    Margin="0"/>
-            <Label Grid.Row="0" Content="Version" />
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10">
+                <Label Content="Version: "/>
+                <Label Content="{Binding Source={x:Static properties:Settings.Default}, Path=Version}" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+            </StackPanel>
         </Grid>
     </Border>
 </Window>

@@ -43,13 +43,13 @@
                 <MenuItem Header="_Preferences..." Command="{Binding Source={x:Static services:GlobalService.Instance}, Path=EditPreferencesCommand}" ToolTip="Edit CMG preferences." InputGestureText="Ctrl+P"/>
                 </MenuItem>
                 <MenuItem Header="_Tools" ToolTip="Access CMG tools.">
-                    <MenuItem Header="_Midi/Frequency Converter..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MidiFrequencyConverterCommand}"
-                              ToolTip="Convert between midi number and audio frequency."
-                              InputGestureText="Ctrl+M"
-                              />
-                    <MenuItem Header="Start CMG _Database Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StartCMGDBEditorCommand}"
+                <MenuItem Header="Start CMG _Database Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StartCMGDBEditorCommand}"
                               ToolTip="Start the CMG Database Editor."
                         InputGestureText="Ctrl+D"                              
+                              />
+                <MenuItem Header="_Midi/Frequency Converter..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MidiFrequencyConverterCommand}"
+                              ToolTip="Convert between midi number and audio frequency."
+                              InputGestureText="Ctrl+M"
                               />
                     <MenuItem Header="_Measure Duration Calculator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MeasureDurationCalculatorCommand}"
                               ToolTip="Determine the number of seconds in a measure at a certain BPM."
@@ -67,7 +67,7 @@
                               ToolTip="Stagger a collection of generators' start times."
                               InputGestureText="Ctrl+T"
                               />
-                    <MenuItem Header="_Align Generator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=AlignGeneratorsCommand}"
+                    <MenuItem Header="_Align Generators..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=AlignGeneratorsCommand}"
                               ToolTip="Align a collection of genrators start or stop times"
                               InputGestureText="Ctrl+A"
                               />

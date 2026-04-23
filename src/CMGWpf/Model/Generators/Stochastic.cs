@@ -398,9 +398,8 @@ namespace CMGWpf.Model.Generators
         {
             Name = XMLFunctions.GetAttributeString(generatorElem, "name", "");
             Parent = parent;
-            double readStopTime = XMLFunctions.GetAttributeDouble(generatorElem, "stopTime", 0);
             StartTime = XMLFunctions.GetAttributeDouble(generatorElem, "startTime", 0);
-            StopTime = readStopTime; // override the calculation doen when starttime is read
+            StopTime = XMLFunctions.GetAttributeDouble(generatorElem, "stopTime", 0);
             Position = XMLFunctions.GetAttributeInt(generatorElem, "position", 0);
             Mute = XMLFunctions.GetAttributeBool(generatorElem, "mute", false);
 

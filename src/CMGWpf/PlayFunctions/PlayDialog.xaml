@@ -39,8 +39,12 @@
                                      ChromeBackground="SaddleBrown">
         </panels:CustomWindowChrome>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <Button Content="{materialIcons:MaterialIconExt Kind=Restart}" Command="{Binding RewindCommand}" Margin="5"/>
-            <Button Command="{Binding PlayPauseCommand}" Margin="5">
+            <Button Content="{materialIcons:MaterialIconExt Kind=Restart}" Command="{Binding RewindCommand}" Margin="5"
+                    ToolTip="Restart from the beginning"
+                    />
+            <Button Command="{Binding PlayPauseCommand}" Margin="5"
+                    ToolTip="Play/pause"
+                    >
                 <materialIcons:MaterialIcon x:Name="SoloIcon">
                     <materialIcons:MaterialIcon.Style>
                         <Style TargetType="materialIcons:MaterialIcon">
@@ -68,6 +72,7 @@
                 IsSnapToTickEnabled="True"
                 Margin="5"
                 VerticalAlignment="Center"
+                    ToolTip="Adjust playback volume"
             />
             </StackPanel>
             <StackPanel>
@@ -79,34 +84,41 @@
                     Value="{Binding CurrentPlayPosition, Mode=TwoWay}" 
                     Margin="5"
                     VerticalAlignment="Center"
+                    ToolTip="Manually position the playback"
                     />
             </StackPanel>
             <Label Content="{Binding CurrentPlayTime}" Width="50"/>
             <Button Content="{materialIcons:MaterialIconExt Kind=AudioBook}" 
                     Command="{Binding ShowVoicesCommand}" 
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" 
-                    Margin="5"/>
+                    Margin="5"
+                    ToolTip="Display or hide the voice legend"
+                    />
             <Border BorderBrush="LightGray" BorderThickness="1" Margin="5">
                 <Grid Width="100" Margin="0">
                     <Line X1="0" Y1="15" X2="{Binding SignalLevelPixels[0]}" Y2="15" Stroke="Red" StrokeThickness="1" />
-                    <Line X1="{Binding MaxSignalLevelPixels[0]}" Y1="0" X2="{Binding MaxSignalLevelPixels[0]}" Y2="30" Stroke="Black" StrokeThickness="1" />
+                    <Line X1="{Binding MaxSignalLevelPixels[0]}" Y1="0" X2="{Binding MaxSignalLevelPixels[0]}" Y2="30" Stroke="Black" StrokeThickness="1" 
+                          ToolTip="Left channel signal level"
+                          />
                 </Grid>
             </Border>
             <Border BorderBrush="LightGray" BorderThickness="1" Margin="5">
                 <Grid Width="100" Margin="0">
                     <Line X1="0" Y1="15" X2="{Binding SignalLevelPixels[1]}" Y2="15" Stroke="Red" StrokeThickness="1"/>
-                    <Line X1="{Binding MaxSignalLevelPixels[1]}" Y1="0" X2="{Binding MaxSignalLevelPixels[1]}" Y2="30" Stroke="Black" StrokeThickness="1" />
+                    <Line X1="{Binding MaxSignalLevelPixels[1]}" Y1="0" X2="{Binding MaxSignalLevelPixels[1]}" Y2="30" Stroke="Black" StrokeThickness="1" 
+                          ToolTip="Right channel signal level"
+                          />
                 </Grid>
             </Border>
             <Button Content="{materialIcons:MaterialIconExt Kind=MicrophoneOutline}" 
                     Command="{Binding RecordAudioCommand}" 
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                    ToolTip="Record Audio"
+                    ToolTip="Record audio"
                     Margin="5"/>
             <Button Content="{materialIcons:MaterialIconExt Kind=VideoOutline}" 
                     Command="{Binding RecordVideoCommand}" 
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                    ToolTip="Record Video (Audio + Soundroll)"
+                    ToolTip="Record video (audio + soundroll)"
                     Margin="5"/>
         </StackPanel>
         <Grid Grid.Row="2" Background="LightGray" Margin="10,0,0,0">

@@ -8,10 +8,10 @@ namespace CMGWpf.PlayFunctions.Utilities
         /// <summary>
         /// Apply reverb to a 2-channel interleaved audio buffer. The reverb is a simple feedback-delay effect, where the delayed signal is added back to the original signal with a decay factor. The delay time and decay factor can be adjusted to create different reverb effects.
         /// </summary>
-        /// <param name="audioBuffer">2-channel interleaved audio</param>
-        /// <param name="reverbDelay">milliseconds of delay</param>
-        /// <param name="reverbDecay">decay level (dB)</param>
-        /// <param name="sampleRate">number of samples per second</param>
+        /// <param name="audioBuffer" type="double[]">2-channel interleaved audio</param>
+        /// <param name="reverbDelay" type="double">milliseconds of delay (msec)</param>
+        /// <param name="reverbDecay" type="double">decay level (dB)</param>
+        /// <param name="sampleRate" type="int">number of samples per second</param>
         public static void Apply(double[] audioBuffer, double reverbDelay, double reverbDecay, int sampleRate)
         {
             if (reverbDelay > 0 && reverbDecay > 0)

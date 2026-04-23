@@ -162,7 +162,7 @@ namespace CMGWpf.PlayFunctions.DSP
             }
             else loop = false;
 
-            // determine the base playback rate from the samples samplerate and the systems sample rate. This seems upside down but the formula is correct. If the sample sample rate is higher than the system sample rate, we need to play it back slower to get the correct pitch, and if it's lower, we need to play it back faster. So the formula is system sample rate divided by sample sample rate.
+            // determine the base playback rate from the samples sample rate and the systems sample rate. This seems upside down but the formula is correct. If the sample rate is higher than the system sample rate, we need to play it back slower to get the correct pitch, and if it's lower, we need to play it back faster. So the formula is system sample rate divided by sample rate.
             double baseRatio = (double)outputSampleRate / (double)inputSampleRate;
             // build the envelope for the note. This will be used to modulate the volume of the note over time. The envelope will be built based on the attack, decay, sustain, and release times, as well as the initial attenuation. The envelope will be applied to each sample in the final output to create the desired volume changes over time.
             double delayEnd = attackEnabled ? delaySeconds : 0;
@@ -214,7 +214,7 @@ namespace CMGWpf.PlayFunctions.DSP
                 envelope = [.. envelope, new GainEnvelope { Gain = noteEndGain, Time = noteEnd }];
                 if (noteEnd != releaseEnd) envelope = [.. envelope, new GainEnvelope { Gain = 0, Time = releaseEnd }];
             }
-            else // attack is complete - add the delay and attact phases to the envelope and check for the other phases
+            else // attack is complete - add the delay and attach phases to the envelope and check for the other phases
             {
                 envelope = [.. envelope, new GainEnvelope { Gain = 0, Time = delayEnd }];
                 envelope = [.. envelope, new GainEnvelope { Gain = volumeGain * initialAttenuationGain, Time = attackEnd }];
@@ -281,14 +281,14 @@ namespace CMGWpf.PlayFunctions.DSP
             // first a few things to initialize.
             int iEnvelope = 0; // the current index in the gain envelope.
             int maxEnvelope = envelope.Length - 1; // the maximum index for the gain envelope.
-            double instrumentSampleIndex = 0; // the current poistion in the instrument sample data that is being read from. This is a double because is is calulated from using the base sample ratio, start and end cents, and tremolo. The integer part of this number will be used to determine which sample to read from the instrument sample data, and the fractional part will be used for interpolation between samples if necessary.
+            double instrumentSampleIndex = 0; // the current position in the instrument sample data that is being read from. This is a double because is is calculated from using the base sample ratio, start and end cents, and tremolo. The integer part of this number will be used to determine which sample to read from the instrument sample data, and the fractional part will be used for interpolation between samples if necessary.
             DebugLog.Write($"Total samples={totalSamples}, base resampling ratio={baseRatio}, startcents={startCents}, endcents={endCents}");
             for (int i = 0; i < totalSamples; i++)
             {
                 // the time of the sample point
                 double t = (double)i / outputSampleRate;
 
-                // calcuate the current cents and vibrato cents and combine it with the base ratio.
+                // calculate the current cents and vibrato cents and combine it with the base ratio.
                 double currentCents = Interpolation.Linear(t, 0, interval, startCents, endCents);
                 double currentVibrato = vibrato.GetCurrentValue(t);
                 double pitchRatio = Math.Pow(2, (currentCents + currentVibrato) / 1200.0); // the time cents to seconds function in double precision
@@ -313,9 +313,6 @@ namespace CMGWpf.PlayFunctions.DSP
                 // apply linear interpolation if necessary handling looping
                 double sample1 = (loop && index >= loopEnd) ? instrumentSample[loopStart] : instrumentSample[index];
                 double sample2 = (loop && index + 1 >= loopEnd) ? instrumentSample[loopStart] : (index + 1 < instrumentSample.Length - 1 ? instrumentSample[index + 1] : sample1); // if the next index is out of bounds, use sample1 as the sample value for interpolation. This can happen if we are at the end of the sample data and not looping, or if we are at the end of the loop and looping.
-                if (index < 0 || index >= instrumentSample.Length) throw new Exception($"A sample got pick up from the wrong place. sample1={sample1}, sample2={sample2}, index={index}, instrument length={instrumentSample.Length}, frac={frac}");
-                if (Math.Abs(sample1) > 1 || Math.Abs(sample2) > 1) throw new Exception($"A sample got pick up with an value out of range. sample1={sample1}, sample2={sample2}, index={index}, instrument length={instrumentSample.Length}, frac={frac}");
-                if (double.IsNaN(sample1) || double.IsNaN(sample2)) throw new Exception($"A sample got pick up with an invalid value. sample1={sample1}, sample2={sample2}, index={index}, instrument length={instrumentSample.Length}, frac={frac}");
                 double sample = sample1 * (1 - frac) + sample2 * frac; // apply linear interpolation between the two samples
 
                 // now we have a very nice sample. We apply frequency noise, the gain envelope and tremolo
@@ -333,7 +330,6 @@ namespace CMGWpf.PlayFunctions.DSP
                 double envelopeGain = (iEnvelope < maxEnvelope) ? Interpolation.Linear(t, envelope[iEnvelope - 1].Time, envelope[iEnvelope].Time, envelope[iEnvelope - 1].Gain, envelope[iEnvelope].Gain) : volumeGain * initialAttenuationGain;
                 double tremoloGain = Sf2Units.VolumeDbToGain(tremolo.GetCurrentValue(t));
                 finalSamples[i] = sample * envelopeGain * tremoloGain;
-                if (double.IsNaN(finalSamples[i])) throw new Exception($"Final sample is invalid at i={i}, sample={sample}, envelopeGain={envelopeGain}, tremoloGain={tremoloGain}");
             }
 
             // oh my gosh, I think I got it all. 

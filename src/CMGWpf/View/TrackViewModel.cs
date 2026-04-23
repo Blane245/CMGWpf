@@ -122,9 +122,9 @@ namespace CMGWpf.View
         public RelayCommand<Track> MoveDownCommand =>
             _moveDownCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).MoveDown());
 
-        private RelayCommand<Track>? _addSilentCommand;
-        public RelayCommand<Track> AddSilentCommand =>
-            _addSilentCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).AddGenerator(Model.Generators.GENERATORTYPE.Silent));
+        //private RelayCommand<Track>? _addSilentCommand;
+        //public RelayCommand<Track> AddSilentCommand =>
+        //    _addSilentCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).AddGenerator(Model.Generators.GENERATORTYPE.Silent));
         private RelayCommand<Track>? _addAlgorithmicCommand;
         public RelayCommand<Track> AddAlgorithmicCommand =>
             _addAlgorithmicCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).AddGenerator(Model.Generators.GENERATORTYPE.Algorithmic));

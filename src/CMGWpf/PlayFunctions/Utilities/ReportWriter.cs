@@ -207,7 +207,7 @@ namespace CMGWpf.PlayFunctions.Utilities
         {
             string typeName = gen switch
             {
-                Silent => "Silent",
+                //Silent => "Silent",
                 Algorithmic => "Algorithmic",
                 Stochastic => "Stochastic",
                 _ => "Unknown"
@@ -215,7 +215,7 @@ namespace CMGWpf.PlayFunctions.Utilities
 
             string typeClass = gen switch
             {
-                Silent => "type-silent",
+                //Silent => "type-silent",
                 Algorithmic => "type-algorithmic",
                 Stochastic => "type-stochastic",
                 _ => ""
