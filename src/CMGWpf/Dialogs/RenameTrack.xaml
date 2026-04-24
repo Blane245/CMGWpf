@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs.TrackTools"
         xmlns:panels="clr-namespace:CMGWpf.Panels"
-        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:viewmodel="clr-namespace:CMGWpf.View"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         d:DataContext="{d:DesignInstance Type=viewmodel:TrackViewModel}"

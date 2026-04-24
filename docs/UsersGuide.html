@@ -1,0 +1,1106 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Computer Music Generator (CMG) User's Guide, Version 4.0</title>
+    <meta http-equiv="cache-control" content="no-cache">
+</head>
+<body>
+
+    <style>
+.note {
+  background-color: rgb(114,74,6);
+  color: white;
+}
+.picture {
+display:block; 
+margin-left: auto; 
+margin-right: auto;
+}
+</style>
+<h1 id="computer-music-generator-cmg-users-guide-version-40">Computer Music Generator (CMG) User's Guide, Version 4.0</h1>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#user-interface-overview">User Interface Overview</a></li>
+<li><a href="#working-with-files">Working with Files</a></li>
+<li><a href="#tracks-and-composition">Tracks and Composition</a></li>
+<li><a href="#generators">Generators</a></li>
+<li><a href="#playback-and-recording">Playback and Recording</a></li>
+<li><a href="#tools-and-utilities">Tools and Utilities</a></li>
+<li><a href="#preferences">Preferences</a></li>
+<li><a href="#keyboard-shortcuts">Keyboard Shortcuts</a></li>
+<li><a href="#tips-and-best-practices">Tips and Best Practices</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#appendix-a-cmg-file-specification">Appendix A: CMG File Format Specification</a></li>
+<li><a href="#appendix-b-digital-signal-processing-of-soundfont-presets">Appendix B: Digital Signal Processing of Soundfont Presets</a></li>
+<li><a href="#appendix-c-algorithmic-generator-processing">Appendix C: Algorithmic Generator Processing</a></li>
+<li><a href="#appendix-d-stochastic-generator-processing">Appendix D: Stochastic Generator Processing</a></li>
+<li><a href="#appendix-e-cmg-database-structure">Appendix E: CMG Database Structure</a>]</li>
+<li><a href="#appendix-f-glossary">Appendix F: Glossary</a></li>
+<li><a href="#acknowledgements">Acknowledgements</a></li>
+</ol>
+<hr />
+<h2 id="introduction">Introduction</h2>
+<p>CMG (Computer Music Generator) is a desktop application developed using the Windows PlatformFramework (WPF) for creating music through algorithmic and stochastic (chance-based) composition techniques. Whether you're an experimental composer, sound designer, or music educator, CMG provides powerful tools for generating, editing, and rendering complex musical structures.</p>
+<p>CMG was inspired by the book <a href="https://en.wikipedia.org/wiki/Formalized_Music">Formalized Music: Thought and Mathematics in Composition</a>, by Iannis Xenakis, which I read many years ago and am just getting around to implementing something. Some of the features that Xenakis lays out are included along with other concepts of my own.</p>
+<p>The features of the CMG include:</p>
+<ul>
+<li>Retention of defined sound generation files between working sessions,</li>
+<li>The use of SoundFont files to produce sampled sounds,</li>
+<li>Pitch vibrato, intensity tremolo, and reverb effects,</li>
+<li>Pitch sequencing,</li>
+<li>The separation of sound generators into tracks that mimics the parts in a music score,</li>
+<li>Two types of sound generators: Algorithmic and Stochastic, and</li>
+<li>Previewing and recording of assembled compositions.</li>
+</ul>
+<p>Below is an example composition in edit mode:</p>
+<p align="center">
+  <img src="images/CompositionExample.png" width="100%" height: auto; alt="description">
+  <br>
+  <em>An example of a composition containing algorithmic and stochastic generators</em>
+</p>
+and the same composition in play mode:
+<p align="center">
+  <img src="images/PlayExample.png" width="100%" height: auto; alt="description">
+  <br>
+  <em>An example of a playing a generated composition</em>
+</p>
+<h3 id="what-is-computer-music-generation">What is Computer Music Generation?</h3>
+<p>Computer music generation uses mathematical algorithms and probability models to create musical sequences. This approach enables:</p>
+<ul>
+<li>Exploration of musical patterns that would be difficult to compose manually</li>
+<li>Creation of long-form compositions with evolving structures</li>
+<li>Generation of variation and unpredictability in musical performance</li>
+<li>Integration of precise timing and control with creative randomness</li>
+</ul>
+<h3 id="key-concepts">Key Concepts</h3>
+<ul>
+<li><strong>Track</strong>: A container for organizing related generators</li>
+<li><strong>Generator</strong>: A musical pattern creator (either algorithmic or stochastic)</li>
+<li><strong>Timeline</strong>: Visual representation of generators across time</li>
+<li><strong>Soundfont</strong>: A collection of sampled instrument sounds (SF2 format)</li>
+<li><strong>Algorithm</strong>: A mathematical formula that produces musical attribute values</li>
+<li><strong>Cloud</strong>: In stochastic generators, a probabilistic distribution of notes</li>
+</ul>
+<hr />
+<h2 id="getting-started">Getting Started</h2>
+<h3 id="installation">Installation</h3>
+<ol>
+<li>Download and install the latest version of <a href="https://github.com/Blane245/CMGWpf.git">CMG</a></li>
+<li>Ensure you have .NET 10.0 Runtime installed</li>
+<li>Launch <code>Computer Music Generator</code> from the Start Menu or desktop shortcut</li>
+<li>Acquire some soundfont files from one of the many places on the internet. I suggest <a href="https://www.polyphone.io/en/soundfonts">PolyPhone</a>. Place them in the default location C:\Soundfonts.</li>
+<li>Install the companion applications CMGDatabaseServer and CMGDatabaseEditor. They are both available in <a href="https://github.com/Blane245?tab=repositories">my GitHub Repository</a>.</li>
+</ol>
+<h3 id="first-launch">First Launch</h3>
+<p>On first launch, CMG will:</p>
+<ul>
+<li>Display a splash screen with the CMG logo</li>
+<li>Start with an empty composition</li>
+<li>Position the window on your primary or secondary monitor</li>
+<li>Load existing lists of soundfont files and ensembles</li>
+</ul>
+<h3 id="creating-your-first-composition">Creating Your First Composition</h3>
+<ol>
+<li><p><strong>Create a Track</strong></p>
+<ul>
+<li>Go to <code>Edit → Add Track</code>. The track will be named T0.</li>
+</ul>
+</li>
+<li><p><strong>Add a Generator</strong>
+- Click the (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M14 3V13.56C13.41 13.21 12.73 13 12 13C9.79 13 8 14.79 8 17S9.79 21 12 21 16 19.21 16 17V3H14Z" /></svg>) icon on the track control menu</p>
+<ul>
+<li>Select either <code>Algorithmic</code> or <code>Stochastic</code> generator type. Try Algorithmic first as it is simpler.</li>
+</ul>
+</li>
+<li><p><strong>Configure the Generator</strong></p>
+<ul>
+<li>Set the start and stop times.</li>
+<li>Configure musical parameters for the generator type. If you are using an Algorithmic generator, at a minimum, select the soundfont file and preset. Using defaults for all other parameters is fine for a first shot.</li>
+<li>Click <code>OK</code> to save the generator. The generator will appear on the track with a name of G0.</li>
+</ul>
+</li>
+<li><p><strong>Preview Your Work</strong></p>
+<ul>
+<li>Click <code>Play-&gt;Play</code> from the edit menu.</li>
+<li>Press <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M8,5.14V19.14L19,12.14L8,5.14Z" /></svg> to listen to the generated audio. The default algorithmic generator plays a C4 (middle C) at 60 beast per minute (BPM).</li>
+</ul>
+</li>
+<li><p><strong>Save Your Composition</strong></p>
+<ul>
+<li>Go to <code>File → Save As...</code></li>
+<li>Choose a location and filename (.cmg extension). Your file will be included in the Recent Files list for easy access later.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="user-interface-overview">User Interface Overview</h2>
+<h3 id="main-window">Main Window</h3>
+<p>The main window consists of:</p>
+<p><strong>Title Bar</strong></p>
+<ul>
+<li>CMG logo (left)</li>
+<li>Menu (left-center)</li>
+<li>Composition filename (center)</li>
+<li>Window controls: Minimize, Maximize, Close (right)</li>
+</ul>
+<p><strong>Menu</strong></p>
+<ul>
+<li>File: New, Open, Save, Save As, Recent files, Exit</li>
+<li>Edit: Add Track, Preferences, Comments</li>
+<li>Tools: Utilities for generator manipulation and calculations</li>
+<li>Play: Playback and recording functions</li>
+<li>Help: About CMG and User's Guide link</li>
+</ul>
+<p><strong>Timeline</strong></p>
+<ul>
+<li>Zoom and pan controls</li>
+<li>Horizontal timeline showing time progression. The position and scale depending on the pan and zoom settings.</li>
+</ul>
+<p><strong>Body</strong></p>
+<ul>
+<li>Vertical track lanes</li>
+<li>Generator blocks showing their temporal extent</li>
+</ul>
+<p><strong>Status/Message Area</strong></p>
+<ul>
+<li>Displays informational messages, warnings, and errors</li>
+<li>Automatically scrolls to show recent messages</li>
+<li>Cleared when starting a new operation</li>
+</ul>
+<h3 id="window-behavior">Window Behavior</h3>
+<p>CMG supports modern window management:</p>
+<ul>
+<li><strong>Multiple Instances</strong>: Run multiple CMG instances simultaneously (different files only)</li>
+<li><strong>Non-Modal Dialogs</strong>: Edit multiple tracks and generators, and bringing up multiple tools  concurrently</li>
+<li><strong>Window Memory</strong>: Remembers size and position across sessions</li>
+<li><strong>Taskbar-Aware Maximize</strong>: Maximizes without overlapping the taskbar</li>
+</ul>
+<hr />
+<h2 id="working-with-files">Working with Files</h2>
+<h3 id="file-types">File Types</h3>
+<p><strong>CMG File (.cmg)</strong></p>
+<ul>
+<li>Native CMG composition format</li>
+<li>XML-based structure</li>
+<li>Contains timeline, and all tracks and generators</li>
+</ul>
+<h3 id="file-operations">File Operations</h3>
+<h4 id="new-composition">New Composition</h4>
+<p><code>File → New</code> or <code>Ctrl+N</code></p>
+<ul>
+<li>Prompts to save current file if modified</li>
+<li>Creates empty composition with default settings</li>
+</ul>
+<h4 id="open">Open</h4>
+<p><code>File → Open</code> or <code>Ctrl+O</code></p>
+<ul>
+<li>Opens file browser to select .cmg file</li>
+<li>Cannot open files already opened in another CMG instance</li>
+<li>Displays error if file is locked</li>
+</ul>
+<h4 id="save">Save</h4>
+<p><code>File → Save</code> or <code>Ctrl+S</code></p>
+<ul>
+<li>Saves current composition to existing filename</li>
+</ul>
+<h4 id="save-as">Save As</h4>
+<p><code>File → Save As</code> or <code>Ctrl+Shift+S</code></p>
+<ul>
+<li>Saves composition with new filename</li>
+<li>Useful for creating variations</li>
+</ul>
+<h4 id="recent-files">Recent Files</h4>
+<p><code>File → Recent</code></p>
+<ul>
+<li>Shows recently opened files</li>
+<li>Click to open (subject to file locking)</li>
+<li>Also available from Windows taskbar Jump List</li>
+</ul>
+<h3 id="file-locking">File Locking</h3>
+<p>CMG prevents multiple instances from opening the same file:</p>
+<ul>
+<li>Lock files (<code>.lock</code>) created when opening a composition</li>
+<li>Automatically cleaned up on normal exit</li>
+<li>Stale locks (older than 1 hour) are automatically removed</li>
+<li>Manual unlock required if application crashes</li>
+</ul>
+<hr />
+<h2 id="tracks-and-composition">Tracks and Composition</h2>
+<h3 id="understanding-tracks">Understanding Tracks</h3>
+<p>Tracks organize your composition into logical layers, similar to tracks in a DAW (Digital Audio Workstation). Each track must have a unique name and can contain multiple generators that play sequentially or simultaneously.</p>
+<h3 id="track-operations">Track Operations</h3>
+<h4 id="adding-a-track">Adding a Track</h4>
+<p><code>Edit → Add Track</code> or <code>Ctrl+T</code></p>
+<ol>
+<li>Track appears in the body of the window below existing tracks</li>
+<li>Given a unique name starting the &quot;T&quot;.</li>
+</ol>
+<h4 id="renaming-a-track">Renaming a Track</h4>
+<p><code>Track → Rename Track</code> (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M15 16L11 20H21V16H15M12.06 7.19L3 16.25V20H6.75L15.81 10.94L12.06 7.19M18.71 8.04C19.1 7.65 19.1 7 18.71 6.63L16.37 4.29C16.17 4.09 15.92 4 15.66 4C15.41 4 15.15 4.1 14.96 4.29L13.13 6.12L16.88 9.87L18.71 8.04Z" /></svg>)</p>
+<ol>
+<li>Enter new unique name</li>
+</ol>
+<h4 id="deleting-a-track">Deleting a Track</h4>
+<p><code>Track → Delete Track</code> (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>)</p>
+<ol>
+<li>Confirm deletion</li>
+<li>The track and all of its generators are removed</li>
+</ol>
+<h4 id="move-track-up-and-down">Move Track Up and Down</h4>
+<p>Tracks can be moved up and down in the vertical display of tracks. Use <code>Track-&gt;Move Up</code> (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z" /></svg>) and <code>Track-&gt;Move Down</code> (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M11,4H13V16L18.5,10.5L19.92,11.92L12,19.84L4.08,11.92L5.5,10.5L11,16V4Z" /></svg>) to performs these operations.</p>
+<h4 id="track-solo-and-mute">Track Solo and Mute</h4>
+<p>When playing a composition, tracks can be muted or soloed. None of the generators in a muted track will be heard. One or more tracks can be soloed, in which case all other tracks will not be heard. Use <code>Track-&gt;Mute</code> (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" /></svg>) and <code>Track-&gt;Solo</code> (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" /></svg>) for these operations. The buttons will change to (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" /></svg>) and (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M21.1,12.5L22.5,13.91L15.97,20.5L12.5,17L13.9,15.59L15.97,17.67L21.1,12.5M10,17L13,20H3V18C3,15.79 6.58,14 11,14L12.89,14.11L10,17M11,4A4,4 0 0,1 15,8A4,4 0 0,1 11,12A4,4 0 0,1 7,8A4,4 0 0,1 11,4Z" /></svg>), respectively.</p>
+<h3 id="track-level-tools-">Track-Level Tools (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M18 16H16V15H8V16H6V15H2V20H22V15H18V16M20 8H17V6C17 4.9 16.1 4 15 4H9C7.9 4 7 4.9 7 6V8H4C2.9 8 2 8.9 2 10V14H6V12H8V14H16V12H18V14H22V10C22 8.9 21.1 8 20 8M15 8H9V6H15V8Z" /></svg>)</h3>
+<h4 id="track-volume">Track Volume</h4>
+<p><code>Track → Tools → Volume</code></p>
+<ul>
+<li>Adjusts overall volume for all generators on track</li>
+<li>Range: -10 dB to +10 dB (0 dB = no change)</li>
+<li>Applied during playback</li>
+</ul>
+<h4 id="track-shift">Track Shift</h4>
+<p><code>Track → Tools → Shift</code></p>
+<ul>
+<li>Moves all generators on track forward or backward in time. The shift must not move any generator such that its start time is less than zero.</li>
+<li>Useful for adjusting timing relationships between tracks</li>
+</ul>
+<div class="note">**Note**: This operation cannot be performed when any generators on the track are being edited.</div>
+<h4 id="track-duplicate">Track Duplicate</h4>
+<p><code>Track → Tools → Duplicate</code></p>
+<ul>
+<li>Creates a new copy of the track with a new name and all generators with new names. Places the new track at the end of all of the tracks.</li>
+<li>Useful to set a starting point for a set of generators</li>
+</ul>
+<div class="note">**Note**: This operation cannot be performed when any generators on the track are being edited.</div>
+<hr />
+<h2 id="generators">Generators</h2>
+<p>Generators are the core of CMG, defining the actual musical content. There are two types: <strong>Algorithmic</strong> and <strong>Stochastic</strong>. The details of the parameter setting and the algorithms employed by the generators can be found in the appendices.</p>
+<p class="note">In what follows, a number of the parameters include a random number generator, and an optional seed can be provided for each individually. If a seed is not specified, the date and time value is used to seed the random number generator causing a different sequence of vlaues to be created each time it is used. A seed can be manually entered or one can be generated. Seeds for each random generator may be different or the same as desired.</p>
+<h3 id="generator-types">Generator Types</h3>
+<h4 id="algorithmic-generators">Algorithmic Generators</h4>
+<p>Algorithmic generators use mathematical formulas to create deterministic or probabilistic musical sequences. These generators control the values of musical attributes by using algorithms. The musical attributes are:</p>
+<ul>
+<li><strong>Note (pitch) Algorithm</strong>: Determines which notes to play</li>
+<li><strong>Speed (tempo) Algorithm</strong>: Controls tempo/rhythm</li>
+<li><strong>Duration (note value) Algorithm</strong>: Sets note lengths</li>
+<li><strong>Attack (velocity) Algorithm</strong>: Controls note velocity</li>
+<li><strong>Volume (intensity) Algorithm</strong>: Overall level adjustment</li>
+<li><strong>Pan (channel) Algorithm</strong>: Stereo positioning</li>
+</ul>
+<p><strong>Algorithm Types:</strong>
+Each of the attributes has a algorithm assigned to it. More details may be found in <a href="#appendix-c-algorithmic-generator-processing">Appendix C: Algorithmic Generator Processing</a>. The algorithms are:</p>
+<ul>
+<li><strong>Constant</strong>: Fixed value</li>
+<li><strong>Oscillator</strong>: Value cycles over time with a given frequency and amplitude</li>
+<li><strong>Markovian</strong>: Value remains the same, goes up, or goes down within a certain range at a given step size, with specified probabilities</li>
+<li><strong>Wiener</strong>: Value does a random walk with a specified trend and deviation</li>
+<li><strong>Autoregressive</strong>: Value does a random walk with a specified memory of the previous value.</li>
+<li><strong>Sequencer</strong>: Sequence of values obtained from the CMG Database. Sequences can be transposed, inverted, or reflected. <b><i>The Sequencer apply only to the note attribute</i></b>.</li>
+</ul>
+<p class="note">Note: as CMG converts the generator definitions into sound, it will constrain the attribute values within the valid limits of that parameter. For example, if an pan algorithm generatoes a value outside of [-1,+1] the value will be constained to remain within those limits. The Markovian algorithm has an addition feature. The value will "bounce" off of the limit, turning the opposite direction.</p>
+<p><strong>General Parameters:</strong></p>
+<ul>
+<li><strong>SoundFont</strong>: Name of the soundfont file to get sound samples</li>
+<li><strong>Preset</strong>: Name of the preset of the specific sound samples desired</li>
+<li><strong>Looping?</strong>: Enable instrument defined looping</li>
+<li><strong>Attack?</strong>: Enable the attack phase of the intensity envelope as defined in the Soundfont instrument</li>
+<li><strong>Microtones</strong>: Enable pitch values between semitones</li>
+<li><strong>Noise:</strong> Frequency modulated Gaussian noise may be applied to the signal
+<ul>
+<li><strong>Seed</strong>: The seed of the random number generator. Click <code>New Seed</code> to have one generated.</li>
+<li><strong>Level (+-10dB)</strong>: The amount of random noise</li>
+<li><strong>Frequency (Hz)</strong>: The frequency of the noise</li>
+</ul>
+</li>
+<li><strong>Reverb</strong>:
+<ul>
+<li><strong>Delay (msec)</strong>: The time delay of the original signal feeding into the reverberator</li>
+<li><strong>Decay (1-10dB)</strong>: The amount of signal decay applied to the reverberator</li>
+</ul>
+</li>
+<li><strong>Tremolo</strong>: The cyclic change in volume of the signal
+<ul>
+<li><strong>Speed (mHz)</strong>: The cycle speed of the tremolo</li>
+<li><strong>Depth (dB)</strong>: The amount of intensity variation</li>
+<li><strong>Modulator</strong> One of the available oscillators</li>
+</ul>
+</li>
+<li><strong>Vibrato</strong>: The cyclic change in pitch of the signal
+<ul>
+<li><strong>Speed (mHz)</strong>: The cycle speed of the vibrato</li>
+<li><strong>Depth (cents)</strong>: The amount of pitch variation</li>
+<li><strong>Modulator</strong>: One of the available oscillators</li>
+</ul>
+</li>
+<li><strong>Measure</strong>:
+<ul>
+<li><strong>Length (beats)</strong>: The number of beats in a measure</li>
+<li><strong>On Beats (beats)</strong>: How many beats will be heard in the measure (between 1 and the measure length)</li>
+<li><strong>Beat Shift</strong>: The number of beats to shift the on beat pattern (between 0 and measure length - 1)</li>
+</ul>
+</li>
+<li><strong>Octave</strong>:
+<ul>
+<li><strong>Note Count (1-12)</strong>: The number of on tones in an octave</li>
+<li><strong>Shift (tones)</strong>: The shift in the on tone pattern (between 0 and 11)</li>
+</ul>
+</li>
+</ul>
+<h4 id="stochastic-generators">Stochastic Generators</h4>
+<p>Stochastic generators create music through probability distributions called &quot;clouds.&quot; A &quot;composition&quot; is constructed based on a time grid and an &quot;ensemble&quot; of voices. Based on this composition, &quot;clouds&quot; are constructed for each time cell and voice.</p>
+<p><strong>Structure:</strong></p>
+<ul>
+<li><strong>Ensemble</strong>: A collection of voices</li>
+<li><strong>Voices</strong>: Individual Soundfont Presets with independent settings</li>
+<li><strong>Composition</strong>: Grid of voices across time cells</li>
+<li><strong>Cloud</strong>: Probabilistic event distributions within time cells and voices</li>
+<li><strong>Event</strong>: An individual note event within a cloud</li>
+</ul>
+<p><strong>Composition Paremeters</strong>:</p>
+<p>These only affect the definition of the composition. Any changes to them will delete an existing composition.</p>
+<ul>
+<li><strong>Ensemble</strong>: The name of an ensemble from the CMG Database</li>
+<li><strong>Composition Length (sec)</strong>: Duration of the composition</li>
+<li><strong>Number of Time Cells</strong>: Number of equally-spaced time divisions. Each cell will be the composition length divided by the number of cells.</li>
+<li><strong>Events/Cell</strong>: Average number of clouds within a given time division</li>
+<li><strong>Composition Seed</strong>: Seed of the random number generators for the composition</li>
+</ul>
+<p>Once a composition is defined it can be build with the <code>Build Composition</code> button. The composition matrix will be displayed with its non-muted voices as columns and the time cells as rows. The rows and columns can be moved around to place the events into desired voices or time cells.</p>
+<p><strong>Dynamics Parameters</strong>:</p>
+<p>These affect the production of sound from the defined composition. Changes to these parameters do not effect a built composition.</p>
+<ul>
+<li><strong>Sounds/Second</strong>: Average number of sound events in a time/voice cell</li>
+<li><strong>Microtones?</strong>: Enables the use of microtones between semi-tones</li>
+<li><strong>Intensity Transition</strong>: Variation of the volume over time
+<ul>
+<li><strong>Scope Option</strong>: Where intensity transition are applied. Either Cloud, Voice, or Composition level</li>
+<li><strong>Transition Option</strong>: Performed either by persisting the last intensity level to the next transition or randomly selecting an new transition profile</li>
+<li><strong>Cycle Time</strong>: Average period of time that intensity transitions occur</li>
+</ul>
+</li>
+<li><strong>Pan</strong>: How the sound moves between channels
+<ul>
+<li><strong>Scope Option</strong>: Where pan are applied. Either Cloud, Voice, or Composition level</li>
+<li><strong>Method</strong>: Performed either by gliding to the next pan value or making random changes each cycle.</li>
+<li><strong>Cycle Time</strong>: Average period of time between pan changes</li>
+</ul>
+</li>
+<li><strong>Reverb</strong>: How reverb is applied to the sound
+<ul>
+<li><strong>Delay (msec)</strong>: The time delay of the original signal feeding into the reverberator</li>
+<li><strong>Decay (1-10dB)</strong>: The amount of signal decay applied to the reverberator</li>
+</ul>
+</li>
+</ul>
+<p><strong>Ensemble Definition</strong></p>
+<p>An ensemble is a collection of voices. Ensembles and Voices are stored in the CMG Database. The database has the following parameters defined for each voice.</p>
+<ul>
+<li><strong>Name</strong>: Name of the voice</li>
+<li><strong>Description</strong>: Optional voice description</li>
+<li><strong>Timber</strong>: Either sustained for glissando</li>
+<li><strong>Register Lo and Hi</strong>: The lowest and highest notes that can be played by the voice</li>
+<li><strong>Duration</strong>: For sustained voices, the percentage of time interval that the voice plays. Zero means 100%. Lower percentages cause a pizzicato effect.</li>
+<li><strong>Sondfont</strong>: Name of the soundfont file</li>
+<li><strong>Preset</strong>: Bank, channel, and name of the voices preset.</li>
+</ul>
+<p>The following parameters may be set for each voice:</p>
+<ul>
+<li><strong>Volume</strong>: Relative volume (+-10dB) of the voice</li>
+<li><strong>Velocity</strong>: Velocity, or attack, value of the voice</li>
+<li><strong>Mute</strong>: Disable the voice in the final composition.</li>
+</ul>
+<p>Ensembles and voices may be changed within the CMG Database independent of their use within CMG. Each time a CMG file is loaded, the ensemble and voices are reread from the database. If changes are made while a file is opened, this changes will only take effect by pressing the <strong>Reload</strong> buttons <code>Ensemble</code> or <code>Voices</code>.</p>
+<h3 id="generator-operations">Generator Operations</h3>
+<h4 id="adding-a-generator">Adding a Generator</h4>
+<ol>
+<li>Track-&gt;Add generator (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M14 3V13.56C13.41 13.21 12.73 13 12 13C9.79 13 8 14.79 8 17S9.79 21 12 21 16 19.21 16 17V3H14Z" /></svg>)</li>
+<li>Choose Algorithmic or Stochastic</li>
+<li>Generator editor opens in Add mode</li>
+<li>Configure parameters</li>
+<li>Click <code>OK</code> to add generator or <code>Cancel</code> to discard</li>
+<li>Generator cannot be added until all parameters have been entered correctly</li>
+</ol>
+<h4 id="editing-a-generator">Editing a Generator</h4>
+<ol>
+<li>Right click the generator</li>
+<li>Select <code>Edit...</code></li>
+<li>Generator editor opens. More than one generator can be edited at the same time.</li>
+<li>Modify parameters</li>
+<li>Click <code>OK</code> to save changes or <code>Cancel</code> to discard</li>
+<li>Generator cannot be modified until all parameters have been entered correctly</li>
+<li>Multiple generators can be edited simultaneously</li>
+</ol>
+<h4 id="muting-a-generator">Muting a Generator</h4>
+<ol>
+<li>Right click the generator</li>
+<li>Select <code>Mute</code></li>
+<li>The generator will be muted and the menu item will change to <code>Unmute</code></li>
+<li>Selecting <code>Unmute</code> will unmute the generator</li>
+</ol>
+<h4 id="movingcopying-a-generator">Moving/Copying a Generator</h4>
+<ol>
+<li>Right-click generator</li>
+<li>Select <code>Move to Track...</code> or <code>Copy to Track...</code></li>
+<li>Choose destination track</li>
+<li>Generator is moved/copied</li>
+<li>Cannot move/copy if generator is being edited</li>
+</ol>
+<h4 id="deleting-a-generator">Deleting a Generator</h4>
+<ol>
+<li>Right-click generator</li>
+<li>Select <code>Delete...</code></li>
+<li>Confirm deletion</li>
+<li>Cannot delete if generator is being edited</li>
+</ol>
+<h4 id="playing-a-generator">Playing a Generator</h4>
+<ol>
+<li>Click <code>Play...</code> button in generator editor or from the generator menu</li>
+<li>Plays current state (even if not yet submitted)</li>
+<li>Useful for auditioning changes before saving</li>
+</ol>
+<h4 id="reposition-a-generator">Reposition a Generator</h4>
+<p>The generator box is 1/3 of the height of a track. This provides space so that generators that are simultaneous or overlapping in time on the same track can be de-conflicted. To move a generator up and down with the track boundaries:</p>
+<ol>
+<li>Left click the generator and a resize north-south cursor will be display</li>
+<li>Drag the mouse either up or down and the generator box will follow within the bounds of the track.</li>
+<li>Release the mouse button and the reposition is complete.</li>
+</ol>
+<h3 id="generator-dialog-features">Generator Dialog Features</h3>
+<h4 id="error-display">Error Display</h4>
+<p>All generator parameters must be correct. Numbers must be in valid ranges. The bottom of the generator dialog shows validation errors in a scrolling list. If errors exist the generator cannot be modified or played.</p>
+<h4 id="time-controls">Time Controls</h4>
+<p>All generators must have a non-negative start and stop time. The stop time must be greater than the start time.</p>
+<ul>
+<li><strong>Start Time</strong>: When generator begins in seconds</li>
+<li><strong>Stop Time</strong>: When generator ends in seconds</li>
+<li><strong>Auto-adjust</strong>: Changing start time maintains duration by changing the stop time</li>
+</ul>
+<h2 id="time-intervals">Time Intervals</h2>
+<p>A time interval can be defined to select a subset of generators for playback and reporting. All generators whose start and stop times are within the time interval are considered selected, and their boxes on the will become slightly darker to indicate they are selected.</p>
+<h2 id="define-a-time-interval">Define a Time Interval</h2>
+<ol>
+<li>Move the cursor within the time line. The cross cursor will be displayed.</li>
+<li>Left click and drag the mouse left or right. The time interval box will be displayed in the time line. Generators selected will highlight as they become enclosed in the interval.</li>
+<li>Release the left button and the time interval definition is complete.</li>
+<li>One click of the left button outside of an exiting time interval will delete the interval.</li>
+</ol>
+<h2 id="moving-a-time-interval">Moving a Time Interval</h2>
+<ol>
+<li>Move the mouse into the time interval. The cursor will change to a scroll-west-east cursor.</li>
+<li>Left click and drag the mouse left and right. The time interval box will reposition as the mouse is moved and the selected generators will be highlighted.</li>
+<li>Release the left button and the time interval redefinition is complete.</li>
+</ol>
+<h2 id="resizing-a-time-interval">Resizing a Time Interval</h2>
+<ol>
+<li>Move the cursor near the right or left edge of the time interval. The cursor will change to a resize west-east cursor.</li>
+<li>Left click and drag the mouse left or right. The time interval box change as the mouse is moved. Generators selected will highlight as they become enclosed in the interval.</li>
+<li>Release the left button and the time interval definition is complete.</li>
+</ol>
+<hr />
+<h2 id="playback-recording-and-reporting">Playback, Recording, and Reporting</h2>
+<p>The purpose of CMG is to create sound based from defined generators. This is the heart of the application. Playback has several ways that it can be invoked.</p>
+<h3 id="playing-a-single-generator">Playing a Single Generator</h3>
+<p>By either selecting the <code>Play...</code> option on the generator menu or by pressing the <code>Play</code> button in the generator edit dialog, that generator, and only that one, will be played. A generator that is being edited must be valid before it can be played. These methods are useful will constructing a generator to hear what it sounds like on its own.</p>
+<h3 id="playing-multiple-generators">Playing Multiple Generators</h3>
+<p>If a time interval has been defined and either the <code>Play-&gt;Play...</code> or <code>Play-&gt;Report...</code> option is selected from the Play menu, only the generators that are within the time interval will be used for the playback or reporting. This overrides track mute and solo, and generator mute settings.</p>
+<p>If no time interval is defined, all generators in solo tracks will be selected if they are not muted. If no tracks are soloed, then all generators in non-muted tracks that are not muted themselves are selected.</p>
+<h3 id="audio-playback">Audio Playback</h3>
+<h4 id="play-dialog">Play Dialog</h4>
+<p><code>Play → Play...</code>, <code>CTRL+SHIFT+P</code>, generator menu item <code>Play...</code> , or <code>Play</code> in generator editor will cause the creation of an audio signal and the sound roll. Once this is complete the Play Dialog is displayed. This blocks access to the main file edit window until the dialog is closed.</p>
+<p>The Play dialog provides:</p>
+<ul>
+<li><strong>Restart</strong>: Clicking (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M12,4C14.1,4 16.1,4.8 17.6,6.3C20.7,9.4 20.7,14.5 17.6,17.6C15.8,19.5 13.3,20.2 10.9,19.9L11.4,17.9C13.1,18.1 14.9,17.5 16.2,16.2C18.5,13.9 18.5,10.1 16.2,7.7C15.1,6.6 13.5,6 12,6V10.6L7,5.6L12,0.6V4M6.3,17.6C3.7,15 3.3,11 5.1,7.9L6.6,9.4C5.5,11.6 5.9,14.4 7.8,16.2C8.3,16.7 8.9,17.1 9.6,17.4L9,19.4C8,19 7.1,18.4 6.3,17.6Z" /></svg>) will restart the playback</li>
+<li><strong>Pause/Resume</strong>: Clicking (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M14,19H18V5H14M6,19H10V5H6V19Z" /></svg>) will continue playback from the current position, while clicking (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M8,5.14V19.14L19,12.14L8,5.14Z" /></svg>) will pause the playback</li>
+<li><strong>Volume Control</strong>: Manual control of the volume of the playback</li>
+<li><strong>Progress Bar</strong>: Visual playback position with manual control</li>
+<li><strong>Time Display</strong>: Current time and total duration</li>
+<li><strong>Voice Legend</strong>: Clicking (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M13 20.5C13 21.03 13.09 21.53 13.26 22H6C4.89 22 4 21.11 4 20V4C4 2.9 4.89 2 6 2H7V9L9.5 7.5L12 9V2H18C19.1 2 20 2.89 20 4V11H16.5V16.11C14.5 16.57 13 18.36 13 20.5M20 13H18.5V18.21C18.19 18.07 17.86 18 17.5 18C16.12 18 15 19.12 15 20.5S16.12 23 17.5 23 20 21.88 20 20.5V15H22V13H20Z" /></svg>) displays or hides the table of voices with their soundfont, preset, and color.</li>
+<li><strong>Signal Levels</strong>: Visual feedback of the average and maximum signal levels of the left and right channels</li>
+<li><strong>Record Audio</strong>: Clicking (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M17.3,11C17.3,14 14.76,16.1 12,16.1C9.24,16.1 6.7,14 6.7,11H5C5,14.41 7.72,17.23 11,17.72V21H13V17.72C16.28,17.23 19,14.41 19,11M10.8,4.9C10.8,4.24 11.34,3.7 12,3.7C12.66,3.7 13.2,4.24 13.2,4.9L13.19,11.1C13.19,11.76 12.66,12.3 12,12.3C11.34,12.3 10.8,11.76 10.8,11.1M12,14A3,3 0 0,0 15,11V5A3,3 0 0,0 12,2A3,3 0 0,0 9,5V11A3,3 0 0,0 12,14Z" /></svg>) will start audio recording.</li>
+<li><strong>Record Video</strong>: Clicking (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M15,8V16H5V8H15M16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5V7A1,1 0 0,0 16,6Z" /></svg>) will start video recording.</li>
+<li><strong>Exit</strong>: Closing the window will terminate playback</li>
+<li><strong>Minimize/Maximize</strong>: Window controls</li>
+</ul>
+<p class="note">**Important**: While the play dialog is active, main window is blocked. Minimize the play window if you need to access other applications.</p>
+<h3 id="recording">Recording</h3>
+<p>Before recording starts a file dialog request where the recording is to be placed. Progress bars with a cancel option are available during audio and video recording. The default file name is the CMG file name with the appropriate file type (.wav, .mp3, or .mp4).</p>
+<h4 id="audio-recording-formats">Audio Recording Formats</h4>
+<p>Recording format can be changed in <code>Edit-&gt;Preferences</code>. There are two available</p>
+<ul>
+<li><strong>wav</strong>: Uncompressed, high quality</li>
+<li><strong>mp3</strong>: Compressed, smaller file size</li>
+</ul>
+<h4 id="audio-recording-settings">Audio Recording Settings</h4>
+<ul>
+<li>Sample Rate: 44.1 kHz</li>
+<li>Bit Depth: 16-bit (WAV), Variable (MP3)</li>
+<li>Channels: Stereo</li>
+</ul>
+<h3 id="video-recording">Video Recording</h3>
+<p>Creates MP4 video with:</p>
+<ul>
+<li>Synchronized audio track</li>
+<li>Animated sound roll visualization</li>
+<li>30 frames per second</li>
+</ul>
+<h3 id="report-generation">Report Generation</h3>
+<p><code>Play → Report</code></p>
+<p>Creates detailed HTML report with:</p>
+<ul>
+<li>Composition metadata</li>
+<li>Track listings</li>
+<li>Generator parameters</li>
+<li>Generated signal processing data for each instrument (source)</li>
+</ul>
+<p><strong>Uses</strong>: Documentation, debugging, sharing composition details</p>
+<hr />
+<h2 id="tools-and-utilities">Tools and Utilities</h2>
+<p>CMG tools are accessible from the Tools menu. They include some convenient calculators, access to the CMG Database Editor, and generator timing manipulators.</p>
+<p class="note">**Note**: As many calculator tools can be opened simutaneously as desired. Generator tools cannot be used if any generator is being edited.</p>
+<ul>
+<li><strong>Start CMG Database Editor</strong>: Starts that application in a new browser panel</li>
+<li><strong>Midi/Frequency Converter</strong>: Displays a dialog which will convert a midi number its audio frequency (Hz) and vice versa</li>
+<li><strong>Measure Duration Calculator</strong>: Displays a dialog which takes the number of beats in a measure and a speed (BPM) and calculates the number of seconds in the measure</li>
+<li><strong>Oscillator Frequency Calculator</strong>: Displays a dialog that takes an midi amplitude and speed (BPM) and calculates the modulator frequency (mHz) that will cause all notes in the amplitude to be played.</li>
+<li><strong>Set Generators Duration Equal</strong>: Displays a dialog that will set the duration of a list of secondary generators equal to a primary one while maintaining either the start or stop time</li>
+<li><strong>Stagger Generators Start Time</strong>: Displays a dialog that will stagger the start times of a list of secondary generators a specified number of seconds from the start time of a primary one. Staggers occurs in the order of the secondary in the list so the list can be reordered as necessary.</li>
+<li><strong>Align Generators</strong>: Displays a dialog that will align either the start or stop times of a list of secondary generators to the start or stop time of a primary one.</li>
+</ul>
+<hr />
+<h2 id="preferences">Preferences</h2>
+<p><code>Edit → Preferences</code> <code>Ctrl+P</code> will display the preferences dialog, which sets preferences that are maintained between CMG sessions. Be mindful that changes preferences in one instance of CMG affect the preferences of the other instances.</p>
+<ul>
+<li><strong>Soundfont Directory</strong>: The file system directory that contains the soundfont files. The default value is C:\Soundfonts</li>
+<li><strong>Record Format</strong>: Audio recording format, either mp3 or wav</li>
+</ul>
+<p class="note">**Note**: The following preferences do not affect CMG as they are not currently implemented.</p>
+<ul>
+<li><strong>Time Line Mode</strong>: Either Time or Measure</li>
+<li><strong>Measure Length (sec)</strong>: The duration of a measure</li>
+<li><strong>Beats per Measure</strong>: The number of beats in a measure</li>
+<li><strong>Snap Mode</strong>: Enable time line snap mode</li>
+<li><strong>Snap Increment</strong>: The number of seconds or beats where snapping occurs</li>
+</ul>
+<h2 id="comments">Comments</h2>
+<p><code>Edit → Comment</code> or <code>Ctrl+Shift+C</code> will provide a dialog that edits the comments of the CMG file. This is useful for project information, compositional intentions, and revision history among other things.</p>
+<hr />
+<h2 id="keyboard-shortcuts">Keyboard Shortcuts</h2>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Shortcut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New Composition</td>
+<td><code>Ctrl+N</code></td>
+</tr>
+<tr>
+<td>Open Composition</td>
+<td><code>Ctrl+O</code></td>
+</tr>
+<tr>
+<td>Save</td>
+<td><code>Ctrl+S</code></td>
+</tr>
+<tr>
+<td>Save As</td>
+<td><code>Ctrl+Shift+S</code></td>
+</tr>
+<tr>
+<td>Recent File</td>
+<td><code>Ctrl+n</code> n=0-9</td>
+</tr>
+<tr>
+<td>Add Track</td>
+<td><code>Ctrl+T</code></td>
+</tr>
+<tr>
+<td>Edit Comment</td>
+<td><code>Ctrl+Shift+C</code></td>
+</tr>
+<tr>
+<td>Edit Preferences</td>
+<td><code>Ctrl+P</code></td>
+</tr>
+<tr>
+<td>Midi Frequency Converter</td>
+<td><code>ctrl+M</code></td>
+</tr>
+<tr>
+<td>Start CMG Database Editor</td>
+<td><code>ctrl+D</code></td>
+</tr>
+<tr>
+<td>Oscillator Frequency Calculator</td>
+<td><code>ctrl+F</code></td>
+</tr>
+<tr>
+<td>Set Generators Duration Equal</td>
+<td><code>ctrl+E</code></td>
+</tr>
+<tr>
+<td>Play</td>
+<td><code>Ctrl+Shift+P</code></td>
+</tr>
+<tr>
+<td>Report</td>
+<td><code>Ctrl+Shift+R</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="tips-and-best-practices">Tips and Best Practices</h2>
+<h3 id="composition-workflow">Composition Workflow</h3>
+<ol>
+<li><p><strong>Plan Your Structure</strong></p>
+<ul>
+<li>Sketch out tracks and their roles</li>
+<li>Consider which parts are algorithmic vs. stochastic</li>
+<li>Think about temporal relationships</li>
+</ul>
+</li>
+<li><p><strong>Start Simple</strong></p>
+<ul>
+<li>Begin with one track and one generator</li>
+<li>Test playback early and often</li>
+<li>Add complexity gradually</li>
+</ul>
+</li>
+<li><p><strong>Use Meaningful Names</strong></p>
+<ul>
+<li>Name tracks and generators descriptively</li>
+<li>Makes navigation easier in complex projects</li>
+<li>Helps when returning to old projects</li>
+</ul>
+</li>
+<li><p><strong>Time Line Zoom and Pan</strong></p>
+<ul>
+<li>Zoom and pan the time line as you work to focus on a certain area or to get a fuller overview</li>
+<li>The zoom and pan setting and the time interval are saved with the CMG file so it will start where you left off</li>
+<li>Use the time interval to listen to a certain period of time while constructing a large composition</li>
+</ul>
+</li>
+<li><p><strong>Save Regularly</strong></p>
+<ul>
+<li>Use <code>Ctrl+S</code> frequently</li>
+<li>Create backup copies with <code>Save As</code> <code>Ctrl+Shift+S</code></li>
+<li>Consider version numbering (e.g., MyPiece_v1, MyPiece_v2)</li>
+</ul>
+</li>
+</ol>
+<h3 id="generator-design">Generator Design</h3>
+<p>Here is some guidance for building generators. Generally it is best to used fixed random number seeds so that random effects are predictable during generator construction. Only use an empty seed if you want each rendition to be different.</p>
+<h4 id="algorithmic-generators-1">Algorithmic Generators</h4>
+<ul>
+<li><strong>Test Algorithms Independently</strong>: Use constant values for other parameters while testing one algorithm.</li>
+<li><strong>Use Euclidean Rhythms</strong>: Great for creating poly-rhythms and interesting patterns</li>
+<li><strong>Combine Algorithm Types</strong>: For example, use Markovian note selection with Autoregressive speed for variation.</li>
+<li><strong>Layer Generators</strong>: Multiple simple generators can create complex results.</li>
+</ul>
+<h4 id="stochastic-generators-1">Stochastic Generators</h4>
+<ul>
+<li><strong>Start with Few Voices</strong>: The voices in a large ensemble can be muted to 2-4 voices which is easier to manage and understand the relationships between the voices.</li>
+<li><strong>Use Fewer Time Cells</strong>: Start with 2-4 cells, change composition length and add more as needed.</li>
+<li><strong>Control Density</strong>: Too many events per cell or large sound density can muddy the texture.</li>
+<li><strong>Experiment with Intensity, Pan, and Reverb</strong>: Find the parameters that produces the best sonic effects.</li>
+<li><strong>Experiment woth microtones</strong>: Using microtones can have interesting sound effects but may cause sonic &quot;clutter&quot;.</li>
+<li><strong>Adjust the Time Rows and Voice Columns</strong>: Move the time rows up and down to aggregate or disperse silent and intense period. Move the voice columns left and right to change event densities for voices.</li>
+</ul>
+<h3 id="performance-optimization">Performance Optimization</h3>
+<ul>
+<li><strong>Soundfont Size</strong>: Smaller soundfonts load faster</li>
+<li><strong>Generator Count</strong>: Many generators increase CPU load</li>
+<li><strong>Close Unused Dialogs</strong>: Non-modal dialogs consume memory</li>
+</ul>
+<h3 id="troubleshooting-tips">Troubleshooting Tips</h3>
+<ul>
+<li><strong>Generator Won't Play</strong>: Check error messages on the main window or the generator dialog</li>
+<li><strong>File Won't Open</strong>: Another instance may have it open; check for .lock file. The file may not be in proper CMG format.</li>
+<li><strong>No Sound</strong>: Check system audio output device for proper functioning. Increase system volume. Increase playback volume. Increase track volume. Check generator volume.</li>
+<li><strong>Distorted Audio</strong>: Could be a bad preset in the soundfont. Use another soundfont application to determine its parameters and quality. Reduce volume to prevent clipping.</li>
+<li><strong>Slow Playback</strong>: System is overloading memory or CPU usage. Check task manager for the use of these resources. All playbacks use the same amount of these resources regardless of the number of generators or voices.</li>
+</ul>
+<hr />
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<h4 id="file-is-already-open-in-another-instance">&quot;File is already open in another instance&quot;</h4>
+<p><strong>Cause</strong>: Another CMG instance has the file open, or stale lock file exists.</p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>Check for other CMG windows</li>
+<li>Close the other instance</li>
+<li>If no other instance is running, delete the <code>.lock</code> file in the composition directory, or wait an hour and it will be deleted by Windows.</li>
+<li>Retry opening the file</li>
+</ol>
+<h4 id="error-messages-when-play-is-selected">&quot;Error Messages When Play is Selected&quot;</h4>
+<p><strong>Cause</strong>: Generator has validation errors.</p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>Open generator editor</li>
+<li>Check error display at bottom</li>
+<li>Fix highlighted issues</li>
+<li>Revalidate by clicking <code>OK</code></li>
+</ol>
+<h4 id="soundfont-not-found">&quot;Soundfont not found&quot;</h4>
+<p><strong>Cause</strong>: Soundfont file moved or deleted since last use.</p>
+<p><strong>Solution</strong>:</p>
+<ol>
+<li>Restart CMG. This will load the current list soundfont files</li>
+<li>Open generator editor</li>
+<li>Click &quot;Select SoundFont&quot;</li>
+<li>Select an existing .sf2 file location</li>
+<li>Reselect preset</li>
+</ol>
+<h4 id="no-audio-output">No Audio Output</h4>
+<p><strong>Possible Causes</strong>:</p>
+<ul>
+<li>Audio device not selected or is invalid</li>
+<li>Volume set to -10</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Check system audio device and volume</li>
+<li>Check track and generator volumes</li>
+</ul>
+<h4 id="application-crashes">Application Crashes</h4>
+<p><strong>If CMG crashes</strong>:
+2. Delete any <code>.lock</code> files manually if needed</p>
+<ol>
+<li>Restart the application</li>
+<li>Check for corrupted .cmg files (open in text editor to verify XML structure)</li>
+<li>Report issue with reproduction steps</li>
+</ol>
+<h4 id="video-recording-fails">Video Recording Fails</h4>
+<p><strong>Possible Causes</strong>:</p>
+<ul>
+<li>FFmpeg not installed</li>
+<li>Insufficient disk space</li>
+<li>Invalid output path</li>
+</ul>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>Ensure FFmpeg available (FFMpegCore auto-downloads)</li>
+<li>Check available disk space</li>
+<li>Verify output directory exists and is writable</li>
+<li>Try shorter composition or lower quality settings</li>
+</ol>
+<h3 id="getting-help">Getting Help</h3>
+<ul>
+<li><strong>Error Messages</strong>: Read carefully; they often indicate the specific problem</li>
+<li><strong>Status Area</strong>: Check message area for warnings and information</li>
+<li><strong>Recent Files</strong>: If a file won't open, try recent backup</li>
+<li><strong>GitHub Issues</strong>: Report bugs at <a href="https://github.com/Blane245/CMGWpf/issues">https://github.com/Blane245/CMGWpf/issues</a></li>
+</ul>
+<hr />
+<h2 id="appendix-a-cmg-file-specification">Appendix A: CMG File Specification</h2>
+<h3 id="cmg-file-structure">CMG File Structure</h3>
+<p>CMG files are XML-based with the following structure:</p>
+<pre><code class="language-xml">&lt;CMG&gt;
+    &lt;fileContents comment=&quot;...&quot;&gt;
+        &lt;tracks&gt;
+            &lt;track name=&quot;...&quot; ...parameters&gt;
+                &lt;generators&gt;
+                    &lt;generator type=&quot;Algorithmic&quot; name=&quot;...&quot; ...parameters...&gt;
+                    &lt;/generator&gt;
+                    &lt;generator type=&quot;Stochastic&quot; name=&quot;...&quot; ...parameters...&gt;
+                    &lt;/generator&gt;
+                &lt;/generators&gt;
+            &lt;/track&gt;
+        &lt;/tracks&gt;
+    &lt;/fileContents&gt;
+    &lt;timeLine ...parameters...&gt;
+        &lt;timeInterval ...parameters.../&gt;
+    &lt;/timeLine&gt;
+&lt;/CMG&gt;
+</code></pre>
+<h3 id="lock-file-format">Lock File Format</h3>
+<p><code>.lock</code> files contain:</p>
+<ul>
+<li>Process ID</li>
+<li>Lock timestamp</li>
+<li>Machine name</li>
+<li>User name</li>
+</ul>
+<hr />
+<h2 id="appendix-b-digital-signal-processing-of-soundfont-presets">Appendix B: Digital Signal Processing of Soundfont Presets</h2>
+<p class="note">**Note**: There is an unfortunate word collision here. The word "generator" applies to both CMG generators and soundfont preset and instrument generators. For clarity the word "generator" will be prefixed by its type in this section. </p>
+<p>Digital Signal Processing (DSP) of a soundfont preset instrument involves applying various preset and instrument generators to the audio samples defined in the soundfont file. These generators modify parameters such as gain envelope, pitch modulation, noise application, and volume modulation to produce the final sound output. The DSP is given the start and stop times of the preset along with several other parameters of the CMG generator and applies the preset generators to the sound samples according to these parameters. The DSP produces a single channel of samples for a single instrument in a preset. The resulting sound is then sent to the CMG generator processor for further modification such as pan, intensity, and reverb modulations before being added to the final audio stereo signal.</p>
+<h2 id="soundfont-file-structure">Soundfont File Structure</h2>
+<p>Soundfont files (.sf2) are structured as follows:</p>
+<ul>
+<li><strong>RIFF Header</strong>: Identifies file as RIFF format</li>
+<li><strong>INFO List</strong>: Metadata about the soundfont (name, author, comments)</li>
+<li><strong>sdta List</strong>: Contains the actual audio sample data</li>
+<li><strong>pdta List</strong>: Contains preset definitions, including:
+<ul>
+<li><strong>Preset Headers</strong>: Define presets with parameters like name, bank, and preset number</li>
+<li><strong>Instrument Definitions</strong>: Define instruments with parameters like key range, velocity range, and sample mapping</li>
+<li><strong>Sample Headers</strong>: Define individual audio samples with parameters like sample rate, loop points, and original pitch</li>
+</ul>
+</li>
+</ul>
+<p>A full specification of soundfont file contents can be found the SynthFont web site <a href="https://www.synthfont.com/SFSPEC21.PDF">here</a>.</p>
+<h2 id="preset-generators">Preset Generators</h2>
+<p>There are 41 preset/instrument generators in the soundfont specification. CMG only uses a subset of them. The ones used fall into the following categories:</p>
+<ul>
+<li><strong>Sample Address Offsets</strong>: These generators define the start and end points of the sample data to be used for playback. They can specify offsets for the start and end of the sample, as well as loop points and coarse offsets.</li>
+<li><strong>Volume</strong>: The initial attenuation generator sets the base volume level for the sample playback.</li>
+<li><strong>Tuning</strong>: These generators adjust the pitch of the sample. Coarse tuning allows for semitone adjustments, fine tuning allows for cent adjustments, scale tuning can apply a scaling factor to the pitch, and overriding root key can specify a different root key for the sample.</li>
+<li><strong>Volume Envelope</strong>: The delay, attack, decay, sustain, release (DADSR) envelope generators shape the amplitude of the sound over time, allowing for dynamic expression. DADSR parameters control how the sound evolves from the moment a sample is triggered until it fades out.</li>
+<li><strong>Sample Modes</strong>: The generators define how the sample is played back, such as whether it loops or is one-shot.</li>
+</ul>
+<h2 id="sound-generation-process">Sound Generation Process</h2>
+<p>This process is common to both algorithmic and stochastic generators as they both use presets from soundfont files to produce sound.</p>
+<h3 id="gain-envelope">Gain Envelope</h3>
+<ul>
+<li><strong>Volume Envelope</strong>: DADSR envelope shapes the amplitude of the sound over time. In particular, the following generators are applied to the sound samples:
+<ul>
+<li><strong>Delay</strong>: Time before the attack phase begins</li>
+<li><strong>Attack</strong>: Time taken for initial run-up of level from 0 to peak</li>
+<li><strong>Decay</strong>: Time taken for level to drop from peak to sustain level</li>
+<li><strong>Sustain (hold)</strong>: Level during the main sequence of the sound's duration</li>
+<li><strong>Release</strong>: Time taken for level to decay from sustain level to 0 after key release
+attack option is available in algorithmic generator definition.</li>
+</ul>
+</li>
+</ul>
+<p>There are several special cases to consider since a note may end before the complete development of the gain envelope. For example, if a note is shorter than the delay time, no sound will be heard; or if the decay phase ends before the end of the note, sound will stop at the end of the decay phase regardless of sustain or release time.</p>
+<p>If attack is disabled, the delay and attack phases of the envelope will be skipped and the sound will immediately jump to the peak level. Some presets may have multiple instruments used to accentuate the attack phase of the sound. Using an attack phase on these instruments may cause an overemphasis of the attack. If attack is disabled, the sound may be more smooth and less percussive. It is best to experiment with both options to see which one produces the desired effect for a given preset.</p>
+<h3 id="volume-modulation">Volume Modulation</h3>
+<p>In addition to the gain envelope which modifies the gain of the signal as it is processed, the gain may be modulated be a tremolo effect based on its parameters of frequency, depth, and modulation type. The final gain modification is made by the application of the track volume.</p>
+<h3 id="pitch-modulation">Pitch Modulation</h3>
+<p>Each instrument in a preset has a base pitch defined by the root key generator. This is the MIDI note number that corresponds to the original pitch of the sample. CMG adjusts this pitch to the desired note by calculating a resampling factor. The DSP may be given two pitches, a starting and an ending pitch in order to create a glissando. If this is the case, the resampling rate is adjusted as time progresses to evolve the sound from the start pitch to the end pitch.</p>
+<h3 id="noise-application">Noise Application</h3>
+<ul>
+<li><p><strong>Noise</strong>: Frequency modulated Gaussian noise can be applied to the signal. This is
+The Gaussian equation is</p>
+<p><span class="math">\(\varphi(z)=\frac {1}{2\pi\sigma}e^{-\frac {(z-\mu)^2}{2\sigma^2}}\)</span></p>
+<p>where <span class="math">\(\sigma\)</span> is the noise depth and <span class="math">\(\mu\)</span> is zero.</p>
+<p>This is done after all of the samples have been processed. The noise value calculated at each time is</p>
+<p><span class="math">\(N(t)=\sigma*sin(2\pi(f+x)t)\)</span></p>
+<p>where <span class="math">\(t\)</span> is the sample time, <span class="math">\(\sigma\)</span>, <span class="math">\(f\)</span> is the modulation frequency, and <span class="math">\(x\)</span> is a Gaussian random number with standard deviation <span class="math">\(f\)</span>.</p>
+<p>The noise is added to the instrument signal at time <span class="math">\(t\)</span>.</p>
+</li>
+</ul>
+<hr />
+<h2 id="appendix-c-algorithmic-generator-processing">Appendix C: Algorithmic Generator Processing</h2>
+<p>Sound production from algorithmic generators involves cycling through the period of time from the start of the generator to it stop time. There are two options here depending on whether or not the note attribute is using a sequencer. In either case, all of the attribute algorithms that use random number generators are initialized with their seeds before starting and the note beat sequence is initialized.</p>
+<h3 id="beat-and-note-processing">Beat and Note Processing</h3>
+<p>A Euclidean Rhythm algorithm is used to determine a beat pattern and the notes selectable with in octave.
+* The number of beats in the measure is specified along with the number of 'on beats'. An 'on beat' is one that will produce a sound from the current preset, while an 'off beat' is silent no matter what preset is currently active. If the measure length and on beat count are the same, all notes will be played.
+* The number of notes in an octave determines which presets are available for use by the note parameter. When the note algorithm selects a pitch value, the value is modified to the closest selectable pitch number. If the number of notes in the octave is set to 12, all notes in the octave will be heard.</p>
+<h3 id="non-sequencer-algorithmic-generation">Non-Sequencer Algorithmic Generation</h3>
+<p>The following loop is executed from the start time to the stop time of the generator:</p>
+<ol>
+<li>Get the current values of all of the attributes at the current time. These include whether a beat is on, its pitch, attack, speed, duration, volume, and pan.</li>
+<li>Determine the length of the current time interval from the speed.</li>
+<li>Determine the duration of the signal as a percentage of the interval.</li>
+<li>If the beat is on, get the instruments and merge their preset/instrument generators. For each of the instruments in the preset, perform the following:
+<ol>
+<li>Get the sample from the DSP based on the current pitch (algorithmic generator do not have a glissando feature), and the other current attribute values, except pan.</li>
+<li>Create a stereo version of this DSP signal applying the current pan value.</li>
+<li>Apply reverb according to the generator's parameters</li>
+<li>Add the panned and reverberated signal to the final stereo signal</li>
+</ol>
+</li>
+<li>Increment time by the length of the current interval</li>
+</ol>
+<h3 id="sequencer-algorithmic-generation">Sequencer Algorithmic Generation</h3>
+<p>When the note attribute is using a sequencer, processing is as follows:</p>
+<ol>
+<li>Sequence reversal and reflection is applied to the note sequence as specified by the note attribute parameters</li>
+<li>For each item in the (normal, reversed, and/or reflected) sequence the following is performed:
+<ol>
+<li>The pitch is transposed as specified by the note attribute parameters</li>
+<li>The current values for on beat, speed, attack, duration, volume, and pan at the current time are obtained.</li>
+<li>Determine the length of the current time interval from the speed.</li>
+<li>Determine the duration of the signal as a percentage of the interval.</li>
+<li>If the sequence item is not a rest (beats is zero) and the beat is on, perform the following:
+<ol>
+<li>Get the instruments and their preset/instrument generators for the preset. For each of the instruments in the preset, perform the following:</li>
+<li>Get the sample from the DSP based on the current pitch (algorithmic generator do not have a glissando feature), the other current attribute values (except pan).</li>
+<li>Create a stereo version of this DSP signal applying the current pan value.</li>
+<li>Apply reverb according to the generator's parameters</li>
+<li>Add the panned and reverberated signal to the final stereo signal</li>
+</ol>
+</li>
+<li>Increment the time by the current interval, and proceed to the next item in the sequence.</li>
+</ol>
+</li>
+</ol>
+<h3 id="attribute-modulation">Attribute Modulation</h3>
+<p>Each of the generator's attributes (note, attack, speed, duration, volume, and pan) have an associated algorithm. These algorithms are used to determine the value of the attribute based on the current time since the generator started. All algorithms can be assigned to any of the attributes, except the sequencer, which is specifically designed for the note attribute. The algorithms include Sequencer, Constant, Oscillator, Markovian, Autoregressive, and Wiener. Each of these algorithms has its own parameters that must be set in the generator editor. The following sections will describe the algorithms including relevant equations and show their data entry panels using one of the sound attributes as an example. Note that units and values vary between attributes.</p>
+<h4 id="constant-algorithm">Constant Algorithm</h4>
+<p>The constant algorithm produces the same value for all times for the attribute. The value is determined by the user and is set in the generator editor. This is the simplest algorithm and can be used to create a steady state for any of the parameters. For example, a constant value of 60 for the note attribute will produce a steady stream of C4 notes, while a constant value of -10 for the volume attribute will produce a steady stream of notes at an attenuation of -10 dB.</p>
+<p align="center">
+  <img src="images/Constant.png" width="50%" height: auto; alt="description">
+  <br>
+  <em>The default settings of a Constant algorithm applied to the Duration attribute</em>
+</p>
+<h4 id="sequencer-algorithm">Sequencer Algorithm</h4>
+<p>The sequencer algorithm applies only to the note attribute. It uses a Sequence defined in the CMG database. A sequence is a list of notes and the number of beats to apply to each note. The length of a beat is determine by the current value of the speed attribute. A sequence may be transposed up or down in pitch, may be reversed so it is played from last to first, or it may be reflected about a specific note. For example, a sequence of notes [C4, D4, E4] in reverse is [E4, D4, C4]. That sequence transposed up 2 semitones is [D4, E4, F#4]. That sequence reflect around F4 is [A#4, G#4, F#4]. Note in a sequence can use microtones, which are pitches that are between the standard semitones. For example, a note that is a quarter tone above C4 would be notated as C4+50. Press <code>Reload Sequences</code> to refresh the list of selectable sequences. Press <code>View Sequence</code> to see the contents of the sequence.</p>
+<p align="center">
+  <img src="images/Sequencer.png" width="100%" height: auto; alt="description">
+  <br>
+  <em>The default setting of a Sequencer algorithm applied to the Note attribute</em>
+</p>
+<h4 id="oscillator-algorithm">Oscillator Algorithm</h4>
+<p>The oscillator algorithm creates a periodic modulation of the attribute. The modulator can be either a sine wave, a square wave, a triangular wave, a increasing sawtooth, or a decreasing sawtooth. Center value, frequency, and depth of the modulation are determined by the user and set in the generator editor. For example, an oscillator with a center of 0, a frequency of 500 mHz, and a depth of 1 applied to the pan attribute will create a slow left-right panning effect that moves 1 unit to the left and right of the center position.</p>
+<p align="center">
+  <img src="images/Oscillator.png" width="100%" height: auto; alt="description">
+  <br>
+  <em>The default values of a Oscillator algorithm applied to the Attack attribute</em>
+</p>
+<h3 id="markovian-algorithm">Markovian Algorithm</h3>
+<p>The Markovian algorithm creates a sequence of values for the assigned attribute based on a statistical process that has three states with probability transitions between each state. The states are<br />
+* keep the same value
+* move the value up
+* move the value down
+The user specified a initial value, the lowest and highest allowed value, the step size between each transition, and the state transition matrix. The latter is the probability of move from one state to the another. The time is not used in this algorithm, rather the previous state value is used to determine the next state value. determined by the user and set in the generator editor.
+The probabilities of moving from state to another state must add up to be 1.</p>
+<p>If the next value is outside of the lower and upper limits, the value is step is reversed. So a step above the upper limit will result in a step down. A step below the lower limit will step up. This is called a &quot;bounce&quot; effect.</p>
+<p align="center">
+  <img src="images/Markovian.png" width="100%" height: auto; alt="description">
+  <br>
+  <em>the default values of a Markovian algorithm applied to the Speed attribute</em>
+</p>
+<h2 id="autoregressive-algorithm">Autoregressive Algorithm</h2>
+<p>The autoregressive algorithm creates a sequence of values for the assigned attribute based on a statistical process where the next value is determined by the previous value and a random noise component. The next value is calculated using the following equation:</p>
+<p><span class="math">\(V_{i}=\alpha V_{i-1}+\sigma_i\)</span></p>
+<p>where <span class="math">\(V_{i}\)</span> is the next value in the series, <span class="math">\(\alpha\)</span> is the persistence parameters, usually between 0 and +1, <span class="math">\(V_{i-1}\)</span> is the previous value in the series, and <span class="math">\(\sigma\)</span> standard deviation of the random dispersion.</p>
+<p>The sequence of values starts at the user specified initial value. The value of <span class="math">\(\alpha\)</span> determines how much &quot;memory&quot; there is in the sequence. The higher the value, the more steady is the sequence around the initial value. The lower the value, the more random the sequence is. A value of 0 will produce a completely random sequence (usually called a random walk) with no relation between the values, while a value of 1 will produce a constant sequence with all values equal to the initial value. Values between 0 and 1 will produce a sequence that fluctuates around the initial value, with the degree of fluctuation determined by the value of <span class="math">\(\alpha\)</span>.</p>
+<p>An autoregressive sequence is restrained to values between the lowest and highest. If a limit are exceeded, the value is clamped at the limit.</p>
+<p align="center">
+  <img src="images/Autoregressive.png" width="100%" height: auto; alt="description">
+  <br>
+  <em>the default values of a Autoregressive algorithm applied to the Duration attribute</em>
+</p>
+<h3 id="wiener-algorithm">Wiener Algorithm</h3>
+<p>The Wiener algorithm is similar to the autoregressive algorithm in that it is based on a random walk but has no memory of previous values. The equation for the Wiener algorithm is</p>
+<p><span class="math">\(x_t=x_0+\alpha t+N(0,\sigma\sqrt{t})\)</span></p>
+<p>where <span class="math">\(x_t\)</span> is the new attribute value at time <span class="math">\(t\)</span>, <span class="math">\(x_0\)</span> is initial attribute value, <span class="math">\(\alpha\)</span> is the trend, <span class="math">\(\sigma\)</span> is the dispersion variable, and <span class="math">\(N\)</span> is the Gaussian noise function which generates a random variable with mean <span class="math">\(0\)</span> and standard deviation <span class="math">\(\sigma\sqrt{t}\)</span>.</p>
+<p>This type of sequence has an initial value and, low and high values specified by user along with the trend and the dispersion parameters. A Wiener with a zero trend and zero sigma is the same as the Constant Algorithm. One with a nonzero trend and zero sigma is a straight line. One with a zero trend and a non zero dispersion will spread out over time based on this amount of dispersion.</p>
+<p align="center">
+  <img src="images/Wiener.png" width="100%" height: auto; alt="description">
+  <br>
+  <em>the default values of a Wiener algorithm applied to the Volume attribute</em>
+</p>
+<hr />
+<h2 id="appendix-d-stochastic-generator-processing">Appendix D: Stochastic Generator Processing</h2>
+<p>The stochastic generator is based on the probabilistic theory of small numbers, embodied in the Poisson Distribution (see <a href="https://en.wikipedia.org/wiki/Poisson_distribution">Wikipedia: Poisson distribution</a>) for details and examples. The Poisson distribution formula is</p>
+<p><span class="math">\(\varphi(k)=\frac {\lambda}{k!}e^{-\lambda}\)</span></p>
+<p>where <span class="math">\(\lambda\)</span> is the average number of sound events in each cell, and <span class="math">\(k\)</span> is the number of events.</p>
+<p>This theory is applied and expanded upon to create composition of events applied to voices in a ensemble, at the
+large scale, and to the creation of event sequences, called clouds, at the small scale.</p>
+<p>A Stochastic generator consists of a composition and a set of dynamics parameters.</p>
+<h3 id="composition-processing">Composition Processing</h3>
+<p>A composition is defined as an ensemble of voices, a duration, a number of time cells, and an average event density per time. It is a matrix of event numbers, where the rows are the time cells and the columns are the voices in the ensemble. The events determine by the Poisson equation are placed in random rows and columns until all cells have been occupied. Once the composition is completed, the user may shuffle the rows and columns as desired, as this has no effect on the distribution probabilities. This process is done as part of the stochastic generator definition. The final composition is used during the DSP phase along with the dynamics parameters.</p>
+<p>The Stochastic processor proceeds as follows:</p>
+<ol>
+<li>Create a composition buffer that will holds all of the signals from the active (non-muted) voices. This buffer will be longer than the composition length to accommodate voices that extend past the last time cell.</li>
+<li>Initialize the dynamics random number generator with the user specified seed. This will be used to create the clouds for each voice.</li>
+<li>For each non-muted voice, perform the following steps:
+<ol>
+<li>Determine the maximum number of clouds in be created for the voice by finding the maximum number of events in any time cell for that voice. This will be used to track the state of each cloud as it is processed through the time cells.</li>
+<li>For each time cell in the voice, perform the following steps:
+<ol>
+<li>Determine the number of events in the current time cell. This will determine how many clouds are created for the voice in this time cell.</li>
+<li>Create a cloud for each event in the time cell (see below). Add the cloud to the voice buffer at it appropriate time.</li>
+</ol>
+</li>
+<li>If intensity transition is to be performed at the voice level, modify the voice buffer.</li>
+<li>If pan transition is to be performed at the voice level, modify the voice buffer.</li>
+<li>add the voice buffer to the composition buffer.</li>
+</ol>
+</li>
+<li>If intensity transition is to be performed at the composition level, modify the composition buffer.</li>
+<li>If pan transition is to be performed at the composition level, modify the composition buffer.</li>
+<li>Add the composition buffer to the final stereo signal, applying reverb according to the generator's parameters.</li>
+</ol>
+<h3 id="cloud-processing">Cloud Processing</h3>
+<p>A cloud is a sequence of sonic events for a voice. Each event has a start and end time and has the voice's preset. A voice may be sustained or glissando. The sequence of events in a cloud are defined by breaking up the time interval into an number of segments derived from the average number of sounds per second. The segments may not start at the beginning of the time cell and may extend into the next cell. The first law of Continuous Probability is used to determine the duration of each event in the cloud:</p>
+<p><span class="math">\(\varphi(x)=ce^{-cx}dx\)</span>,</p>
+<p>where <span class="math">\(c\)</span> is the density of events.</p>
+<p>Pitch is determine by the second law of Continuous Probability, which produces a distribution of pitch intervals that is weighted towards smaller intervals, which is desirable for creating a more cohesive sound texture. The equation for this distribution is</p>
+<p><span class="math">\(\varphi(j)=\frac {2}{a}(1-\frac {j}{a})dj\)</span></p>
+<p>where <span class="math">\(a\)</span> is the number of semitones in the range of the voice and <span class="math">\(j\)</span> ranges from 0 to <span class="math">\(a\)</span>.</p>
+<p>Once the time and pitch of each event is determined, the DSP is be used to process each instrument in the preset. For sustained voices, only the starting pitch is used. For glissando voices, the pitch and the pitch of the next event is used.</p>
+<p>To prevent all clouds for all voice from starting at the same time at the beginning of a composition, the first event is used as the starting point for the cloud rather than the start time of the time cell. This means that the first event in the cloud will start at a random time within the time cell, and subsequent events will be placed according to the average number of sounds per second. Each event must start within the time cell, but the last event may end after the time cell. This last time value is used to connect to the next cloud in the next time cell. This is the purpose of tracking the cloud states during voice processing.</p>
+<p>Once a cloud is constructed, it is turned into an interleaved stereo buffer and intensity transition and pan processing is performed, if configured. The cloud and its state are passed back to the voice processor.</p>
+<h3 id="intensity-modulation">Intensity Modulation</h3>
+<p>Intensity (volume) modulation is the process of varying the sound from one level to another over time. Other terms are crescendo and decrescendo. In CMG, intensity modulation can be applied at the cloud, voice, or composition level. The user specifies the level, the method (persistent or random), and the average cycle time. The following figure (taken from Xenakis) lists the type of transitions that are used in CMG.</p>
+<p align="center">
+<img src="./images/Intensity Forms.png" width="50%"; hieght="auto"; alt="description">
+<br>
+<em> The intensity transitions used by CMG taken from Xenakis' book</em>
+</p>
+<p>Persistent intensity transition occurs when the next transition starts at the same level as the end of the pervious one. For example, if the ending level is <em>p</em> the next transition will be one that starts with <em>p</em>. Random transition does not concern itself with the previous transition. The duration of a transition is determined using the first law of Continuous Probability about the cycle time. The next transition is picked at random from the list of available transitions taking persistence into account if selected.</p>
+<p class="note">**Note**: The cycle time for application of intensity transition at the cloud level should consider the length of a time cell. No transition may occur if the cycle time is large relative to the cell size.</p>
+<h3 id="pan-modulation">Pan Modulation</h3>
+<p>Pan (spatial positioning) modulation is the process of varying the pan position of the sound from one position to another over time. In CMG, pan modulation can be applied at the cloud, voice, or composition level. The user specifies the method (glide or random), and the cycle time. The glide method creates a smooth transition from the current pan position to the next pan position over the cycle time. The random method creates a new random pan position at each cycle time and holds it until the next transition. The duration of a pan transition is determined using the first law of Continuous Probability about the cycle time. Like intensity transition, applying pan at the cloud level should consider the length of a time cell. No transition may occur if the cycle time is large relative to the cell size.</p>
+<h3 id="reverb-processing">Reverb Processing</h3>
+<p>Reverberation is accomplished using the simple Feedback Delay Network (FDN) method with a single delay line. The FDN is a common method for creating artificial reverberation and is based on the principle of feeding back delayed versions of the input signal to create a dense, echoing effect. The parameters of the reverb include the reverb delay time, which determines how long the signal is delayed before feedback, and the decay level, which determines how much of the reverberated signal is mixed with the original signal. Reverb is applied only at the composition level.</p>
+<pre class="mermaid">flowchart LR
+    A[Input Signal] --> B[Mixer]
+    B --> C[Output Signal]
+    C --> B[Mixer]
+</pre>
+<p align="center">
+<em> The simple Feedback Delay Network (FDN) method for reverb processing</em>
+</p>
+<hr />
+<h2 id="appendix-e-on-beats-and-notes-in-octave">Appendix E: On Beats and Notes in Octave</h2>
+<p>The use of on beats and notes in octave are methods for establish complex rhythms and scales. The techniques use the Euclidean Rhythm algorithm (<a href="https://en.wikipedia.org/wiki/Euclidean_rhythm">See Wikipedia: Euclidean rhythm</a>) for details and examples.) For on beats, the user specifies the length of the measure, the number of on beats in the measure and the offset to the pattern. For example, a measure length of 4, with on beats of three and an offset of 0 will generate the pattern [xxx.]. By offsetting the pattern by 1 beat, the pattern will be [.xxx], by 2 will be [x.xx], and by 3 will be [xx.x]. This technique can be used to create poly-rhythms by using different on beat patterns for different generators. For example, one generator could have a pattern of 13 by 9 and another generator could have a pattern of 15 by 7.</p>
+<p>Notes in octave is similar to on beats, except the length of the series is 12. Using a number less than 12 will cause notes in the octave to be skipped. A similar offset to on beats is provided.</p>
+<p align="center">
+<img src="./images/EuclideanRhythm.png" width="100%"; hieght="auto"; alt="description">
+<br>
+<em> The default values of of "On Beats" and "Notes in Octave" in the algorithmic generator</em>
+</p>
+<hr />
+<h2 id="appendix-f-glossary">Appendix F: Glossary</h2>
+<p><strong>Algorithm</strong>: Mathematical formula producing parameter values<br />
+<strong>Algorithmic Generator</strong>: Deterministic musical sequence<br />
+<strong>Attack</strong>: Initial volume/velocity of note<br />
+<strong>BPM</strong>: Beats Per Minute (tempo)<br />
+<strong>Cloud</strong>: Probabilistic note distribution in stochastic generator<br />
+<strong>Composition</strong>: Complete musical work in CMG<br />
+<strong>Duration</strong>: Length of note or generator<br />
+<strong>Euclidean Rhythm</strong>: Evenly-distributed rhythm pattern<br />
+<strong>Generator</strong>: Musical pattern creator (algorithmic or stochastic)<br />
+<strong>Grain</strong>: Individual note event in stochastic cloud<br />
+<strong>Jump List</strong>: Windows taskbar recent file list<br />
+<strong>Lock File</strong>: Prevents concurrent file access<br />
+<strong>Microtone</strong>: Pitch between standard semitones<br />
+<strong>Pan</strong>: Stereo positioning (left/right)<br />
+<strong>Preset</strong>: Instrument sound from soundfont<br />
+<strong>Reverb</strong>: Echo/ambience effect<br />
+<strong>Soundfont</strong>: Collection of sampled instruments (.sf2)<br />
+<strong>Sound Roll</strong>: Visual representation of playback<br />
+<strong>Stochastic</strong>: Probability-based composition<br />
+<strong>Time Cell</strong>: Temporal division in stochastic generator<br />
+<strong>Timeline</strong>: Visual representation of composition structure<br />
+<strong>Track</strong>: Container for organizing generators<br />
+<strong>Tremolo</strong>: Amplitude (volume) modulation<br />
+<strong>Vibrato</strong>: Pitch modulation<br />
+<strong>Voice</strong>: Independent layer in stochastic generator consisting of one preset and its parameters</p>
+<hr />
+<h2 id="acknowledgements">Acknowledgements</h2>
+<p>Special thanks to various people and non-people</p>
+<ul>
+<li>My son, Ryan Lane, that got me into web-based programming and provides a sounding board for problems when I am having them. One of his web sites is a monitor of <a href="https://wx.mc-lane.com/">his weather station</a>.</li>
+<li><a href="https://github.com/felixroos/sfumato">sfumato</a> - who revealed to me the complexities of soundfont signal processing</li>
+<li>The Google search engine and Visual Studio Copilot (aka Claude Sonnet) that helped me hack my way through this. Claude, you're great!</li>
+<li>'The Computer Music Tutorial', by Curtis Roads, 1996. This is an excellent book that gives the history and basic of signal processing as applied to sound. Since it was written, many algorithmic methods described there are realizable on computers in real time.</li>
+<li>Iannis Xenakis, 'Formalized Music: Thought and Mathematics in Composition', 1971. This is a classic book that describes the use of stochastic processes in music composition. It is a bit difficult to read but is full of interesting ideas and techniques for using probability in music composition. Iannis is much more of a philosopher than I am.</li>
+</ul>
+<p><em>CMG User's Guide - Version 4.0</em><br />
+<em>Last Updated: 2026</em></p>
+
+</body>
+</html>

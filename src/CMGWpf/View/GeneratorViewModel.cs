@@ -231,7 +231,6 @@ namespace CMGWpf.View
             bool selected = IsSelected();
             Brush brush = type switch
             {
-                //"Silent" => selected ? Brushes.DarkGray : Brushes.LightGray,
                 "Algorithmic" => selected ? Brushes.Cyan : Brushes.LightCyan,
                 "Stochastic" => selected ? Brushes.Coral : Brushes.LightCoral,
                 _ => Brushes.White

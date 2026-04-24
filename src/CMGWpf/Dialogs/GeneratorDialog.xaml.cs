@@ -50,11 +50,6 @@ namespace CMGWpf.Dialogs
                     // the cloning occuring here will restore the UI generator stop time values
                     switch (vm.Generator.ToString())
                     {
-                        //case "Silent":
-                        //    {
-                        //        vm.UIGenerator = (g as Silent)!.Clone(g.Parent);
-                        //        break;
-                        //    }
                         case "Algorithmic":
                             {
                                 vm.UIGenerator = (g as Algorithmic)!.Clone(g.Parent);

@@ -160,10 +160,6 @@ namespace CMGWpf.PlayFunctions.Utilities
                     background-color: #e74c3c;
                     color: white;
                 }
-                .type-silent {
-                    background-color: #95a5a6;
-                    color: white;
-                }
                 hr {
                     border: none;
                     border-top: 2px solid #bdc3c7;
@@ -207,7 +203,6 @@ namespace CMGWpf.PlayFunctions.Utilities
         {
             string typeName = gen switch
             {
-                //Silent => "Silent",
                 Algorithmic => "Algorithmic",
                 Stochastic => "Stochastic",
                 _ => "Unknown"
@@ -215,7 +210,6 @@ namespace CMGWpf.PlayFunctions.Utilities
 
             string typeClass = gen switch
             {
-                //Silent => "type-silent",
                 Algorithmic => "type-algorithmic",
                 Stochastic => "type-stochastic",
                 _ => ""

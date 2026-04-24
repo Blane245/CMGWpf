@@ -217,8 +217,6 @@ namespace CMGWpf.PlayFunctions
 
                 switch (gen)
                 {
-                    //case Silent:
-                    //    break;
                     case Algorithmic:
                         _ = SourcesFromAlgorithmic.Get(gen as Algorithmic, ref stereoBuffer, sF_Presets, sources);
                         break;

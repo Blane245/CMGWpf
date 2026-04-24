@@ -9,7 +9,6 @@ namespace CMGWpf.Model.Generators
     public enum GENERATORTYPE
     {
         NoGenertor,
-        //Silent,
         Algorithmic,
         Stochastic,
     }
@@ -31,16 +30,10 @@ namespace CMGWpf.Model.Generators
     {
         public string Name { get; set; } = "G" + uid;
         public Track Parent { get; set; } = parent;
-        // when the starttime changes update the stop time to maintain the duration of the generator
         public double StartTime { get; set; }
-        private double stopTime = 0;
-        public double StopTime { 
-            get => stopTime; 
-            set => stopTime = value; 
-        }
+        public double StopTime { get; set; }
         public bool Mute { get; set; } = false;
         public int Position { get; set; } = 0;
-        public bool firstTime = true;
 
         public static class GeneratorFactory
         {
@@ -49,7 +42,6 @@ namespace CMGWpf.Model.Generators
                 int uid = Uid.Get("generator", FileViewModel.Instance.File.Tracks);
                 return type switch
                 {
-                    //GENERATORTYPE.Silent => new Silent(uid, parent),
                     GENERATORTYPE.Algorithmic => new Algorithmic(uid, parent),
                     GENERATORTYPE.Stochastic => new Stochastic(uid, parent),
                     _ => throw new ArgumentException("Unknown generator type", nameof(type)),

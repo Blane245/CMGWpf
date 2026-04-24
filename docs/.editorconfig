@@ -1,0 +1,4 @@
+[UsersGuide.*]
+vsspell_section_id = 7b7bdc8864c54eed9b87a44db2dc5df3
+vsspell_exclusion_expressions_7b7bdc8864c54eed9b87a44db2dc5df3 = \$\$.*\$\$(?@@PND@@ equations)(?@@PND@@/Options/None)
+

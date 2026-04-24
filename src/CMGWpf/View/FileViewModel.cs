@@ -177,6 +177,12 @@ namespace CMGWpf.View
         private RelayCommand<object>? _reportCommand;
         public RelayCommand<object> ReportCommand =>
             _reportCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).Report(null));
+        private RelayCommand<object>? _aboutCommand;
+        public RelayCommand<object> AboutCommand =>
+            _aboutCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).About(null));
+        private RelayCommand<object>? _UGCommand;
+        public RelayCommand<object> UGCommand =>
+            _UGCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).UG(null));
         #endregion
     }
 }

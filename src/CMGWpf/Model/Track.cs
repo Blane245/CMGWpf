@@ -77,13 +77,6 @@ namespace CMGWpf.Model
                         string type = XMLFunctions.GetAttributeString(generatorElem, "type", "");
                         switch (type)
                         {
-                            //case "Silent":
-                            //    {
-                            //        Silent g = new(0, this);
-                            //        await g.LoadXML(generatorElem, this).ConfigureAwait(false);
-                            //        Generators.Add(g);
-                            //        break;
-                            //    }
                             case "Algorithmic":
                                 {
                                     Algorithmic g = new(0, this);

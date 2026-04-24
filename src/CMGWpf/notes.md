@@ -11,12 +11,7 @@
 		* The task bar icon is not the correct one. In fact, none of the icons are right except withint the application
 	* DSP
 		* appears to be a coupling betwen markov algorithms of different generators. Related to copy generator and track. Problem resolves when file is reloaded.
-# testing
-	* do thorough testing of all generator parameters
-	* put the DSP through its paces check all controls and algorithms.
-	* Jump List Testing - Deferred due to file associations causing rebuild of test structure
-# review documentation
 # feature changes
 	* ~~consider removing the silent generator. It does not have much purpose anymore as the way that the audio is generted has chenged. ~~
-	* clean up code related to the silent generator and remove it from the UI. It is not needed anymore as the way that audio is generated has changed.
-	* implement help about and user guide link
+# release
+	* figure out where to put the installer. Windows Applications?

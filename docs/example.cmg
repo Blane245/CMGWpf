@@ -1,0 +1,189 @@
+<CMG>
+  <fileContents comment="asdfasd">
+    <tracks>
+      <track name="god" mute="False" solo="True" volume="0">
+        <generators>
+          <generator type="Algorithmic" name="G1" startTime="74" stopTime="93" mute="False" position="0" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="70.13" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="DESCENDINGSAWTOOTH" center="-5" frequency="50" amplitude="10" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+          <generator type="Algorithmic" name="G29" startTime="74.5" stopTime="93" mute="False" position="34" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="58.13" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="DESCENDINGSAWTOOTH" center="-5" frequency="50" amplitude="10" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+          <generator type="Algorithmic" name="G30" startTime="75" stopTime="93" mute="False" position="61" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="46.13" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="DESCENDINGSAWTOOTH" center="-5" frequency="50" amplitude="10" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+          <generator type="Algorithmic" name="G3" startTime="1" stopTime="20" mute="False" position="0" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="70.13" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+          <generator type="Algorithmic" name="G7" startTime="1.5" stopTime="20" mute="False" position="34" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="58.13" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+          <generator type="Algorithmic" name="G9" startTime="2" stopTime="20" mute="False" position="61" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="46.13" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+        </generators>
+      </track>
+      <track name="healing1" mute="False" solo="True" volume="0">
+        <generators>
+          <generator type="Algorithmic" name="G8" startTime="19" stopTime="40" mute="False" position="0" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="68.373" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+          <generator type="Algorithmic" name="G31" startTime="19.5" stopTime="40" mute="False" position="33" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="80.373" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+          <generator type="Algorithmic" name="G32" startTime="20" stopTime="40" mute="False" position="64" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="56.373" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+        </generators>
+      </track>
+      <track name="healing2" mute="False" solo="True" volume="0">
+        <generators>
+          <generator type="Algorithmic" name="G2" startTime="38" stopTime="58" mute="False" position="0" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="67.662" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+          <generator type="Algorithmic" name="G0" startTime="38.5" stopTime="58" mute="False" position="34" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="55.662" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+          <generator type="Algorithmic" name="G5" startTime="39" stopTime="58" mute="False" position="66" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Oscillator" type="SINE" center="79.662" frequency="0" amplitude="0" phase="0" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <panP algorithmType="Oscillator" type="SINE" center="0" frequency="0" amplitude="0" phase="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+        </generators>
+      </track>
+      <track name="healing3" mute="False" solo="True" volume="0">
+        <generators>
+          <generator type="Algorithmic" name="G4" startTime="56" stopTime="76" mute="False" position="0" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Constant" value="69.274" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Constant" value="0" />
+            <panP algorithmType="Constant" value="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+          <generator type="Algorithmic" name="G10" startTime="56.5" stopTime="76" mute="False" position="36" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Constant" value="57.274" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Constant" value="0" />
+            <panP algorithmType="Constant" value="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+          <generator type="Algorithmic" name="G12" startTime="57" stopTime="76" mute="False" position="66" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="000:014:Tubular Bells" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="1" noteCount="12" offsetNotes="0" noiseSeed="seed" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Constant" value="45.274" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="1" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Constant" value="0" />
+            <panP algorithmType="Constant" value="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="500" depth="30" waveForm="SINE" />
+          </generator>
+        </generators>
+      </track>
+      <track name="heart beat" mute="False" solo="True" volume="0">
+        <generators>
+          <generator type="Algorithmic" name="G14" startTime="15" stopTime="90" mute="False" position="0" soundFontFile="GeneralUser-GSwithgong.sf2" presetName="128:056:SFX" microtones="true" isLooping="true" measureLength="4" beatCount="4" offsetSequence="0" noteCount="12" offsetNotes="0" noiseSeed="" noiseFrequency="0" noiseAmplitude="0" attackEnabled="False">
+            <noteP algorithmType="Constant" value="55" />
+            <attackP algorithmType="Constant" value="63" />
+            <speedP algorithmType="Constant" value="60" />
+            <durationP algorithmType="Constant" value="100" />
+            <volumeP algorithmType="Constant" value="-4" />
+            <panP algorithmType="Constant" value="0" />
+            <tremolo speed="0" depth="0" waveForm="SINE" />
+            <vibrato speed="0" depth="0" waveForm="SINE" />
+          </generator>
+        </generators>
+      </track>
+    </tracks>
+  </fileContents>
+  <timeLine startTime="0" currentZoomLevel="19" mode="Time" snap="False" snapIncrement="1" beatsPerMeasure="1" measureSize="1">
+    <timeInterval startTime="0" endTime="0" />
+  </timeLine>
+</CMG>

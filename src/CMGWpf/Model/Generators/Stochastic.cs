@@ -61,7 +61,7 @@ namespace CMGWpf.Model.Generators
         }
         public class ReverbParameters
         {
-            public double Delay { get; set; } // mseconds of delay
+            public double Delay { get; set; } // milliseconds of delay
             public double Decay { get; set; } // decay level (dB)
         }
         public class Ensemble
@@ -156,13 +156,6 @@ namespace CMGWpf.Model.Generators
     #endregion
 
     #region Stochastic Generator
-    // the stochastic generator was adapted from Iannis Xenakis Formal Music. It creates a composition from an ensemble of voices, using Poisson probability distributions to determine the timing of events. There are three basic part of the generator. There is teh dynamic parameters that determine the structure of the composition, there is the signal processing part which determines how the voices are processed, and there is the composition part which allows for changes to be be made to its organzation. The stochastic generator is a powerful tool for creating complex and dynamic compositions, and it can be used in a variety of musical styles and genres. It is particularly well-suited for creating music that isunpredictable and constantly evolving, making it a popular choice for experimental and avant-garde composers.
-    /// <summary>
-    /// The Ensemble type is a record strucure that holds the ensemble information that is read from the CMGDatabase. It contains the name of the ensemble, a description of the ensemble, and the names of the voices, comma delimited.
-    /// </summary>
-    /// <summary>
-    /// The Voice Type is a record structure that holds the voice information that is read from the CMGDatabase and provided by the user. It contains the name of the voice, a description of the voice, the name of the soundfont file, the name of the preset, the timbre, the register range, and the duration read from the database. Preset is loaded from the identified soundfont. User setting are  whether it is muted or not, and the volume and velocity.
-    /// </summary>
     public class Stochastic(int uid, Track parent) : Generator(uid, parent), INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -198,7 +191,7 @@ namespace CMGWpf.Model.Generators
         public double Lambda { get => lambda; set { if (value != lambda) { Composition = []; lambda = value; }; } } // The average number of events per time cell. If it changes, clear the composition
         private string compositionSeed = string.Empty;
         public string CompositionSeed { get => compositionSeed; set { if (value != compositionSeed) { Composition = []; compositionSeed = value; }; } } // the seed for the random number generator used to determine the timing of events in the composition. The seed is provided by the user and can be changed during the composition process. If it changes, clear the composition
-        public FastRandom CompositionRn = MathUtilities.StartFastRandom(null); // the random number generator used to determine the timing of events in the composition. The random number generator is initialized with the composition seed provided by the user. If no seed is provided, the random number generator is initialized with a seed determiend from the curren time.
+        public FastRandom CompositionRn = MathUtilities.StartFastRandom(null); // the random number generator used to determine the timing of events in the composition. The random number generator is initialized with the composition seed provided by the user. If no seed is provided, the random number generator is initialized with a seed determined from the current time.
         private ObservableCollection<Voice> voices = [];
         public ObservableCollection<Voice> Voices
         {
@@ -209,7 +202,7 @@ namespace CMGWpf.Model.Generators
         public double Delta { get; set; } = 0; // The average number of sounds/second for each voice. This is determined by the user and can be changed during the composition process.
         public bool Microtones { get; set; } = false; // whether microtones are allowed in the composition. This is determined by the user and can be changed during the composition process.
         public string DynamicsSeed { get; set; } = String.Empty; // the seed for the random number generator used to determine the dynamics of events in the composition. The seed is provided by the user and can be changed during the composition process.
-        public FastRandom DynamicsRn = MathUtilities.StartFastRandom(null); // the random number generator used to determine the dynamics of events in the composition. The random number generator is initialized with the dynamics seed provided by the user. If no seed is provided, the random number generator is initialized with a seed determiend from the curren time.
+        public FastRandom DynamicsRn = MathUtilities.StartFastRandom(null); // the random number generator used to determine the dynamics of events in the composition. The random number generator is initialized with the dynamics seed provided by the user. If no seed is provided, the random number generator is initialized with a seed determined from the current time.
         public INTENSITYOPTION IntensityOption { get; set; } = INTENSITYOPTION.none; // the option for determining the intensity of events in the composition. The intensity of events can be determined by the composition, by the voice, or by a cloud of events. This is determined by the user and can be changed during the composition process.
         public INTENSITYTRANSITIONOPTION IntensityTransitionOption { get; set; } = INTENSITYTRANSITIONOPTION.none; // the option for determining the transition of intensity of events in the composition. The transition of intensity can be random, persistent, or none. This is determined by the user and can be changed during the composition process.
         public IntensityParameters IntensityParameters { get; set; } = new() { CycleTime = 0 }; // the parameters for determining the intensity of events in the composition. The parameters are used to determine the cycle time for changing the intensity of events in the composition. This is determined by the user and can be changed during the composition process.
@@ -549,7 +542,7 @@ namespace CMGWpf.Model.Generators
         {
             return StopTime + CompositionDuration / numberOfTimeCells; // add one time cells to provide for cloud overflows
         }
-        // CMG does not use CurrentValues from the Stocastic class. Rather, values calculations are done in the GetSourcesFromStochastic routine.
+        // CMG does not use CurrentValues from the Stochastic class. Rather, values calculations are done in the GetSourcesFromStochastic routine.
         public override CurrentValues GetCurrentValues(double time, double beats)
         {
             return new CurrentValues

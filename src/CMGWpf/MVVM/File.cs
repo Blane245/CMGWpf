@@ -304,6 +304,61 @@ namespace CMGWpf.MVVM
         {
             PlayFunctions.PlayEngine.StartUp(generator, false, false);
         }
+        public void About(object? param)
+        {
+            Debug.WriteLine("About command being executed.");
+            // display the about dialog
+            AboutDialog dialog = new()
+            {
+                Owner = Application.Current.MainWindow
+            };
+            dialog.ShowDialog();
+        }
+        public void UG(object? param)
+        {
+            Debug.WriteLine("User's Guide command being executed.");
+
+            // Try multiple locations for the User's Guide
+            string? ugPath = null;
+
+            // Location 1: Installed location (same directory as executable)
+            string installedPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "docs", "UsersGuide.html");
+            if (System.IO.File.Exists(installedPath))
+            {
+                ugPath = installedPath;
+            }
+            else
+            {
+                // Location 2: Development location (solution root)
+                string devPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "..", "docs", "UsersGuide.html");
+                string fullDevPath = System.IO.Path.GetFullPath(devPath);
+                if (System.IO.File.Exists(fullDevPath))
+                {
+                    ugPath = fullDevPath;
+                }
+            }
+
+            if (ugPath == null)
+            {
+                MessageBox.Show("User's Guide (UsersGuide.html) not found.", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                vm.StatusMessages = [new Message { Text = "User's Guide not found.", Error = true }];
+                return;
+            }
+
+            string url = new Uri(ugPath).AbsoluteUri;
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to open browser: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         #endregion
     }
 }
