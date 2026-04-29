@@ -141,7 +141,7 @@ namespace CMGWpf.PlayFunctions.DSP
                     var durationPercent = currentValues.Duration;
                     var volumedB = currentValues.Volume;
                     var pan = currentValues.Pan;
-                    volumedB += parent.Volume;
+                    volumedB += Math.Clamp(parent.Volume, -10, 10);
                     double interval = Math.Min(60 / speed, stopTime - time);
                     double duration = (interval * currentValues.Duration) / 100;
                     if (item.value >= 0 && hitBeat) // not a rest or a skipped note

@@ -52,7 +52,7 @@
                         <Label Content="Name: "/>
                         <TextBox x:Name="GeneratorName" Text="{Binding NewGeneratorName}" ToolTip="Enter a new unique name for the generator."/>
                         <Label Content="Start Time (sec): "/>
-                        <xctk:DoubleUpDown x:Name="StartTime" FormatString="F2" Value="{Binding NewStartTime}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the start time of the generator. A change to this will cause the stop time to change maintaing the generator's duration."/>
+                        <xctk:DoubleUpDown x:Name="StartTime" FormatString="F2" Value="{Binding NewStartTime}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the start time of the generator. A change to this will cause the stop time to change maintaining the generator's duration."/>
                         <Label Content="Stop Time (sec): "/>
                         <xctk:DoubleUpDown x:Name="StopTime" FormatString="F2" Value="{Binding NewStopTime}" Minimum="0" Maximum="10000" Increment="0.01" ToolTip="Enter the stop time of the generator."/>
                     </StackPanel>

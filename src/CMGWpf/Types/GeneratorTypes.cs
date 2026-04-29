@@ -1,4 +1,3 @@
-using Microsoft.VisualBasic;
 using System.Windows.Media;
 
 namespace CMGWpf.Types

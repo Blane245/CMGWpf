@@ -37,7 +37,7 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                     <Label Content="Events/Cell:"/>
                     <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="0.01" Value="{Binding StochasticGenerator.Lambda}" ToolTip="The average number of events in each cell"/>
                     <Label Content="Composition Seed:"/>
-                    <Button Content="New Seed" Background="Green" Foreground="White" Command="{Binding CompositionSeedCommand}" CommandParameter="{Binding StochasticGenerator}" ToolTip="Click to generatoe a new random seed"/>
+                    <Button Content="New Seed" Background="Green" Foreground="White" Command="{Binding CompositionSeedCommand}" CommandParameter="{Binding StochasticGenerator}" ToolTip="Click to generate a new random seed"/>
                     <TextBox TextWrapping="NoWrap" Text="{Binding StochasticGenerator.CompositionSeed}" MinWidth="100" ToolTip="See used to generate the composition. Blank will use a new seed each time the composition is generated." />
                 </StackPanel>
             <StackPanel Orientation="Horizontal">
@@ -60,7 +60,7 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                     <CheckBox Content="" IsChecked="{Binding StochasticGenerator.Microtones}" ToolTip="Whether to allow microtonal sounds" VerticalAlignment="center"/>
                     <Label Content="Dynamics Seed:"/>
                     <Button Content="New Seed" Background="Green" Foreground="White" Command="{Binding DynamicsSeedCommand}" CommandParameter="{Binding StochasticGenerator}" VerticalAlignment="Center" ToolTip="Generate a new seed for the dynamics parameters to use"/>
-                    <TextBox TextWrapping="NoWrap" Text="{Binding StochasticGenerator.DynamicsSeed}" MinWidth="100" VerticalAlignment="Center" ToolTip="The seed to use by dynamics algorithms. Blank will cause a new seed to be generatd each time the sounds are created for the composition." />
+                    <TextBox TextWrapping="NoWrap" Text="{Binding StochasticGenerator.DynamicsSeed}" MinWidth="100" VerticalAlignment="Center" ToolTip="The seed to use by dynamics algorithms. Blank will cause a new seed to be generated each time the sounds are created for the composition." />
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>

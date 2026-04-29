@@ -1,0 +1,36 @@
+﻿<Window x:Class="CMGDBEditor.Dialogs.VoiceEnsemblesList"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CMGDBEditor.Dialogs"
+        d:DataContext="{d:DesignInstance Type=viewmodel:EnsembleView}"
+        xmlns:viewmodel="clr-namespace:CMGDBEditor.View"
+        mc:Ignorable="d"
+        Title="Voice Ensembles List" Height="600" Width="800"
+        >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Grid.Row="0" Content="{Binding EnsembleListTitle}" FontSize="16" HorizontalAlignment="Left" Margin="5"/>
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding VoiceEnsemblesList}" 
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False" 
+                  CanUserReorderColumns="False" 
+                  CanUserSortColumns="True" 
+                  CanUserResizeColumns="True"
+                  Margin="5">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Button Grid.Row="2" Content="OK" Width="100" Click="Button_Click" HorizontalAlignment="Left" Margin="5"/>
+    </Grid>
+</Window>

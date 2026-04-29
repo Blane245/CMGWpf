@@ -11,8 +11,12 @@ namespace CMGWpf.Panels
     public partial class CustomWindowChrome : UserControl
     {
         public static readonly DependencyProperty WindowTitleProperty =
-            DependencyProperty.Register(nameof(WindowTitle), typeof(string), typeof(CustomWindowChrome), 
+            DependencyProperty.Register(nameof(WindowTitle), typeof(string), typeof(CustomWindowChrome),
                 new PropertyMetadata("CMG"));
+
+        public static readonly DependencyProperty IconSourceProperty =
+            DependencyProperty.Register(nameof(IconSource), typeof(string), typeof(CustomWindowChrome),
+                new PropertyMetadata("/Assets/CMG-Logo.png"));
 
         public static readonly DependencyProperty ChromeMenuContentProperty =
             DependencyProperty.Register(nameof(ChromeMenuContent), typeof(object), typeof(CustomWindowChrome), 
@@ -27,7 +31,11 @@ namespace CMGWpf.Panels
             get => (string)GetValue(WindowTitleProperty);
             set => SetValue(WindowTitleProperty, value);
         }
-
+        public string IconSource
+        {
+            get => (string)GetValue(IconSourceProperty);
+            set => SetValue(IconSourceProperty, value);
+        }
         public object ChromeMenuContent
         {
             get => GetValue(ChromeMenuContentProperty);

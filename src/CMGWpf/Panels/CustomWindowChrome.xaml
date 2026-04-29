@@ -27,7 +27,7 @@
 
         <!-- Logo -->
         <Image Grid.Column="0" 
-               Source="/Assets/CMG-Logo.png"
+               Source="{Binding IconSource, RelativeSource={RelativeSource AncestorType=local:CustomWindowChrome}}"
                Width="32" 
                Height="32"
                Margin="8,4,8,4"

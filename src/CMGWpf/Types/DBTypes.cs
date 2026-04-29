@@ -7,6 +7,12 @@ namespace CMGWpf.Types
     /// </summary>
     public class DBTypes
     {
+        public class EnsembleResponse
+        {
+            public string Name { get; set; } = "";
+            public string Description { get; set; } = "";
+            public string Voices { get; set; } = "";
+        }
         public enum DBRESPONSETYPE
         {
             error,

@@ -210,7 +210,7 @@ namespace CMGWpf.PlayFunctions.DSP
                         Interval = interval,
                         StartPitch = pitch1,
                         EndPitch = pitch2,
-                        VolumeDb = voice.Volume,
+                        VolumeDb = voice.Volume + generator.Parent.Volume,
                         Voice = instrument,
                         SampleRate = PlayTypes.SampleRate,
                         SoundFont = voice.SoundFont!,

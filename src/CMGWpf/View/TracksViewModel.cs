@@ -4,7 +4,6 @@ using CMGWpf.Model.Generators;
 using CMGWpf.Services;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 
 namespace CMGWpf.View
 {
