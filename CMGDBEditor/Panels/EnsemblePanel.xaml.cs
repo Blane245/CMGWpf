@@ -30,20 +30,13 @@ namespace CMGDBEditor.Panels
 
         private async void EnsemblePanel_Loaded(object sender, RoutedEventArgs e)
         {
-            if (isLoaded)
-            {
-                return;
-            }
-
+            if (isLoaded) return;
             isLoaded = true;
-
-            if (vm == null)
-            {
-                return;
-            }
+            if (vm == null) return;
 
             var ensembles = await Helpers.EnsembleHelpers.List();
             var voices = await Helpers.VoiceHelpers.List();
+            vm.EditorPanel = new BlankPanel(); // Initialize with a blank panel
 
             // Ensure UI updates happen on the UI thread
             await Dispatcher.InvokeAsync(() =>

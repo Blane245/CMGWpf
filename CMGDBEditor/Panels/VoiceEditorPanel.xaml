@@ -7,6 +7,7 @@
              d:DataContext="{d:DesignInstance Type=viewmodel:EnsembleView}"
              xmlns:viewmodel="clr-namespace:CMGDBEditor.View"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:panels="clr-namespace:CMGWpf.Panels;assembly=CMGWpf"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <!-- This panel is for adding/editing a voice. It will have fields for name, description, timbre, duration, register hi, register lo, soundfont file, and preset name. The soundfont list is obtained from the list of soundfonts in the settings folder. The preset name list is obtained from the soundfont file. When a soundfont file is selected, the preset name list will be updated to show the presets in the selected soundfont file.
@@ -59,8 +60,10 @@
         </StackPanel>
         <Border BorderBrush="LightGray" BorderThickness="1"></Border>
         <StackPanel Orientation="Horizontal">
-            <Button Command="{Binding SubmitVoiceCommand}" Content="Submit" ToolTip="Submit the voice changes" Width="100"  Margin="5"  HorizontalAlignment="Left"/>
-            <Button Command="{Binding CancelEditorCommand}" Content="Cancel" ToolTip="Cancel voice changes" Width="100"  Margin="5"  HorizontalAlignment="Left"/>
+            <Button Command="{Binding SubmitVoiceCommand}" Content="Submit" ToolTip="Submit the ensemble changes" Width="100"  Margin="5"  HorizontalAlignment="Left"/>
+            <Button Command="{Binding CancelEditorCommand}" Content="Cancel" ToolTip="Cancel ensemble changes" Width="100"  Margin="5"  HorizontalAlignment="Left"/>
         </StackPanel>
+        <Border BorderBrush="LightGray" BorderThickness="1"></Border>
+        <panels:MessagePanel Source="{Binding DataContext.Errors, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="0,5,0,5"/>
     </StackPanel>
 </UserControl>

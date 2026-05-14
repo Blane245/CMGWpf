@@ -41,6 +41,7 @@ namespace CMGWpf.Utilities
 
         public static string MidiToNote(double midi)
         {
+            if (midi < 0) return "Rest";
             int baseMidi = (int)Math.Round(midi);
             int cents = (int)Math.Round((midi - (double)baseMidi) * 100);
             int octave = baseMidi / 12 - 1;

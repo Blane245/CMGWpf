@@ -1,6 +1,6 @@
-﻿using CMGDBEditor.Model;
+﻿using CMGDBEditor.Helpers;
+using CMGDBEditor.Model;
 using CMGDBEditor.Panels;
-using CMGDBEditor.Types;
 using CMGDBEditor.View;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;
@@ -18,31 +18,27 @@ namespace CMGDBEditor.MVVM
             vm.NewEnsembleName = "";
             vm.EditorPanel = new EnsembleEditorPanel(vm);
             vm.ModifyMode = "Add";
-            vm.NotifyPropertyChanged(nameof(vm.EditorPanel));
+            vm.Errors = new ObservableCollection<Message>();
         }
         public async void EditEnsemble(string name)
         {
-            var response = await Helpers.EnsembleHelpers.Get(name);
+            var response = await EnsembleHelpers.Get(name);
             if (response == null)
             {
-                MainView.Instance.Messages = [.. MainView.Instance.Messages, new Message() { Error = true, Text = "Ensemble not found." }];
-                return;
+                vm.Status = new Message() { Text = "Ensemble not found.", Error = true };
+                return;        
             }
             vm.UIEnsemble = response.Clone();
             vm.NewEnsembleName = name;
             vm.EditorPanel = new EnsembleEditorPanel(vm);
             vm.ModifyMode = "Modify";
-            vm.NotifyPropertyChanged(nameof(vm.EditorPanel));
+            vm.Errors = new ObservableCollection<Message>();
         }
         public async void SubmitEnsemble()
         {
             if (vm.UIEnsemble == null) return;
-            ObservableCollection<Error> errors = Ensemble.Validate(vm.UIEnsemble, vm.NewEnsembleName, vm.EnsembleList);
-            if (errors.Count > 0)
-            {
-                vm.Errors = errors;
-                return;
-            }
+            vm.Errors = Ensemble.Validate(vm.UIEnsemble, vm.NewEnsembleName, vm.EnsembleList);
+            if (vm.Errors.Count > 0) return;
 
             // retrieve the selectableVoiceList and update the UIEnsemble voices
             vm.UIEnsemble.Voices.Clear();
@@ -54,31 +50,34 @@ namespace CMGDBEditor.MVVM
             if (vm.ModifyMode == "Add")
             {
                 vm.UIEnsemble.Name = vm.NewEnsembleName;
-                var response = await Helpers.EnsembleHelpers.Add(vm.UIEnsemble);
+                var response = await EnsembleHelpers.Add(vm.UIEnsemble);
                 if (!response)
                 {
-                    MainView.Instance.Messages = [.. MainView.Instance.Messages, new Message() { Error = true, Text = "Unknown error occurred while adding ensemble." }];
+                    vm.Status = new Message() { Text = "Unknown error occurred while adding ensemble.", Error = true };
                     vm.EditorPanel = new BlankPanel();
-                    vm.NotifyPropertyChanged(nameof(vm.EditorPanel));
+
                     return;
                 }
-                MainView.Instance.Messages = [.. MainView.Instance.Messages, new Message() { Error = false, Text = "Ensemble '" + vm.UIEnsemble.Name + "' has been added successfully." }];
             }
             else
             {
-                var response = await Helpers.EnsembleHelpers.Modify(vm.UIEnsemble, vm.NewEnsembleName);
+                var response = await EnsembleHelpers.Modify(vm.UIEnsemble, vm.NewEnsembleName);
                 if (!response)
                 {
-                    MainView.Instance.Messages = [.. MainView.Instance.Messages, new Message() { Error = true, Text = "Unknown error occurred while modifying ensemble." }];
+                    vm.Status = new Message() { Text = "Unknown error occurred while modifying ensemble.", Error = true };
                     vm.EditorPanel = new BlankPanel();
-                    vm.NotifyPropertyChanged(nameof(vm.EditorPanel));
-                    return;
                 }
             }
 
-            MainView.Instance.Messages = [.. MainView.Instance.Messages, new Message() { Error = false, Text =
-                "Ensemble '" + vm.UIEnsemble.Name + "' has been " + (vm.ModifyMode == "Add" ? "added" : "modified") + " successfully. " + (vm.UIEnsemble.Name != vm.NewEnsembleName && vm.ModifyMode == "Add"? "": "New Name is '" + vm.NewEnsembleName + "'") }];
+            vm.Status = new Message() { Text = "Ensemble '" + 
+                vm.UIEnsemble.Name + 
+                "' has been " + 
+                (vm.ModifyMode == "Add" ? "added" : "modified") + 
+                " successfully. " + 
+                (vm.UIEnsemble.Name != vm.NewEnsembleName && vm.ModifyMode == "Add" ? "" : "New Name is '" + vm.NewEnsembleName + "'"), 
+                Error = false };
             // refresh the ensemble list
+            vm.EditorPanel = new BlankPanel();
             ListEnsembles();
         }
         public async void DeleteEnsemble(string name)
@@ -87,31 +86,28 @@ namespace CMGDBEditor.MVVM
             if (result == MessageBoxResult.Yes)
             {
                 // delete the ensemble from the DB
-                var response = await Helpers.EnsembleHelpers.Delete(name);
+                var response = await EnsembleHelpers.Delete(name);
                 if (!response)
                 {
-                    MainView.Instance.Messages = [.. MainView.Instance.Messages, new Message() { Error = true, Text = $"Ensemble '{name}' not found." }];
+                    vm.Status = new Message() { Text = "Ensemble not found.", Error = true };
                     return;
                 }
-                MainView.Instance.Messages = [.. MainView.Instance.Messages, new Message() { Error = false, Text = $"Ensemble '{name}' has been deleted successfully." }];
-                // refresh the ensemble list
+                vm.Status = new Message() { Text = $"Ensemble '{name}' has been deleted successfully.", Error = false };
                 ListEnsembles();
             }
 
         }
         public async void ListEnsembles()
         {
-            var response = await Helpers.EnsembleHelpers.List();
+            var response = await EnsembleHelpers.List();
             if (response == null)
             {
-                MainView.Instance.Messages = [.. MainView.Instance.Messages, new Message() { Error = true, Text = "Failed to load ensembles." }];
+                vm.Status = new Message() { Text = "Failed to load ensembles.", Error = true };
                 return;
             }
             vm.EnsembleList = response;
-            MainView.Instance.Messages = [.. MainView.Instance.Messages, new Message() { Error = false, Text = $"{vm.EnsembleList.Count} ensembles loaded." }];
-            vm.EditorPanel = new BlankPanel();
-            vm.NotifyPropertyChanged(nameof(vm.EnsembleList));
-            vm.NotifyPropertyChanged(nameof(vm.EditorPanel));
+            vm.Status = new Message() { Text = $"{vm.EnsembleList.Count} ensembles loaded.", Error = false };
+            return;
         }
     }
 }

@@ -4,10 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CMGWpf.Panels"
+             xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
              mc:Ignorable="d" 
              Height="40"
              d:DesignHeight="40" d:DesignWidth="800">
-    <Grid Background="{Binding ChromeBackground, RelativeSource={RelativeSource AncestorType=local:CustomWindowChrome}}"
+    <Grid Background="{Binding ChromeBackground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:CustomWindowChrome}}"
           MouseLeftButtonDown="DragArea_MouseLeftButtonDown"
           MouseMove="DragArea_MouseMove">
         <Grid.ColumnDefinitions>
@@ -27,7 +28,7 @@
 
         <!-- Logo -->
         <Image Grid.Column="0" 
-               Source="{Binding IconSource, RelativeSource={RelativeSource AncestorType=local:CustomWindowChrome}}"
+               Source="{Binding IconSource, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:CustomWindowChrome}}"
                Width="32" 
                Height="32"
                Margin="8,4,8,4"
@@ -37,12 +38,13 @@
         <ContentPresenter Grid.Column="1" 
                          x:Name="MenuContentPresenter"
                          VerticalAlignment="Center"
-                         Content="{Binding ChromeMenuContent, RelativeSource={RelativeSource AncestorType=local:CustomWindowChrome}}"/>
+                         shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                         Content="{Binding ChromeMenuContent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:CustomWindowChrome}}"/>
 
         <!-- Title -->
         <TextBlock Grid.Column="3"
                    x:Name="TitleText"
-                   Text="{Binding WindowTitle, RelativeSource={RelativeSource AncestorType=local:CustomWindowChrome}}"
+                   Text="{Binding WindowTitle, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:CustomWindowChrome}}"
                    FontSize="14"
                    FontWeight="SemiBold"
                    Foreground="White"
@@ -52,14 +54,16 @@
         <!-- Window Control Buttons -->
         <StackPanel Grid.Column="5" 
                    Orientation="Horizontal"
-                   HorizontalAlignment="Right">
-            
+                   HorizontalAlignment="Right"
+                   shell:WindowChrome.IsHitTestVisibleInChrome="True">
+
             <!-- Minimize Button -->
             <Button x:Name="MinimizeButton"
                     Width="30"
                     Height="30"
                     Content="─"
-                    ToolTip="Minimize">
+                    ToolTip="Minimize"
+                    shell:WindowChrome.IsHitTestVisibleInChrome="True">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border" 
@@ -118,7 +122,8 @@
                     Width="30"
                     Height="30"
                     Content="✕"
-                    ToolTip="Close">
+                    ToolTip="Close"
+                    shell:WindowChrome.IsHitTestVisibleInChrome="True">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="border" 

@@ -1,8 +1,8 @@
 ﻿using CMGDBEditor.Model;
 using CMGDBEditor.MVVM;
 using CMGDBEditor.Panels;
-using CMGDBEditor.Types;
 using CMGWpf.SoundFont_2;
+using CMGWpf.Types;
 using CMGWpf.View;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -59,8 +59,8 @@ namespace CMGDBEditor.View
         }
         public ObservableCollection<string> SoundFontFileNames
         {
-            get { if (soundFontFileNames.Count == 0) 
-                    LoadSoundFontFileNames(); 
+            get { if (soundFontFileNames.Count == 0)
+                    LoadSoundFontFileNames();
                 return soundFontFileNames; }
         }
         private ObservableCollection<string> _presetNames = new ObservableCollection<string>();
@@ -74,8 +74,8 @@ namespace CMGDBEditor.View
         {
             get { return newSoundFontFile; }
             // when the soundfont file changes, load it into the SF buffer and get the list of presets to populate the preset drop down
-            set { 
-                newSoundFontFile = value; 
+            set {
+                newSoundFontFile = value;
                 SoundFont? sf = CMGWpf.Utilities.SoundFontUtilities.GetSoundFont(newSoundFontFile);
                 if (sf != null)
                 {
@@ -87,7 +87,7 @@ namespace CMGDBEditor.View
                     PresetNames = newPresets;
                 }
 
-                OnPropertyChanged(); 
+                OnPropertyChanged();
             }
         }
         private ObservableCollection<Ensemble> _ensembleList = new ObservableCollection<Ensemble>();
@@ -131,8 +131,8 @@ namespace CMGDBEditor.View
             public string Description { get => _description; set { _description = value; OnPropertyChanged(); } }
         }
         private ObservableCollection<VoiceEnsemblesListType> _voiceEnsemblesList = [];
-        public ObservableCollection<VoiceEnsemblesListType> VoiceEnsemblesList 
-        { get => _voiceEnsemblesList; 
+        public ObservableCollection<VoiceEnsemblesListType> VoiceEnsemblesList
+        { get => _voiceEnsemblesList;
             set { _voiceEnsemblesList = value; OnPropertyChanged(); } }
 
         private ObservableCollection<SelectableVoiceType> _selectableVoiceList = new ObservableCollection<SelectableVoiceType>();
@@ -173,8 +173,12 @@ namespace CMGDBEditor.View
             get { return _UIVoice; }
             set { _UIVoice = value; OnPropertyChanged(); }
         }
-        private ObservableCollection<Error> _errors = new ObservableCollection<Error>();
-        public ObservableCollection<Error> Errors { get { return _errors; } set { _errors = value; OnPropertyChanged(); } }
+        private ObservableCollection<Message> _errors = new ObservableCollection<Message>();
+        public ObservableCollection<Message> Errors { get { return _errors; } set { _errors = value; OnPropertyChanged(); } }
+        public Message Status
+        { get => MainView.Instance.Status; 
+         set { MainView.Instance.Status = value; OnPropertyChanged(); } }
+
         private UserControl? _editorPanel;
         public UserControl? EditorPanel
         {

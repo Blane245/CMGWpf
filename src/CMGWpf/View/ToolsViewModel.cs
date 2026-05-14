@@ -2,6 +2,7 @@
 using CMGWpf.MVVM;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace CMGWpf.View
 {
@@ -13,24 +14,48 @@ namespace CMGWpf.View
         private ToolsViewModel()
         {
         }
-        private double _midi = 0;
-        public double Midi
+
+        // property and relay command to assure that only a single dialog is activated
+        // dialog close action will permit new dialog to be created.
+        private Window? _thisDialog = null;
+        public Window? ThisDialog {get=>_thisDialog; set { _thisDialog = value; OnPropertyChanged(); } }
+        private RelayCommand<object?>? _generatorandCalculatorToolsCommand;
+        public RelayCommand<object?> GeneratorandCalculatorToolsCommand =>
+            _generatorandCalculatorToolsCommand ??= new RelayCommand<Object?>(execute =>
+            {
+                if (ThisDialog == null)
+                {
+                    ThisDialog = new GeneratorAndCalculatorTools();
+                    ThisDialog.Show();
+                }
+            });
+
+        private double _midi1 = 0;
+        public double Midi1
         {
-            get => _midi;
-            set { 
-                _midi = value;
-                _frequency = Math.Round(ToolUtilities.MidiToFrequency(_midi),2);
-                OnPropertyChanged(nameof(Frequency));
+            get => _midi1;
+            set
+            {
+                _midi1 = value;
+                OnPropertyChanged();
+                _frequency1 = Math.Round(ToolUtilities.MidiToFrequency(_midi1), 2);
+                OnPropertyChanged(nameof(Frequency1));
             }
         }
-        private double _frequency = 0;
-        public double Frequency
+        private double _frequency1 = 0;
+        public double Frequency1 { get => _frequency1; }
+        private double _midi2 = 0;
+        public double Midi2 { get => _midi2; }
+        private double _frequency2 = 0;
+        public double Frequency2
         {
-            get => _frequency;
-            set { 
-                _frequency = value;
-                _midi = Math.Round(ToolUtilities.FrequencyToMidi(_frequency),2);
-                OnPropertyChanged(nameof(Midi));
+            get => _frequency2;
+            set
+            {
+                _frequency2 = value;
+                OnPropertyChanged();
+                _midi2 = Math.Round(ToolUtilities.FrequencyToMidi(_frequency2), 2);
+                OnPropertyChanged(nameof(Midi2));
             }
         }
         private double _beatCount = 0;
@@ -81,6 +106,12 @@ namespace CMGWpf.View
         }
         private double _oscillatorFrequency = 0;
         public double OscillatorFrequency { get => _oscillatorFrequency; }
+        private ObservableCollection<Message> _messages = [];
+        public ObservableCollection<Message> Messages
+        {
+            get => _messages;
+            set { _messages = value; OnPropertyChanged(); }
+        }
         public ObservableCollection<string> GeneratorList
         {
             get
@@ -117,31 +148,12 @@ namespace CMGWpf.View
 
         public bool StaggerSelectAll { get; set; } = false;
 
-        // active generator properties
-        private MidiFrequencyConverterDialog? activeMidiFrequencyConverterDialog = null;
-        public MidiFrequencyConverterDialog? ActiveMidiFrequencyConverterDialog { get => activeMidiFrequencyConverterDialog; set { activeMidiFrequencyConverterDialog = value; OnPropertyChanged(); } }
-
-        private MeasureDurationCalculatorDialog? activeMeasureDurationCalculatorDialog = null;
-        public MeasureDurationCalculatorDialog? ActiveMeasureDurationCalculatorDialog { get => activeMeasureDurationCalculatorDialog; set { activeMeasureDurationCalculatorDialog = value; OnPropertyChanged(); } }
-
-        private OscillatorFrequencyCalculatorDialog? activeOscillatorFrequencyCalculatorDialog = null;
-        public OscillatorFrequencyCalculatorDialog? ActiveOscillatorFrequencyCalculatorDialog { get => activeOscillatorFrequencyCalculatorDialog; set { activeOscillatorFrequencyCalculatorDialog = value; OnPropertyChanged(); } }
-
-        private AlignGeneratorsDialog? activeAlignGeneratorsDialog = null;
-        public AlignGeneratorsDialog? ActiveAlignGeneratorsDialog { get => activeAlignGeneratorsDialog; set { activeAlignGeneratorsDialog = value; OnPropertyChanged(); } }
-
-        private SetGeneratorsDurationEqualDialog? activeSetGeneratorsDurationEqualDialog = null;
-        public SetGeneratorsDurationEqualDialog? ActiveSetGeneratorsDurationEqualDialog { get => activeSetGeneratorsDurationEqualDialog; set { activeSetGeneratorsDurationEqualDialog = value; OnPropertyChanged(); } }
-
-        private StaggerGeneratorsStartTimeDialog? activeStaggerGeneratorsStartTimeDialog = null;
-        public StaggerGeneratorsStartTimeDialog? ActiveStaggerGeneratorsStartTimeDialog { get => activeStaggerGeneratorsStartTimeDialog; set { activeStaggerGeneratorsStartTimeDialog = value; OnPropertyChanged(); } }
-
-        // dialog properties
-        public static readonly ObservableCollection<string> MaintainAlignTimeOptions = ["Start Time", "Stop Time"];
+        // generator calculator properties
+        public static ObservableCollection<string> MaintainAlignTimeOptions { get => ["Start Time", "Stop Time"]; }
         private string _maintainTimeOption = "Start Time";
         public string MaintainTimeOption { get => _maintainTimeOption; set { _maintainTimeOption = value; OnPropertyChanged(); } }
         private double _staggerAmount = 0;
-        public double StaggerAmount { get => _staggerAmount; set { _staggerAmount = Math.Round(value,2); OnPropertyChanged(); } }
+        public double StaggerAmount { get => _staggerAmount; set { _staggerAmount = Math.Round(value, 2); OnPropertyChanged(); } }
         private string _primaryGeneratorName = "";
         public string PrimaryGeneratorName { get => _primaryGeneratorName; set { _primaryGeneratorName = value; OnPropertyChanged(); } }
         private ObservableCollection<string> _secondaryGeneratorNames = [];
@@ -149,28 +161,6 @@ namespace CMGWpf.View
         private string _alignTimeOption = "Start Time";
         public string AlignTimeOption { get => _alignTimeOption; set { _alignTimeOption = value; OnPropertyChanged(); } }
         #region Tools Commands
-        private RelayCommand<object>? _midiFrequencyConverterCommand;
-        public RelayCommand<object> MidiFrequencyConverterCommand =>
-            _midiFrequencyConverterCommand ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).MidiFrequencyConverter());
-        private RelayCommand<object>? _startCMGDBEditorCommand;
-        public RelayCommand<object> StartCMGDBEditorCommand =>
-            _startCMGDBEditorCommand ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).StartCMGDBEditor());
-        private RelayCommand<object>? _measureDurationCalculatorCommand;
-        public RelayCommand<object> MeasureDurationCalculatorCommand =>
-            _measureDurationCalculatorCommand ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).MeasureDurationCalculator());
-        private RelayCommand<object>? _oscillatorFrequencyCalculatorCommand;
-        public RelayCommand<object> OscillatorFrequencyCalculatorCommand =>
-            _oscillatorFrequencyCalculatorCommand ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).OscillatorFrequencyCalculator());
-        private RelayCommand<object>? _setGeneratorsDurationEqualCommand;
-        public RelayCommand<object> SetGeneratorsDurationEqualCommand =>
-            _setGeneratorsDurationEqualCommand ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).SetGeneratorsDurationEqual());
-        private RelayCommand<object>? _staggerGeneratorsStartTimeCommand;
-        public RelayCommand<object> StaggerGeneratorsStartTimeCommand =>
-            _staggerGeneratorsStartTimeCommand ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).StaggerGeneratorsStartTime());
-        private RelayCommand<object>? _align;
-        private RelayCommand<object>? _alignGeneratorsCommand;
-        public RelayCommand<object> AlignGeneratorsCommand =>
-            _alignGeneratorsCommand ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).AlignGenerators());
 
         private RelayCommand<StaggerGeneratorsSelection>? _moveStaggerUp;
         public RelayCommand<StaggerGeneratorsSelection> MoveStaggerUp =>
@@ -178,6 +168,7 @@ namespace CMGWpf.View
         private RelayCommand<StaggerGeneratorsSelection>? _moveStaggerDown;
         public RelayCommand<StaggerGeneratorsSelection> MoveStaggerDown =>
             _moveStaggerDown ??= new RelayCommand<StaggerGeneratorsSelection>(selection => new ToolsCommands(this, FileViewModel.Instance.File).MoveStaggerDown(selection));
+        private RelayCommand<object>? _align;
         public RelayCommand<object> Align =>
             _align ??= new RelayCommand<object>(execute => new ToolsCommands(this, FileViewModel.Instance.File).Align());
 

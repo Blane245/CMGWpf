@@ -1,16 +1,6 @@
 ﻿using CMGDBEditor.View;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Collections.ObjectModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-
 namespace CMGDBEditor.Dialogs
 {
     /// <summary>
@@ -18,10 +8,16 @@ namespace CMGDBEditor.Dialogs
     /// </summary>
     public partial class VoiceEnsemblesList : Window
     {
-        public VoiceEnsemblesList(EnsembleView vm)
+        public ObservableCollection<EnsembleView.VoiceEnsemblesListType> List { get; set; } = new ObservableCollection<EnsembleView.VoiceEnsemblesListType>();
+        public string ListTitle { get; set; } = string.Empty;
+        public EnsembleView? CommandView { get; set; } = null;
+        public VoiceEnsemblesList(EnsembleView vm, string name, ObservableCollection<EnsembleView.VoiceEnsemblesListType> list)
         {
             InitializeComponent();
-            DataContext = vm;
+            DataContext = this;
+            List = list;
+            ListTitle = $"Ensemble list for voice '{name}'";
+            CommandView = vm;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

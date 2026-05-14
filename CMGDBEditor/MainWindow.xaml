@@ -17,10 +17,10 @@
     <Grid Margin="0">
         <Grid.RowDefinitions>
             <!-- Custom Window Chrome -->
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=ChromeHeight}"/>
             <!-- This probably is wrong as a resize of the CMG window will affect this one and vice versa -->
-            <RowDefinition Height="800"/>
-            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=FooterHeight}"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="150"/>
         </Grid.RowDefinitions>
 
         <!-- Custom Window Chrome with Menu -->

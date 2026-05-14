@@ -10,7 +10,7 @@
              d:DesignHeight="100" d:DesignWidth="800"
              >
     <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="100">
             <ItemsControl ItemsSource="{Binding Source, RelativeSource={RelativeSource AncestorType=UserControl}}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

@@ -29,6 +29,10 @@ namespace CMGWpf.Model
             set { if (muted != value) { muted = value; OnPropertyChanged(); } } }
         public double Volume { get; set; }
         public double Velocity { get; set; }
+        public Voice Clone()
+        {
+            return (Voice)MemberwiseClone();
+        }
 
     }
 }

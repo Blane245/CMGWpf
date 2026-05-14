@@ -21,8 +21,7 @@
             <StackPanel Margin="5">
                 <Label FontWeight="Bold" FontSize="14" Content="Ensembles" HorizontalAlignment="Center"/>
                 <Button Command="{Binding AddEnsembleCommand}" Margin="0" Padding="0" Width="100">Add Ensemble</Button>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="1000">
-                    <DataGrid ItemsSource="{Binding EnsembleList}" AutoGenerateColumns="False" IsReadOnly="True">
+                    <DataGrid ItemsSource="{Binding EnsembleList}" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="500">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="True" CanUserResize="True" CanUserSort="True"/>
                             <DataGridTextColumn Header="Description" Binding="{Binding Description}" CanUserReorder="True" CanUserResize="True" CanUserSort="True"/>
@@ -42,17 +41,15 @@
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                     </DataGrid>
-                </ScrollViewer>
             </StackPanel>
         </Border>
 
         <!-- Voices Column -->
-        <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="5">
+        <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="5" >
             <StackPanel Margin="5">
                 <Label FontWeight="Bold" FontSize="14" Content="Voices" HorizontalAlignment="Center"/>
                 <Button Command="{Binding AddVoiceCommand}" Margin="0" Padding="0" Width="100">Add Voice</Button>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="500">
-                    <DataGrid ItemsSource="{Binding VoiceList}" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid ItemsSource="{Binding VoiceList}" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="500">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserResize="True" CanUserReorder="True" CanUserSort="True"/>
                             <DataGridTextColumn Header="Description" Binding="{Binding Description}" CanUserResize="True" CanUserReorder="True" CanUserSort="True"/>
@@ -74,7 +71,6 @@
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                     </DataGrid>
-                </ScrollViewer>
             </StackPanel>
         </Border>
         <ContentControl Grid.Column="2" Content="{Binding EditorPanel}"/>

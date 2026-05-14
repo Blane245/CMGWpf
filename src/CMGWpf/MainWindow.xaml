@@ -48,10 +48,7 @@
         <KeyBinding Key="P" Modifiers="Ctrl" Command="{Binding Source={x:Static services:GlobalService.Instance}, Path=EditPreferencesCommand}"/>
 
         <!-- Tools Menu Shortcuts -->
-        <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MidiFrequencyConverterCommand}"/>
-        <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StartCMGDBEditorCommand}"/>
-        <KeyBinding Key="F" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=OscillatorFrequencyCalculatorCommand}"/>
-        <KeyBinding Key="E" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=SetGeneratorsDurationEqualCommand}"/>
+        <KeyBinding Key="G" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=GeneratorAndCalculatorToolsCommand}"/>
         <!-- Play Menu Shortcuts -->
         <KeyBinding Key="P" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=PlayCommand}"/>
         <KeyBinding Key="R" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=ReportCommand}"/>
@@ -68,6 +65,8 @@
 
         <!-- Custom Window Chrome with Menu -->
         <panels:CustomWindowChrome Grid.Row="0"
+                                   IconSource="/Assets/CGM2.png"
+                                   ChromeBackground="SaddleBrown"
                                      WindowTitle="{Binding WindowTitle}">
             <panels:CustomWindowChrome.ChromeMenuContent>
                 <layout:Menu/>

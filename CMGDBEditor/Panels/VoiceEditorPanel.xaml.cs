@@ -1,5 +1,7 @@
 ﻿using CMGDBEditor.Model;
 using CMGDBEditor.View;
+using CMGWpf.SoundFont_2;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -21,6 +23,17 @@ namespace CMGDBEditor.Panels
 
         private void VoiceEditorPanel_Loaded(object sender, RoutedEventArgs e)
         {
+            // trigger the loading of the preset list 
+            if (_vm != null && _vm.UIVoice != null && _vm.UIVoice.SoundFontFile != string.Empty)
+            {
+                var soundfont = CMGWpf.Utilities.SoundFontUtilities.GetSoundFont(_vm.UIVoice.SoundFontFile);
+                if (soundfont != null)
+                {
+                    var list = soundfont.Presets.Select((p) => CMGWpf.Utilities.SoundFontUtilities.BankPresetToName(p)).ToArray();
+                    list.Sort();
+                    _vm.PresetNames = new ObservableCollection<string>(list);
+                }
+            }
         }
     }
 }

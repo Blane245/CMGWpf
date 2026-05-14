@@ -16,6 +16,8 @@ namespace CMGDBEditor.Data
         // DbSets for your entities
         public DbSet<Ensemble> Ensembles { get; set; }
         public DbSet<Voice> Voices { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<NoteSequence> NoteSequences { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -121,6 +123,83 @@ namespace CMGDBEditor.Data
 
                 entity.Property(v => v.PresetName)
                     .HasMaxLength(255);
+            });
+            // Configure NoteSequence entity
+            modelBuilder.Entity<NoteSequence>(entity =>
+            {
+                entity.ToTable("notesequence");
+
+                // Primary key
+                entity.HasKey(e => new { e.Name });
+
+                // Properties
+                entity.Property(e => e.Name)
+                    .HasMaxLength(45)
+                    .IsRequired();
+
+                entity.Property(e => e.Items);
+
+                // Many-to-many relationship with Tag
+                entity.HasMany(e => e.Tags)
+                    .WithMany(v => v.NoteSequences)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "notesequence_tag",
+                        j => j
+                            .HasOne<Tag>()
+                            .WithMany()
+                            .HasForeignKey("tag_name")
+                            .HasPrincipalKey(nameof(Tag.Name))
+                            .OnDelete(DeleteBehavior.Cascade),
+                        j => j
+                            .HasOne<NoteSequence>()
+                            .WithMany()
+                            .HasForeignKey("notesequence_name")
+                            .HasPrincipalKey(nameof(NoteSequence.Name))
+                            .OnDelete(DeleteBehavior.Cascade),
+                        j =>
+                        {
+                            j.HasKey("notesequence_name", "tag_name");
+                            j.ToTable("notesequence_tag");
+                        }
+                    );
+            });
+
+            // Configure Tag entity
+            modelBuilder.Entity<Tag>(entity =>
+            {
+                entity.ToTable("tag");
+
+                // Primary key
+                entity.HasKey(e => e.Name);
+
+                // Properties
+                entity.Property(e => e.Name)
+                    .HasMaxLength(45)
+                    .IsRequired();
+
+                // Many-to-many relationship with NoteSequence
+                entity.HasMany(e => e.NoteSequences)
+                    .WithMany(v => v.Tags)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "notesequence_tag",
+                        j => j
+                            .HasOne<NoteSequence>()
+                            .WithMany()
+                            .HasForeignKey("notesequence_name")
+                            .HasPrincipalKey(nameof(NoteSequence.Name))
+                            .OnDelete(DeleteBehavior.Cascade),
+                        j => j
+                            .HasOne<Tag>()
+                            .WithMany()
+                            .HasForeignKey("tag_name")
+                            .HasPrincipalKey(nameof(Tag.Name))
+                            .OnDelete(DeleteBehavior.Cascade),
+                        j =>
+                        {
+                            j.HasKey("notesequence_name", "tag_name");
+                            j.ToTable("notesequence_tag");
+                        }
+                    );
             });
         }
     }

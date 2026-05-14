@@ -29,8 +29,8 @@
         </Grid.RowDefinitions>
         <panels:CustomWindowChrome Grid.Row="0"
                                      WindowTitle="{Binding WindowTitle}"
-                                     ChromeBackground="SaddleBrown">
-        </panels:CustomWindowChrome>
+                                     ChromeBackground="SaddleBrown"/>
+
         <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
             <StackPanel Orientation="Vertical">
                 <Label Content="Edit File Comment" Foreground="Black" FontWeight="Bold" VerticalAlignment="Center"/>

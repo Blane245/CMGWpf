@@ -1,4 +1,4 @@
-﻿using CMGDBEditor.Model;
+﻿using CMGDBEditor.Dialogs;
 using CMGDBEditor.Panels;
 using CMGWpf.Properties;
 using CMGWpf.Services;
@@ -6,7 +6,8 @@ using CMGWpf.Types;
 using CMGWpf.Utilities;
 using CMGWpf.View;
 using System.Collections.ObjectModel;
-using System.Windows.Controls;
+using System.Drawing;
+using System.Windows.Media;
 
 namespace CMGDBEditor.View
 {
@@ -31,7 +32,11 @@ namespace CMGDBEditor.View
             get { return soundFontFileNames; }
             set { soundFontFileNames = value; OnPropertyChanged(); }
         }
-
+        private Message _status = new();
+        public Message Status { get => _status; 
+            set {  _status = value;
+                _status.Brush = (_status.Error) ? new SolidColorBrush (Colors.Red)  : new SolidColorBrush(Colors.Black);
+                OnPropertyChanged(); }  }
         // panel selection either ensemble or note sequences
         private object? elementPanel = new BlankPanel();
         public object? ElementPanel
@@ -49,69 +54,20 @@ namespace CMGDBEditor.View
             _showEnsembleCommand ??= new RelayCommand<object>(async execute =>
             {
                 ElementPanel = new EnsemblePanel();
-                OnPropertyChanged(nameof(ElementPanel));
-                //var eResponse = await Ensemble.List();
-                //var ensembles = new ObservableCollection<Ensemble>();
-                //foreach (var item in eResponse)
-                //{
-                //    string name = item["name"]?.ToString() ?? string.Empty;
-                //    string description = item["description"]?.ToString() ?? string.Empty;
-                //    ensembles.Add(new Ensemble() { Name = name, Description = description });
-                //}
-                //EnsembleList = ensembles;
-                //var vResponse = await Voice.List();
-                //var voices = new ObservableCollection<Voice>();
-                //foreach (var item in vResponse)
-                //{
-                //    string name = item["name"]?.ToString() ?? string.Empty;
-                //    string description = item["description"]?.ToString() ?? string.Empty;
-                //    voices.Add(new Voice() { Name = name, Description = description });
-                //}
-                //VoiceList = voices;
-                //ElementPanel = EnsemblePanel;
-                //OnPropertyChanged(nameof(EnsembleList));
-                //OnPropertyChanged(nameof(VoiceList));
-                //OnPropertyChanged(nameof(ElementPanel));
-
             });
         private RelayCommand<object>? _showNoteSequencesCommand;
         public RelayCommand<object> ShowNoteSequencesCommand =>
             _showNoteSequencesCommand ??= new RelayCommand<object>(execute =>
             {
                 ElementPanel = new NoteSequencesPanel();
-                OnPropertyChanged(nameof(ElementPanel));
 
             });
-        //private RelayCommand<Ensemble>? _showEnsembleEditorCommand;
-        //public RelayCommand<Ensemble> EnsembleEditorCommand =>
-        //    _showEnsembleEditorCommand ??= new RelayCommand<Ensemble>(execute =>
-        //    {
-        //        EditorPanel = EnsembleEditorPanel;
-        //        OnPropertyChanged(nameof(EditorPanel));
-        //    });
-        //private RelayCommand<Voice>? _showVoiceEditorCommand;
-        //public RelayCommand<Voice> VoiceEditorCommand =>
-        //    _showVoiceEditorCommand ??= new RelayCommand<Voice>(execute =>
-        //    {
-        //        EditorPanel = VoiceEditorPanel;
-        //        OnPropertyChanged(nameof(EditorPanel));
-        //    });
-        //private RelayCommand<NoteSequence>? _showNoteSequenceEditorCommand;
-        //public RelayCommand<NoteSequence> NoteSequenceEditorCommand =>
-        //    _showNoteSequenceEditorCommand ??= new RelayCommand<NoteSequence>(execute =>
-        //    {
-        //        EditorPanel = NoteSequenceEditorPanel;
-        //        OnPropertyChanged(nameof(EditorPanel));
-        //    });
-        private ObservableCollection<Message> _messages = new ObservableCollection<Message>();
-        public ObservableCollection<Message> Messages
-        {
-            get => _messages;
-            set
+        private RelayCommand<object>? _showHelpCommand;
+        public RelayCommand<object> ShowHelpCommand =>
+            _showHelpCommand ??= new RelayCommand<object>(execute =>
             {
-                _messages = value;
-                OnPropertyChanged();
-            }
-        }
+                HelpDialog dialog = new HelpDialog();
+                dialog.ShowDialog();
+            });
     }
 }

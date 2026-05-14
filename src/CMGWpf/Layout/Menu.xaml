@@ -42,36 +42,22 @@
                 <MenuItem Header="_Comment..." Command="{Binding EditCommentCommand}" ToolTip="Edit a CMG file comment." InputGestureText="Ctrl+Shift+C"/>
                 <MenuItem Header="_Preferences..." Command="{Binding Source={x:Static services:GlobalService.Instance}, Path=EditPreferencesCommand}" ToolTip="Edit CMG preferences." InputGestureText="Ctrl+P"/>
                 </MenuItem>
-                <MenuItem Header="_Tools" ToolTip="Access CMG tools.">
-                <MenuItem Header="Start CMG _Database Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StartCMGDBEditorCommand}"
-                              ToolTip="Start the CMG Database Editor."
+            <MenuItem Header="_Tools" ToolTip="Access CMG tools.">
+                <!-- 
+                <MenuItem Header="Ensemble Voice Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=EnsembleVoiceEditorCommand}"
+                              ToolTip="Display the Ensemble Voice Editor."
+                        InputGestureText="Ctrl+E"                              
+                              />
+                <MenuItem Header="Note Sequence Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=NoteSequenceEditorCommand}"
+                              ToolTip="Display the Note Sequence Editor."
                         InputGestureText="Ctrl+D"                              
                               />
-                <MenuItem Header="_Midi/Frequency Converter..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MidiFrequencyConverterCommand}"
-                              ToolTip="Convert between midi number and audio frequency."
-                              InputGestureText="Ctrl+M"
+                    -->
+                <MenuItem Header="_Generator and Calculator Tools..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=GeneratorandCalculatorToolsCommand}"
+                              ToolTip="Activate Generator and Calculator Tools Window"
+                              InputGestureText="Ctrl+G"
                               />
-                    <MenuItem Header="_Measure Duration Calculator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=MeasureDurationCalculatorCommand}"
-                              ToolTip="Determine the number of seconds in a measure at a certain BPM."
-                              InputGestureText="Ctrl+M"
-                              />
-                    <MenuItem Header="Oscillator _Frequency Calculator..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=OscillatorFrequencyCalculatorCommand}"
-                              ToolTip="Determine the oscillator frequency needed to hit values of an attribute with a certain amplitude."
-                              InputGestureText="Ctrl+F"
-                              />
-                    <MenuItem Header="Set Generators Duration _Equal..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=SetGeneratorsDurationEqualCommand}"
-                              ToolTip="Set a collection of generators to have the same duration."
-                              InputGestureText="Ctrl+E"
-                              />
-                    <MenuItem Header="S_tagger Generators Start Time..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=StaggerGeneratorsStartTimeCommand}"
-                              ToolTip="Stagger a collection of generators' start times."
-                              InputGestureText="Ctrl+T"
-                              />
-                    <MenuItem Header="_Align Generators..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=AlignGeneratorsCommand}"
-                              ToolTip="Align a collection of generators start or stop times"
-                              InputGestureText="Ctrl+A"
-                              />
-                </MenuItem>
+            </MenuItem>
             <MenuItem Header="_Play">
                 <MenuItem Header="_Play..." Command="{Binding PlayCommand}"
                               ToolTip="Play the audio and view the sound roll of the active generators."
