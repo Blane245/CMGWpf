@@ -15,18 +15,50 @@ namespace CMGWpf.View
         {
         }
 
-        // property and relay command to assure that only a single dialog is activated
+        // properties and relay commands to assure that only a single dialog is activated
         // dialog close action will permit new dialog to be created.
-        private Window? _thisDialog = null;
-        public Window? ThisDialog {get=>_thisDialog; set { _thisDialog = value; OnPropertyChanged(); } }
+        private Window? _toolDialog = null;
+        public Window? ToolDialog { get => _toolDialog; set { _toolDialog = value; OnPropertyChanged(); } }
+
+
         private RelayCommand<object?>? _generatorandCalculatorToolsCommand;
         public RelayCommand<object?> GeneratorandCalculatorToolsCommand =>
             _generatorandCalculatorToolsCommand ??= new RelayCommand<Object?>(execute =>
             {
-                if (ThisDialog == null)
+                if (ToolDialog == null)
                 {
-                    ThisDialog = new GeneratorAndCalculatorTools();
-                    ThisDialog.Show();
+                    ToolDialog = new GeneratorAndCalculatorTools();
+                    ToolDialog.Show();
+                }
+            });
+
+        private Window? _ensembleDialog = null;
+        public Window? EnsembleDialog { get => _ensembleDialog; set { _ensembleDialog = value; OnPropertyChanged(); } }
+
+
+        private RelayCommand<object?>? _ensembleVoiceEditorCommand;
+        public RelayCommand<object?> EnsembleVoiceEditorCommand =>
+            _ensembleVoiceEditorCommand ??= new RelayCommand<Object?>(execute =>
+            {
+                if (EnsembleDialog == null)
+                {
+                    EnsembleDialog = new EnsembleDialog();
+                    EnsembleDialog.Show();
+                }
+            });
+
+        private Window? _noteSequenceDialog = null;
+        public Window? NoteSequenceDialog { get => _noteSequenceDialog; set { _noteSequenceDialog = value; OnPropertyChanged(); } }
+
+
+        private RelayCommand<object?>? _noteSequenceEditorCommand;
+        public RelayCommand<object?> NoteSequenceEditorCommand =>
+            _noteSequenceEditorCommand ??= new RelayCommand<Object?>(execute =>
+            {
+                if (NoteSequenceDialog == null)
+                {
+                    NoteSequenceDialog = new NoteSequenceDialog();
+                    NoteSequenceDialog.Show();
                 }
             });
 

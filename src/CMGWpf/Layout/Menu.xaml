@@ -43,7 +43,6 @@
                 <MenuItem Header="_Preferences..." Command="{Binding Source={x:Static services:GlobalService.Instance}, Path=EditPreferencesCommand}" ToolTip="Edit CMG preferences." InputGestureText="Ctrl+P"/>
                 </MenuItem>
             <MenuItem Header="_Tools" ToolTip="Access CMG tools.">
-                <!-- 
                 <MenuItem Header="Ensemble Voice Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=EnsembleVoiceEditorCommand}"
                               ToolTip="Display the Ensemble Voice Editor."
                         InputGestureText="Ctrl+E"                              
@@ -52,7 +51,6 @@
                               ToolTip="Display the Note Sequence Editor."
                         InputGestureText="Ctrl+D"                              
                               />
-                    -->
                 <MenuItem Header="_Generator and Calculator Tools..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=GeneratorandCalculatorToolsCommand}"
                               ToolTip="Activate Generator and Calculator Tools Window"
                               InputGestureText="Ctrl+G"

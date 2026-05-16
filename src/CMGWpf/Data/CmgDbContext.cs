@@ -1,5 +1,6 @@
 using CMGWpf.Model.Database;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace CMGWpf.Data
 {
@@ -23,18 +24,18 @@ namespace CMGWpf.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // Default connection string - matches your appsettings.json
-                var connectionString = "Server=localhost;Port=3306;Database=cmg;Uid=root;Pwd=;";
+                // SQLite database location - stored in user's local app data
+                var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                var dbDirectory = Path.Combine(appDataPath, "CMGWpf");
+                var dbPath = Path.Combine(dbDirectory, "cmg.db");
 
-                optionsBuilder.UseMySql(
-                    connectionString,
-                    ServerVersion.AutoDetect(connectionString),
-                    options => options
-                        .EnableRetryOnFailure(
-                            maxRetryCount: 5,
-                            maxRetryDelay: TimeSpan.FromSeconds(10),
-                            errorNumbersToAdd: null)
-                );
+                // Ensure the directory exists
+                if (!Directory.Exists(dbDirectory))
+                {
+                    Directory.CreateDirectory(dbDirectory);
+                }
+
+                optionsBuilder.UseSqlite($"Data Source={dbPath}");
 
                 // Enable sensitive data logging in debug mode
 #if DEBUG
@@ -109,14 +110,12 @@ namespace CMGWpf.Data
                     .HasConversion<string>()
                     .HasMaxLength(50);
 
-                entity.Property(v => v.RegisterLo)
-                    .HasColumnType("float");
+                // SQLite stores these as REAL type automatically
+                entity.Property(v => v.RegisterLo);
 
-                entity.Property(v => v.RegisterHi)
-                    .HasColumnType("float");
+                entity.Property(v => v.RegisterHi);
 
-                entity.Property(v => v.Duration)
-                    .HasColumnType("float");
+                entity.Property(v => v.Duration);
 
                 entity.Property(v => v.SoundFontFile)
                     .HasMaxLength(500);

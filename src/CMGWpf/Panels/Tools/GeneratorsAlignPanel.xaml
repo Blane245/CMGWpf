@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CMGWpf.Panels.Tools"
                      xmlns:viewmodel="clr-namespace:CMGWpf.View"
-                     d:DataContext="{d:DesignInstance Type=viewmodel:ToolsViewModel.Instance}"
+                     d:DataContext="{d:DesignInstance Type=viewmodel:ToolsViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel Orientation="Vertical">

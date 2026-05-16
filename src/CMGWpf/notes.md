@@ -5,6 +5,9 @@
 * error checking of carnivalsque soundfont is prevent it from loading. Appears mesasesh_10 instrument has a bad end loop value. need some safe setting here
 
 # bugs
+
+	* DB lists are not loading onto the UI thread during ensemebel and notsequence dialog startup
+	* ensemblepanel and notesequencepanel are not necessary
 	* tools 
 		* when a new file is loaded the tools dialog should be retarted to refesh the generator lists
 		* make secondary generator list scrollable with a max number of displayed entries as 10
@@ -20,7 +23,5 @@
 		* The task bar icon is not the correct one. In fact, none of the icons are right except withint the application
 	* DSP
 		* appears to be a coupling betwen markov algorithms of different generators. Related to copy generator and track. Problem resolves when file is reloaded.
-# feature changes
-	* ~~consider removing the silent generator. It does not have much purpose anymore as the way that the audio is generted has chenged. ~~
 # release
 	* figure out where to put the installer. Windows Applications?

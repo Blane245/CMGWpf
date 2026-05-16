@@ -40,7 +40,7 @@ namespace CMGWpf.Dialogs.Tools
 
         private void GeneratorAndCalculatorTools_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (DataContext is ToolsViewModel vm) vm.ThisDialog = null;
+            if (DataContext is ToolsViewModel vm) vm.ToolDialog = null;
         }
     }
 }
