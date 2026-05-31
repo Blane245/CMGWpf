@@ -1,4 +1,4 @@
-using CMGWpf.Types;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -7,22 +7,14 @@ using static CMGWpf.Types.PlayTypes;
 
 namespace CMGWpf.PlayFunctions
 {
-    /// <summary>
-    /// Builds the Sound Roll grid and visual elements
-    /// </summary>
-    public class TimeMidiPreset(TimeMidiLine line, string soundFontName, string presetName)
-    {
-        TimeMidiLine Line { get; set; } = line; string SoundFontName { get; set; } = soundFontName; string PresetName { get; set; } = presetName;
-    };
     public static class SoundRollBuilder
     {
         private static double PixelsPerNote = 0;
         private static double PixelsPerSecond = 0;
         private const int MinNote = 0;   // C-1
         private const int MaxNote = 127; // G9
-        private record struct TimeMidiPreset(TimeMidiLine Line, string SoundFontName, string PresetName);
-        private static List<TimeMidiPreset> timeMidiPresets = [];
-        public static void ClearInstruments() { timeMidiPresets = []; }
+        public static ConcurrentBag<TimeMidiPreset> TimeMidiPresets = new ConcurrentBag<TimeMidiPreset>(); // user responsible for populating this list with the MIDI events to be displayed on the sound roll
+        public static void ClearInstruments() { TimeMidiPresets = new ConcurrentBag<TimeMidiPreset>(); }
 
         /// <summary>
         /// Calculate canvas width based on total duration
@@ -146,9 +138,9 @@ namespace CMGWpf.PlayFunctions
             }
         }
 
-        public static double NoteToY(int note) => (MaxNote - note) * PixelsPerNote;
+        public static double NoteToY(double note) => (MaxNote - note) * PixelsPerNote;
         public static double TimeToX(double seconds) => seconds * PixelsPerSecond;
-        public static ObservableCollection<PresetColor> DefineVoicePalette(List<SF_Preset> sF_Presets)
+        public static ObservableCollection<PresetColor> DefineVoicePalette(ConcurrentBag<SF_Preset> sF_Presets)
         {
             int i = 0;
             int count = sF_Presets.Count;
@@ -193,13 +185,9 @@ namespace CMGWpf.PlayFunctions
                 (byte)Math.Round((b + m) * 255)
             );
         }
-        public static void AddInstrument(TimeMidiLine line, string SoundFontName, string PresetName)
-        {
-            timeMidiPresets.Add(new TimeMidiPreset(line, SoundFontName, PresetName));
-        }
         public static void AddInstrumentsToCanvas(Canvas canvas, ObservableCollection<PresetColor> presetColors)
         {
-            foreach (var _timeMidiPreset in timeMidiPresets)
+            foreach (var _timeMidiPreset in TimeMidiPresets)
             {
                 Color color = presetColors.FirstOrDefault((p) => p.SoundFontName == _timeMidiPreset.SoundFontName && p.PresetName == _timeMidiPreset.PresetName)!.Color;
      

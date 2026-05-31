@@ -15,7 +15,7 @@
         WindowState="Maximized"
         ResizeMode="NoResize"
         AllowsTransparency="False"
-        Title="Play" Height="450" Width="1000"
+        Title="Play"
         >
     <Window.Resources>
         <ResourceDictionary Source="/Styles/PlayDialogStyles.xaml"/>
@@ -30,9 +30,8 @@
     <Grid Margin="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="150"/>
+            <RowDefinition Height="52"/>
+            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=PlayHeight}"/>
         </Grid.RowDefinitions>
         <panels:CustomWindowChrome Grid.Row="0"
                                      WindowTitle="{Binding PlayTitle}"
@@ -95,20 +94,10 @@
                     ToolTip="Display or hide the voice legend"
                     />
             <Border BorderBrush="LightGray" BorderThickness="1" Margin="5">
-                <Grid Width="100" Margin="0">
-                    <Line X1="0" Y1="15" X2="{Binding SignalLevelPixels[0]}" Y2="15" Stroke="Red" StrokeThickness="1" />
-                    <Line X1="{Binding MaxSignalLevelPixels[0]}" Y1="0" X2="{Binding MaxSignalLevelPixels[0]}" Y2="30" Stroke="Black" StrokeThickness="1" 
-                          ToolTip="Left channel signal level"
-                          />
-                </Grid>
+                <Canvas Name="LeftSignalLevel" Width="100" Height="40"/>
             </Border>
             <Border BorderBrush="LightGray" BorderThickness="1" Margin="5">
-                <Grid Width="100" Margin="0">
-                    <Line X1="0" Y1="15" X2="{Binding SignalLevelPixels[1]}" Y2="15" Stroke="Red" StrokeThickness="1"/>
-                    <Line X1="{Binding MaxSignalLevelPixels[1]}" Y1="0" X2="{Binding MaxSignalLevelPixels[1]}" Y2="30" Stroke="Black" StrokeThickness="1" 
-                          ToolTip="Right channel signal level"
-                          />
-                </Grid>
+                <Canvas Name="RightSignalLevel" Width="100" Height="40"/>
             </Border>
             <Button Content="{materialIcons:MaterialIconExt Kind=MicrophoneOutline}" 
                     Command="{Binding RecordAudioCommand}" 
@@ -118,7 +107,7 @@
             <Button Content="{materialIcons:MaterialIconExt Kind=VideoOutline}" 
                     Command="{Binding RecordVideoCommand}" 
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                    ToolTip="Record video (audio + soundroll)"
+                    ToolTip="Record video (audio + Sound Roll)"
                     Margin="5"/>
         </StackPanel>
         <Grid Grid.Row="2" Background="LightGray" Margin="10,0,0,0">
@@ -135,6 +124,5 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"/>
         </Grid>
-        <panels:MessagePanel Grid.Row="3" Source="{Binding Messages}"/>
     </Grid>
 </Window>

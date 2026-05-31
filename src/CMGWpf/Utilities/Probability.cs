@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
+﻿
 namespace CMGWpf.Utilities
 {
     public static class Probability
     {
-        // the continuous probabilty first law. Stop build the arrayes when the cumulative probabilty reaches 99.9%
+        // the continuous probability first law. Stop build the arrays when the cumulative probability reaches 99.9%
         public static (double[], double[]) Continuous(int d, double length, double v)
         {
             static double Poisson(int i, double c, double v) { return Math.Exp(-i * c * v) * (1 - Math.Exp(-c * v)); }
-            ; // the Poisson Distrobution
+            ; // the Poisson Distribution
             // create the probability for the interval in v units
             double c = d / length;
             int n = (int)Math.Round(length / v);
@@ -33,7 +29,7 @@ namespace CMGWpf.Utilities
             }
             return (Xi, Pi);
         }
-        // the continuous probabilty second law
+        // the continuous probability second law
         public static double Interval(double length, FastRandom Rn)
         {
             return length * (1 - Math.Sqrt(1 - Rn.NextDouble()));
@@ -41,6 +37,7 @@ namespace CMGWpf.Utilities
 
         public static double Lookup(double[] p, double[] x, double r)
         {
+            if (p.Length == 0) return 0;
             if (r < p[0]) return 0;
             if (x.Length == 0) return 0;
             if (r > 1) return x[^1];

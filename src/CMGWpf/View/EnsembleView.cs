@@ -193,6 +193,9 @@ namespace CMGWpf.View
         private RelayCommand<Ensemble>? _editEnsembleCommand;
         public RelayCommand<Ensemble> EditEnsembleCommand =>
             _editEnsembleCommand ??= new RelayCommand<Ensemble>(ensemble => new EnsembleCommands(this).EditEnsemble(ensemble.Name));
+        private RelayCommand<VoiceEnsemblesListType>? _editEnsembleByNameCommand;
+        public RelayCommand<VoiceEnsemblesListType> EditEnsembleByNameCommand =>
+            _editEnsembleByNameCommand ??= new RelayCommand<VoiceEnsemblesListType>(item => new EnsembleCommands(this).EditEnsemble(item.Name));
         private RelayCommand<object?>? _submitEnsembleCommand;
         public RelayCommand<object?> SubmitEnsembleCommand =>
             _submitEnsembleCommand ??= new RelayCommand<object?>(execute => new EnsembleCommands(this).SubmitEnsemble());

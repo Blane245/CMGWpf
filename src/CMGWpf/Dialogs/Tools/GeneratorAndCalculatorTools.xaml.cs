@@ -1,8 +1,5 @@
-﻿using CMGWpf.Utilities;
-using CMGWpf.View;
-using System.Collections.ObjectModel;
+﻿using CMGWpf.View;
 using System.Windows;
-using static CMGWpf.View.ToolsViewModel;
 
 namespace CMGWpf.Dialogs.Tools
 {
@@ -23,17 +20,8 @@ namespace CMGWpf.Dialogs.Tools
         {
             if (DataContext is ToolsViewModel vm)
             {
-                ObservableCollection<StaggerGeneratorsSelection> tempList = [];
-                tempList.Clear();
+                vm.LoadStaggerGeneratorList();
                 vm.StaggerAmount = 0;
-                foreach (var track in FileViewModel.Instance.File.Tracks)
-                {
-                    foreach (var generator in track.Generators)
-                    {
-                        tempList.Add(new StaggerGeneratorsSelection() { TrackName = track.Name, GeneratorName = generator.Name, IsSelected = false });
-                    }
-                }
-                vm.StaggerGeneratorList = tempList;
             }
 
         }

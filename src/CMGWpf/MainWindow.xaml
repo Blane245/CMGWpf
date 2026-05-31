@@ -48,7 +48,7 @@
         <KeyBinding Key="P" Modifiers="Ctrl" Command="{Binding Source={x:Static services:GlobalService.Instance}, Path=EditPreferencesCommand}"/>
 
         <!-- Tools Menu Shortcuts -->
-        <KeyBinding Key="G" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=GeneratorAndCalculatorToolsCommand}"/>
+        <KeyBinding Key="G" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=GeneratorandCalculatorToolsCommand}"/>
         <!-- Play Menu Shortcuts -->
         <KeyBinding Key="P" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=PlayCommand}"/>
         <KeyBinding Key="R" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=ReportCommand}"/>

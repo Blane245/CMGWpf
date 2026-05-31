@@ -7,13 +7,12 @@
         ResizeMode="NoResize"
         AllowsTransparency="True"
         Background="Transparent"
-        Width="{Binding Path=DisplayWidth, Source={x:Static services:GlobalService.Instance}}"
-        Height="{Binding Path=DisplayHeight, Source={x:Static services:GlobalService.Instance}}"
+        Width="500"
+        Height="300"
         WindowStartupLocation="Manual">
     <!-- Semi-transparent black overlay to hide the scrolling underneath -->
     <Grid Background="Black">
-        <Grid Width="450" 
-              Height="180"
+        <Grid 
               VerticalAlignment="Center"
               HorizontalAlignment="Center"
               Background="#FF2D2D30">
@@ -39,12 +38,13 @@
                          Width="350"
                          Minimum="0" 
                          Maximum="100" 
-                         Value="0"/>
+                         Value="0"
+                         Margin="5"/>
 
             <TextBlock Grid.Row="2" 
                        x:Name="ProgressText"
                        Text="0 / 0 frames"
-                       Foreground="White"
+                       Foreground="Black"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
                        FontWeight="Bold"/>

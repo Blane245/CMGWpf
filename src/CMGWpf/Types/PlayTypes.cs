@@ -25,7 +25,7 @@ namespace CMGWpf.Types
         public record class TimeMidiPoint
         {
             public double Time { get; init; } = 0;
-            public int Midi { get; init; } = 0;
+            public double Midi { get; init; } = 0;
         }
         /// <summary>
         /// 
@@ -35,8 +35,14 @@ namespace CMGWpf.Types
             public TimeMidiPoint Start { get; init; } = new TimeMidiPoint();
             public TimeMidiPoint End { get; init; } = new TimeMidiPoint();
         }
+        public class TimeMidiPreset
+        {
+            public TimeMidiLine Line { get; set; } = new TimeMidiLine();
+            public string SoundFontName { get; set; } = "";
+            public string PresetName { get; set; } = "";
+        }
         /// <summary>
-        /// Contains the instrument name, its sample header, and the mergd SoundFont generators that apply to the instrument
+        /// Contains the instrument name, its sample header, and the merged SoundFont generators that apply to the instrument
         /// </summary>
         public class FinalVoice
         {

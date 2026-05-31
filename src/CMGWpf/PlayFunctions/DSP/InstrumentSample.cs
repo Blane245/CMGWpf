@@ -232,12 +232,9 @@ namespace CMGWpf.PlayFunctions.DSP
                     if (noteEnd != releaseEnd) envelope = [.. envelope, new GainEnvelope { Gain = 0, Time = releaseEnd }];
                 }
                 else
-                { // decay completes before the end of the note, so sustain to the end of the note and then maybe a release
-                    noteEndGain = sustainGain;
+                { // decay completes before the end of the note, so stop at decayEnd 
                     envelope = [.. envelope, new GainEnvelope { Gain = noteEndGain, Time = holdEnd }];
-                    envelope = [.. envelope, new GainEnvelope { Gain = noteEndGain, Time = decayEnd }];
-                    envelope = [.. envelope, new GainEnvelope { Gain = noteEndGain, Time = noteEnd }];
-                    if (noteEnd != releaseEnd) envelope = [.. envelope, new GainEnvelope { Gain = 0, Time = releaseEnd }];
+                    envelope = [.. envelope, new GainEnvelope { Gain = 0, Time = decayEnd }];
                 }
             }
 

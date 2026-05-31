@@ -1,9 +1,11 @@
 ﻿using CMGWpf.Model.Database;
 using CMGWpf.MVVM;
+using CMGWpf.MVVM.Database;
 using CMGWpf.Panels.Database;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
+using static CMGWpf.View.EnsembleView;
 
 namespace CMGWpf.View
 {
@@ -83,6 +85,9 @@ namespace CMGWpf.View
         private RelayCommand<NoteSequence>? _editNoteSequenceCommand;
         public RelayCommand<NoteSequence> EditNoteSequenceCommand =>
             _editNoteSequenceCommand ??= new RelayCommand<NoteSequence>(noteSequence => new NoteSequenceCommands(this).EditNoteSequence(noteSequence.Name));
+        private RelayCommand<VoiceEnsemblesListType>? _editNoteSequenceByNameCommand;
+        public RelayCommand<VoiceEnsemblesListType> EditNoteSequenceByNameCommand =>
+            _editNoteSequenceByNameCommand ??= new RelayCommand<VoiceEnsemblesListType>(item => new NoteSequenceCommands(this).EditNoteSequence(item.Name));
         private RelayCommand<object?>? _submitNoteSequenceCommand;
         public RelayCommand<object?> SubmitNoteSequenceCommand =>
             _submitNoteSequenceCommand ??= new RelayCommand<object?>(execute => new NoteSequenceCommands(this).SubmitNoteSequence());

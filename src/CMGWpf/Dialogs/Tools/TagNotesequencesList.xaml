@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs"
+        xmlns:viewmodel="clr-namespace:CMGWpf.View"
         mc:Ignorable="d"
         Title="Tag Note Sequences List" Height="450" Width="800">
     <Grid>
@@ -25,7 +26,8 @@
             </DataGrid.Columns>
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Edit" Command="{Binding CommandView.EditNoteSequenceCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding PlacementTarget.SelectedItem,   RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Header="Edit" Command="{Binding Source={x:Static viewmodel:NoteSequencesView.Instance}, Path=EditNoteSequenceByNameCommand}"
+CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>

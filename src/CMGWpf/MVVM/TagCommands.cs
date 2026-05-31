@@ -4,6 +4,7 @@ using CMGWpf.Model;
 using CMGWpf.Model.Database;
 using CMGWpf.Panels;
 using CMGWpf.Panels.Database;
+using CMGWpf.Panels.Tools;
 using CMGWpf.Types;
 using CMGWpf.View;
 using System.Collections.ObjectModel;
@@ -32,7 +33,7 @@ namespace CMGWpf.MVVM
                 vm.UITag = new();
                 vm.NewTagName = "";
             }
-            vm.EditorPanel = new NoteSequenceEditorPanel();
+            vm.EditorPanel = new TagEditorPanel();
             vm.Errors.Clear();
         }
         public async void DeleteTag(string name)
@@ -110,7 +111,7 @@ namespace CMGWpf.MVVM
             }
             vm.UITag = tag;
             ObservableCollection<NoteSequence> list = new ObservableCollection<NoteSequence>(tag.NoteSequences);
-            TagNotesequencesList dialog = new(vm, name, list);
+            TagNotesequencesList dialog = new(tag.Name, list);
             dialog.ShowDialog();
         }
     }

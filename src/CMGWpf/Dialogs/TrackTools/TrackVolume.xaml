@@ -35,8 +35,8 @@
         <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="Track Volume [-10,+10] dB: "/>
-                    <xctk:IntegerUpDown Value="{Binding NewVolume, Mode=TwoWay}" Minimum="-10" Maximum="10" ToolTip="Enter the volume of the track. This will change the volume of all generators in the track."/>
+                    <Label Content="Track Volume [-100,+100] dB: "/>
+                    <xctk:IntegerUpDown Value="{Binding NewVolume, Mode=TwoWay}" Minimum="-100" Maximum="100" ToolTip="Enter the volume of the track. This will change the volume of all generators in the track."/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Button Content="OK" Command="{Binding VolumeOKCommand}"/>

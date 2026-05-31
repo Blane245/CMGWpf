@@ -1,8 +1,9 @@
 ﻿using CMGWpf.Model;
 using CMGWpf.Model.Generators;
 using CMGWpf.PlayFunctions.Utilities;
+using CMGWpf.Services;
 using CMGWpf.Types;
-using System.Collections.ObjectModel;
+using CMGWpf.View;
 using static CMGWpf.Types.DBTypes;
 using static CMGWpf.Types.PlayTypes;
 
@@ -10,12 +11,9 @@ namespace CMGWpf.PlayFunctions.DSP
 {
     public class SourcesFromAlgorithmic
     {
-        public static string Get(Algorithmic? algorithmic, ref double[] stereoBuffer, List<SF_Preset> sF_Presets, ObservableCollection<InstrumentSource> sources)
+        public static void Get(Algorithmic algorithmic)
         {
-            if (algorithmic == null)
-            {
-                return "Algorithmic generator is null.";
-            }
+            // gather the DSP, etc., information from this generator on a separate thread so that multiple generators can be processed in parallel. 
             var name = algorithmic.Name;
             var startTime = algorithmic.StartTime;
             var stopTime = algorithmic.StopTime;
@@ -31,20 +29,14 @@ namespace CMGWpf.PlayFunctions.DSP
             var parent = algorithmic.Parent;
 
             double time = startTime;
-            if (noteAlgorithm == null) return $"Note attribute has not been specified for generator {name}";
-            if (attackAlgorithm == null) return $"Attack attribute has not been specified for generator {name}";
-            if (speedAlgorithm == null) return $"Speed attribute has not been specified for generator {name}";
-            if (durationAlgorithm == null) return $"Duration attribute has not been specified for generator {name}";
-            if (volumeAlgorithm == null) return $"Volume attribute has not been specified for generator {name}";
-            if (panAlgorithm == null) return $"Pan attribute has not been specified for generator {name}";
-            if (preset == null) return $"Preset has not been specified for generator {name}";
+            if (noteAlgorithm == null) return;
+            if (attackAlgorithm == null) return;
+            if (speedAlgorithm == null) return;
+            if (durationAlgorithm == null) return;
+            if (volumeAlgorithm == null) return;
+            if (panAlgorithm == null) return;
+            if (preset == null) return;
 
-            RandomAlgorithm.Initialize(noteAlgorithm);
-            RandomAlgorithm.Initialize(attackAlgorithm);
-            RandomAlgorithm.Initialize(speedAlgorithm);
-            RandomAlgorithm.Initialize(durationAlgorithm);
-            RandomAlgorithm.Initialize(volumeAlgorithm);
-            RandomAlgorithm.Initialize(panAlgorithm);
             algorithmic.InitialSequence();
 
             if (noteAlgorithm.GetType().Name != "Sequencer")
@@ -56,6 +48,7 @@ namespace CMGWpf.PlayFunctions.DSP
                     DebugLog.Write($"At time {time}: Note={currentValues.Note}, Attack={currentValues.Attack}, Speed={currentValues.Speed}, Duration={currentValues.Duration}, Pan={currentValues.Pan}, Volume={currentValues.Volume}");
                     var hitBeat = currentValues.Beat;
                     var note = currentValues.Note;
+                    if (!algorithmic.Microtones) note = Math.Round(note);
                     var velocity = currentValues.Attack;
                     var speed = currentValues.Speed;
                     var durationPercent = currentValues.Duration;
@@ -96,12 +89,11 @@ namespace CMGWpf.PlayFunctions.DSP
                             source.SoundFontName = soundFontName;
                             source.PresetName = preset.Name;
                             source.Name = voice.InstrumentName;
-                            sources.Add(source);
                             // apply pan and merge into audio buffer here
                             double left = (1 - currentValues.Pan) / 2;
                             double right = (1 + currentValues.Pan) / 2;
-                            int instrumentStartIndex = (int)(time * PlayTypes.SampleRate) * 2; // in stereobuffer pointer space
-                            // first create the stereo pan version of the instrument samples
+                            int instrumentStartIndex = (int)(time * PlayTypes.SampleRate) * 2; // in stereo buffer pointer space
+                                                                                               // first create the stereo pan version of the instrument samples
                             double[] panSamples = new double[instrumentSample.Length * 2];
                             for (int i = 0; i < instrumentSample.Length; i++)
                             {
@@ -109,53 +101,70 @@ namespace CMGWpf.PlayFunctions.DSP
                                 panSamples[i * 2 + 1] = instrumentSample[i] * right;
                             }
                             Reverb.Apply(panSamples, algorithmic.ReverbDelay, algorithmic.ReverbDecay, PlayTypes.SampleRate);
-                            // now add the pan samples into the stereo buffer
-                            AudioBuffer.Add(panSamples, ref stereoBuffer, instrumentStartIndex);
-                            SoundRollBuilder.AddInstrument(new TimeMidiLine
+
+                            // Update global data - only lock for buffer modification, use concurrent collections for the rest
+                            double instrumentEndTime = time + (double)instrumentSample.Length / PlayTypes.SampleRate;
+
+                            // Lock only for the audio buffer (needs synchronization for resize)
+                            bool lockTaken = false;
+                            try
                             {
-                                Start = new TimeMidiPoint { Time = time, Midi = (int)note },
-                                End = new TimeMidiPoint { Time = time + noteDuration, Midi = (int)note }
-                            }, soundFontName, preset.Name);
+                                Monitor.Enter(GlobalService.Instance.PlayResultsLock, ref lockTaken);
+                                PlayViewModel.Instance.FinalSignal.Add(panSamples, instrumentStartIndex);
+                            }
+                            finally
+                            {
+                                if (lockTaken)
+                                {
+                                    Monitor.Exit(GlobalService.Instance.PlayResultsLock);
+                                }
+                            }
+
+                            // These use ConcurrentBag - no lock needed!
+                            PlayViewModel.Instance.TimeMidiPresets.Add(new TimeMidiPreset   
+                            {
+                                Line = new TimeMidiLine { Start = new TimeMidiPoint { Time = time, Midi = note }, End = new TimeMidiPoint { Time = instrumentEndTime, Midi = note } },
+                                SoundFontName = soundFontName,
+                                PresetName = preset.Name
+                            });
+                            PlayViewModel.Instance.InstrumentSources.Add(source);
                         }
                     }
                     time += interval;
                 }
 
-            } else
+            }
+            else
             {
                 // note sequencing is driven by the note item sequence and the speed of each beat. The note item sequence is a list of note items, each with a time and a note value. The speed algorithm determines the speed of the generator at each point in time, which affects the interval between notes. The attack, duration, pan, and volume algorithms determine the corresponding values for each note at each point in time.
                 DebugLog.Write($"Sequence algorithm voice generation");
                 Sequencer sequencer = (noteAlgorithm as Sequencer)!;
-                double beats = 1;
-                double transpose = sequencer.Transpose;
-                sequencer.SetReflect();
-                sequencer.SetReverse();
+                int beats = 0;
                 foreach (SequenceItem item in sequencer.Items)
                 {
-                    double note = item.value + transpose;
                     double beat = item.beats;
                     CurrentValues currentValues = algorithmic.GetCurrentValues(time - startTime, beats);
+                    double note = currentValues.Note;
                     var hitBeat = currentValues.Beat;
                     var velocity = currentValues.Attack;
                     var speed = currentValues.Speed;
                     var durationPercent = currentValues.Duration;
-                    var volumedB = currentValues.Volume;
+                    double interval = Math.Min(beat * 60 / speed, stopTime - time);
+                    double duration = (interval * durationPercent) / 100;
+                    var volumedB = Math.Clamp(parent.Volume + currentValues.Volume, -10, 10);
                     var pan = currentValues.Pan;
-                    volumedB += Math.Clamp(parent.Volume, -10, 10);
-                    double interval = Math.Min(60 / speed, stopTime - time);
-                    double duration = (interval * currentValues.Duration) / 100;
                     if (item.value >= 0 && hitBeat) // not a rest or a skipped note
                     {
                         List<FinalVoice> voices = PresetUtilities.BuildVoicesForPresetAtKeyVel(preset, (int)note, (int)velocity);
                         foreach (var voice in voices)
                         {
-                            DebugLog.Write($"Building sample {voice!.SampleHeader!.Name}, start {voice.SampleHeader.Start}, end {voice.SampleHeader.End}, length {voice.SampleHeader.End - voice.SampleHeader.Start}, loop start {voice.SampleHeader.StartLoop}, loop end {voice.SampleHeader.EndLoop}, sample rate {voice.SampleHeader.SampleRate}, original pitch {voice.SampleHeader.OriginalPitch}, pitch correction {voice.SampleHeader.PitchCorrection} for Intrument {voice.InstrumentName} with generators:");
+                            DebugLog.Write($"Building sample {voice!.SampleHeader!.Name}, start {voice.SampleHeader.Start}, end {voice.SampleHeader.End}, length {voice.SampleHeader.End - voice.SampleHeader.Start}, loop start {voice.SampleHeader.StartLoop}, loop end {voice.SampleHeader.EndLoop}, sample rate {voice.SampleHeader.SampleRate}, original pitch {voice.SampleHeader.OriginalPitch}, pitch correction {voice.SampleHeader.PitchCorrection} for Instrument {voice.InstrumentName} with generators:");
                             DebugLog.Write($"");
                             //foreach (var SFgen in voice.Generators)
                             //{
                             //    DebugLog($"  {SFgen.Key}: {SFgen.Value}");
                             //}                        // not a rest
-                            (double[] instrumentSample, InstrumentSource source)  = InstrumentSample.Get(new InstrumentSampleParameters
+                            (double[] instrumentSample, InstrumentSource source) = InstrumentSample.Get(new InstrumentSampleParameters
                             {
                                 Duration = duration,
                                 Interval = interval,
@@ -182,7 +191,6 @@ namespace CMGWpf.PlayFunctions.DSP
                             source.SoundFontName = soundFontName;
                             source.PresetName = preset.Name;
                             source.Name = voice.InstrumentName;
-                            sources.Add(source);
 
                             // apply pan, reverb, and merge into audio buffer here
                             double left = (1 - currentValues.Pan) / 2;
@@ -196,32 +204,52 @@ namespace CMGWpf.PlayFunctions.DSP
 
                             Reverb.Apply(panInstrumentSample, algorithmic.ReverbDelay, algorithmic.ReverbDecay, PlayTypes.SampleRate);
 
-                            int instrumentStartIndex = (int)(time * PlayTypes.SampleRate) * 2; // in stereobuffer pointer space
-                            DebugLog.Write($"Generated sample for note {note} with {instrumentSample.Length} samples at {PlayTypes.SampleRate}Hz. Pan is (left, right)=({left},{right}). Merging at t={time}(sec), index={instrumentStartIndex}");
-                            AudioBuffer.Add(panInstrumentSample, ref stereoBuffer, instrumentStartIndex);
+                            // Update global data - only lock for buffer modification
+                            int instrumentStartIndex = (int)(time * PlayTypes.SampleRate) * 2;
                             double instrumentEndTime = time + (double)instrumentSample.Length / PlayTypes.SampleRate;
-                            SoundRollBuilder.AddInstrument(new TimeMidiLine
+
+                            // Lock only for audio buffer
+                            bool lockTaken = false;
+                            try
                             {
-                                Start = new TimeMidiPoint { Time = time, Midi = (int)note },
-                                End = new TimeMidiPoint { Time = instrumentEndTime, Midi = (int)note }
-                            }, soundFontName, preset.Name);
+                                Monitor.Enter(GlobalService.Instance.PlayResultsLock, ref lockTaken);
+                                PlayViewModel.Instance.FinalSignal.Add(panInstrumentSample, instrumentStartIndex);
+                            }
+                            finally
+                            {
+                                if (lockTaken)
+                                {
+                                    Monitor.Exit(GlobalService.Instance.PlayResultsLock);
+                                }
+                            }
+
+                            // Use concurrent collections - no lock needed
+                            PlayViewModel.Instance.TimeMidiPresets.Add(new TimeMidiPreset
+                            {
+                                Line = new TimeMidiLine
+                                {
+                                    Start = new TimeMidiPoint { Time = time, Midi = note },
+                                    End = new TimeMidiPoint { Time = instrumentEndTime, Midi = note }
+                                },
+                                SoundFontName = soundFontName,
+                                PresetName = preset.Name
+                            });
+                            PlayViewModel.Instance.InstrumentSources.Add(source);
                         }
                     }
                     time += interval;
-                    beats += beat;
+                    beats += 1;
                 }
             }
 
             // add the preset to the collection of presets that have been played so that it can be displayed in the UI with its assigned color
+            // ConcurrentBag is thread-safe, no lock needed
             SF_Preset currentPreset = new()
             {
                 SoundFontName = soundFontName,
                 PresetName = preset.Name
             };
-            sF_Presets.Add(currentPreset);
-
-            return "";
+            PlayViewModel.Instance.SF_Presets.Add(currentPreset);
         }
-
     }
 }

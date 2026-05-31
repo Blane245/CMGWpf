@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMGWpf.Dialogs"
+        xmlns:viewmodel="clr-namespace:CMGWpf.View"
         mc:Ignorable="d"
         Title="" Height="450" Width="800"
         >
@@ -27,10 +28,9 @@
             </DataGrid.Columns>
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Edit"                                           Command="{Binding DataContext.EditVoiceCommand, 
-                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                          CommandParameter="{Binding PlacementTarget.SelectedItem, 
-                                                         RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Header="Edit" 
+                              Command="{Binding Source={x:Static viewmodel:EnsembleView.Instance}, Path=EditEnsembleByNameCommand}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>

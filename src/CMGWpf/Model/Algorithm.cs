@@ -3,6 +3,7 @@ using CMGWpf.Types;
 using CMGWpf.Utilities;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Xml;
@@ -17,6 +18,7 @@ namespace CMGWpf.Model
         Markovian,
         Wiener,
         Autoregressive,
+        Poisson,
         Sequencer
     }
     public enum MARKOVSTATE
@@ -42,6 +44,7 @@ namespace CMGWpf.Model
                 ALGORITHMTYPE.Markovian => new Markovian(),
                 ALGORITHMTYPE.Wiener => new Wiener(),
                 ALGORITHMTYPE.Autoregressive => new Autoregressive(),
+                ALGORITHMTYPE.Poisson => new Poisson(),
                 ALGORITHMTYPE.Sequencer => new Sequencer(),
                 _ => throw new ArgumentException("Unknown generator type", nameof(type)),
             };
@@ -59,6 +62,7 @@ namespace CMGWpf.Model
         public abstract double GetCurrentValue(double time, double beat);
         public abstract void AppendXML(XmlDocument doc, XmlElement elem);
         public abstract void LoadXML(XmlElement algorithmElem);
+        public abstract void Initialize();
         public virtual ObservableCollection<Message> Validate()
         {
             ObservableCollection<Message> errors = [];
@@ -105,6 +109,7 @@ namespace CMGWpf.Model
         {
             Value = XMLFunctions.GetAttributeDouble(elem, "value", 0);
         }
+        public override void Initialize()        {        }
         public override ObservableCollection<Message> Validate() => [];
         public override double GetCurrentValue(double _time, double _beat) => Value;
         public override string ToString() => "Constant";
@@ -171,7 +176,7 @@ namespace CMGWpf.Model
             Amplitude = XMLFunctions.GetAttributeDouble(elem, "amplitude", 0);
             Phase = XMLFunctions.GetAttributeDouble(elem, "phase", 0);
         }
-
+        public override void Initialize()        {                    }
         public override ObservableCollection<Message> Validate()
         {
             ObservableCollection<Message> errors = [];
@@ -207,7 +212,6 @@ namespace CMGWpf.Model
         private string _seed = "";
         public string Seed { get => _seed; set { if (_seed != value) { _seed = value; OnPropertyChanged(); } } }
         public FastRandom Random { get; set; } = new();
-
         public void InitializeRandom() => Random = MathUtilities.StartFastRandom(Seed);
         private MARKOVSTATE CurrentState { get; set; } = MARKOVSTATE.SAME;
         private double CurrentValue { get; set; } = 0;
@@ -238,8 +242,6 @@ namespace CMGWpf.Model
         {
             Markovian n = (Markovian)MemberwiseClone();
             n.Random = MathUtilities.StartFastRandom(Seed);
-            n.CurrentState = this.CurrentState;
-            n.CurrentValue = this.CurrentValue;
             n.TransitionProbabilities = (double[,])this.TransitionProbabilities.Clone();
             n.TransitionRows =
             [
@@ -333,7 +335,7 @@ namespace CMGWpf.Model
             {
                 errors.Add(new Message() { Text = "Start must be between Lo and Hi, inclusive.", Error = true });
             }
-            // loop through all of the transition rows to check if they can be parsed as double, update the transitionprobabilities if so, otherwise add an error message
+            // loop through all of the transition rows to check if they can be parsed as double, update the transition probabilities if so, otherwise add an error message
             for (int i = 0; i < 3; i++)
             {
                 ObservableCollection<string> row = TransitionRows[i].Values;
@@ -365,25 +367,43 @@ namespace CMGWpf.Model
             return errors;
         }
 
+        private bool firstTime = true;
+        public override void Initialize()
+        {
+            Random = MathUtilities.StartFastRandom(Seed);
+            firstTime = true;
+        }
         public override double GetCurrentValue(double time, double _beat)
         {
             // transition the current state to the next state based on the transition probabilities
             double randomValue = Random.NextDouble();
             MARKOVSTATE nextState;
-            if (randomValue < TransitionProbabilities[(int)CurrentState, 0])
-            {
-                nextState = MARKOVSTATE.SAME;
-            }
-            else if (randomValue < TransitionProbabilities[(int)CurrentState, 0] + TransitionProbabilities[(int)CurrentState, 1])
-            {
-                nextState = MARKOVSTATE.UP;
-            }
+            if (firstTime) { nextState = MARKOVSTATE.SAME; }
             else
             {
-                nextState = MARKOVSTATE.DOWN;
+                if (randomValue < TransitionProbabilities[(int)CurrentState, 0])
+                {
+                    nextState = MARKOVSTATE.SAME;
+                }
+                else if (randomValue < TransitionProbabilities[(int)CurrentState, 0] + TransitionProbabilities[(int)CurrentState, 1])
+                {
+                    nextState = MARKOVSTATE.UP;
+                }
+                else
+                {
+                    nextState = MARKOVSTATE.DOWN;
+                }
             }
             CurrentState = nextState;
-            double value = CurrentValue;
+            double value;
+            if (firstTime)
+            {
+                firstTime = false;
+                value = Start;
+            } else
+            {
+                value = CurrentValue;
+            }
             switch (CurrentState)
             {
                 case MARKOVSTATE.SAME:
@@ -400,14 +420,73 @@ namespace CMGWpf.Model
         }
         public override string ToString() => "Markovian";
     }
+    public class Poisson() : Algorithm
+    {
+        private string _seed = "";
+        public string Seed { get => _seed; set { if (_seed != value) { _seed = value; OnPropertyChanged(); } } }
+        public FastRandom Random { get; set; } = MathUtilities.StartFastRandom(null);
+        public int PointCount { get; set; } = 0;
+        public double Lo { get; set; } = 0;
+        public double Hi { get; set; } = 0;
+        public override Poisson Clone()
+        {
+            var clone = (Poisson)MemberwiseClone();
+            clone.Random = MathUtilities.StartFastRandom(Seed);
+            return clone;
+        }
+        public bool Equals(Algorithm value)
+        {
+            return value.GetType() == GetType() &&
+                value is Poisson g &&
+                Seed == g.Seed &&
+                PointCount == g.PointCount &&
+                Lo == g.Lo &&
+                Hi == g.Hi;
+        }
+        public override void AppendXML(XmlDocument doc, XmlElement elem)
+        {
+            elem.SetAttribute("seed", Seed);
+            elem.SetAttribute("pointCount", PointCount.ToString());
+            elem.SetAttribute("lo", Lo.ToString());
+            elem.SetAttribute("hi", Hi.ToString());
+        }
+        public override void LoadXML(XmlElement elem)
+        {
+            Seed = XMLFunctions.GetAttributeString(elem, "seed", string.Empty);
+            Random = MathUtilities.StartFastRandom(Seed);
+            PointCount = XMLFunctions.GetAttributeInt(elem, "pointCount", 0);
+            Lo = XMLFunctions.GetAttributeDouble(elem, "lo", 0);
+            Hi = XMLFunctions.GetAttributeDouble(elem, "hi", 0);
+        }
+        public override ObservableCollection<Message> Validate()
+        {
+            ObservableCollection<Message> errors = [];
+            if (Lo > Hi) errors.Add(new Message() { Text = "Poisson Lo must be less than or equal to Hi.", Error = true });
+            if (PointCount < 0) errors.Add(new Message() { Text = "Poisson Point Count must be nonnegative.", Error = true });
+            return errors;
+        }
+        private double[] Xi = [];
+        private double [] Pi = [];
+
+        public override void Initialize()
+        {
+            Random = MathUtilities.StartFastRandom(Seed);
+            (Xi, Pi) = Probability.Continuous(PointCount, Hi - Lo, (Hi - Lo) / 100);
+        }
+        public override double GetCurrentValue(double _time, double _beat)
+        {
+            double r = Random.NextDouble();
+            double value = Probability.Lookup(Pi, Xi, r);
+            return Math.Clamp(value + Lo, Lo, Hi);
+        }
+        public override string ToString() => "Poisson";
+    }
+
     public class Wiener() : Algorithm
     {
         private string _seed = "";
         public string Seed { get => _seed; set { if (_seed != value) { _seed = value; OnPropertyChanged(); } } }
         public FastRandom Random { get; set; } = MathUtilities.StartFastRandom(null);
-
-        public void InitializeRandom() => 
-                Random = MathUtilities.StartFastRandom(Seed);
 
         private double _initial = 0;
         public double Initial { get => _initial; set { if (_initial != value) { _initial = value; OnPropertyChanged(); } } }
@@ -470,6 +549,10 @@ namespace CMGWpf.Model
             return errors;
         }
 
+        public override void Initialize()
+        {
+            Random = MathUtilities.StartFastRandom(Seed);
+        }
         public override double GetCurrentValue(double time, double _beat)
         {
             if (time == 0 || (Trend == 0 && Dispersion == 0)) return Initial;
@@ -512,6 +595,7 @@ namespace CMGWpf.Model
         }
         public double GetCurrentValue(double time)
         {
+            if (Speed == 0 || Depth == 0) return 0;
             double speedHz = Speed / 1000;
             double value = WaveForm switch
             {
@@ -532,8 +616,8 @@ namespace CMGWpf.Model
     public class Autoregressive() : Algorithm
     {
         private string _seed = "";
-        public string Seed { get => _seed; set { if (_seed != value) { _seed = value; OnPropertyChanged(); Random = (_seed == string.Empty) ? new Random() : new Random(_seed.GetHashCode()); OnPropertyChanged(nameof(Random)); } } }
-        public Random Random { get; set; } = new();
+        public string Seed { get => _seed; set { if (_seed != value) { _seed = value; OnPropertyChanged(); } } }
+        public FastRandom Random { get; set; } = MathUtilities.StartFastRandom(null);
         private double _initial = 0;
         public double Initial { get => _initial; set { if (_initial != value) { _initial = value; OnPropertyChanged(); } } }
         private double _alpha = 0;
@@ -548,7 +632,7 @@ namespace CMGWpf.Model
         public override Autoregressive Clone()
         {
             Autoregressive n = (Autoregressive)this.MemberwiseClone();
-            n.Random = (Seed == string.Empty) ? new Random() : new Random(Seed.GetHashCode());
+            n.Random = MathUtilities.StartFastRandom(Seed);
             return n;
         }
         public bool Equals(Algorithm value)
@@ -574,7 +658,7 @@ namespace CMGWpf.Model
         public override void LoadXML(XmlElement elem)
         {
             Seed = XMLFunctions.GetAttributeString(elem, "seed", string.Empty);
-            Random = (Seed == string.Empty) ? new Random() : new Random(Seed.GetHashCode());
+            Random = MathUtilities.StartFastRandom(Seed);
             Initial = XMLFunctions.GetAttributeDouble(elem, "InitialValue", 0);
             Alpha = XMLFunctions.GetAttributeDouble(elem, "alpha", 0);
             Sigma = XMLFunctions.GetAttributeDouble(elem, "sigma", 0);
@@ -589,6 +673,10 @@ namespace CMGWpf.Model
             if (Alpha < 0) errors.Add(new Message() { Text = "Autoregressive Alpha must be positive.", Error = true });
             if (Sigma < 0) errors.Add(new Message() { Text = "Autoregressive Sigma must be positive.", Error = true });
             return errors;
+        }
+        public override void Initialize()
+        {
+            Random = MathUtilities.StartFastRandom(Seed);
         }
         public override double GetCurrentValue(double time, double _beat)
         {
@@ -665,42 +753,32 @@ namespace CMGWpf.Model
             if (Items == null || Items.Count == 0) errors.Add(new Message() { Text = "Sequencer must have at least one item.", Error = true });
             return errors;
         }
-        public void SetReverse()
+
+        // the sequence items that have been reflected and/or reversed when the sequencer starts up.
+        private ObservableCollection<SequenceItem> SequenceItems = [];
+        public override void Initialize()
         {
-            if (this.ReflectSequence)
+            SequenceItems = new (Items);
+            if (ReverseSequence)
             {
-                Items = [.. Items.Reverse()];
+                SequenceItems = [.. SequenceItems.Reverse()];
             }
-        }
-        public void SetReflect()
-        {
-            if (this.ReflectSequence)
+            if (ReflectSequence)
             {
-                Items = [.. Items.Select(item => new SequenceItem {
+                SequenceItems = [.. SequenceItems.Select(item => new SequenceItem {
                     value = 2 * ReflectPitch - item.value,
                 beats = item.beats,
                 id = item.id})];
             }
         }
-        private int BeatsToIndex(double beat, SequenceItem[] items)
-        {
-            if (items.Length == 0) return 0;
-            double beatSum = 0;
-            for (int i = 0; i < items.Length; i++)
-            {
-                if (items[i].beats + beatSum >= beat) return i;
-                beatSum += items[i].beats;
-                if (i == items.Length - 1) return i;
-            }
-            return -1;
-        }
+
+        // in this case the beat is the item number whose value is clamped to the size of the items collection
         public override double GetCurrentValue(double time, double beat)
         {
-            int itemIndex = BeatsToIndex(beat, [.. Items]);
-            double value = itemIndex < 0 ? 0 : Items[itemIndex].value;
-            return value + Transpose;
+            int itemIndex = (int) Math.Clamp(beat, 0, SequenceItems.Count -1);
+            double value = SequenceItems[itemIndex].value + Transpose;
+            return value;
         }
         public override string ToString() => "Sequencer";
-
     }
 }

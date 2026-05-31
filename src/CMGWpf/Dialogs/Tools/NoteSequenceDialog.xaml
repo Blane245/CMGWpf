@@ -47,7 +47,7 @@
             </Grid.ColumnDefinitions>
             <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
                 <StackPanel Margin="5">
-                    <Label FontWeight="Bold" FontSize="14" Content="Ensembles" HorizontalAlignment="Center"/>
+                    <Label FontWeight="Bold" FontSize="14" Content="Note Sequences" HorizontalAlignment="Center"/>
                     <Button Command="{Binding AddNoteSequenceCommand}" Margin="0" Padding="0" Width="100">Add Note Sequence</Button>
                     <DataGrid ItemsSource="{Binding NoteSequenceList}" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="500">
                         <DataGrid.Columns>
@@ -73,7 +73,7 @@
             </Border>
             <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="0" >
                 <StackPanel Margin="5">
-                    <Label FontWeight="Bold" FontSize="14" Content="Voices" HorizontalAlignment="Center"/>
+                    <Label FontWeight="Bold" FontSize="14" Content="Tags" HorizontalAlignment="Center"/>
                     <Button Command="{Binding AddTagCommand}" Margin="0" Padding="0" Width="100">Add Tag</Button>
                     <DataGrid ItemsSource="{Binding TagList}" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="500">
                         <DataGrid.Columns>
@@ -85,11 +85,11 @@
                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                           CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                <MenuItem Header="List Note Sequences"                                           Command="{Binding DataContext.ListTagVoiceSequencesCommand, 
+                                <MenuItem Header="List Note Sequences"                                           Command="{Binding DataContext.ListTagNoteSequencesCommand, 
                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                           CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                <MenuItem Header="Delete"                                           Command="{Binding DataContext.DeleteTagommand, 
+                                <MenuItem Header="Delete"                                           Command="{Binding DataContext.DeleteTagCommand, 
                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                           CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>

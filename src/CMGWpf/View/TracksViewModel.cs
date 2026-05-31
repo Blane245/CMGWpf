@@ -139,6 +139,7 @@ namespace CMGWpf.View
             IsDirty = true;
             // Refresh all track view models to reflect the changes
             RefreshAllTracks();
+            ToolsViewModel.Instance?.NotifyGeneratorListChanged();
         }
         #endregion
     }

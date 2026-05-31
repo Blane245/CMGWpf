@@ -36,7 +36,7 @@
             <Label Content="Primary Generator: "/>
             <ComboBox ItemsSource="{Binding GeneratorList}" SelectedItem="{Binding PrimaryGeneratorName, Mode=TwoWay}" ToolTip="Select the generator that will be used to Stagger the start times for the secondary generators."/>
             <Label Content="Secondary Generators: "/>
-            <ListView ItemsSource="{Binding StaggerGeneratorList}">
+            <ListView ItemsSource="{Binding StaggerGeneratorList}" Height="150">
                 <ListView.View>
                     <GridView ColumnHeaderToolTip="Stagger selected generators in arranged order">
                         <GridViewColumn CellTemplate="{StaticResource Up}" Header="Up"/>
@@ -49,7 +49,7 @@
             </ListView>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <Button Width="50" Content="Stagger" Command="{Binding Stagger}" Margin="0"/>
+            <Button Width="50" Content="Stagger" Command="{Binding Stagger}" Margin="5"/>
         </StackPanel>
     </StackPanel>
 </UserControl>

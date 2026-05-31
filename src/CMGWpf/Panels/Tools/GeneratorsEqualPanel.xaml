@@ -17,12 +17,13 @@
             <ListBox x:Name="SecondaryGeneratorsListBox"
                              ItemsSource="{Binding GeneratorList}" 
                              SelectionMode="Multiple" 
+                     Height="150"
                              ToolTip="Select the generators whose durations will be set equal to the primary generator."/>
             <Label Content="Maintain Time? "/>
             <ComboBox ItemsSource="{Binding MaintainAlignTimeOptions}" SelectedItem="{Binding AlignTimeOption}" ToolTip="Select either the start or stop time for setting generation durations equal."/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <Button Width="50" Content="Set Equal" Command="{Binding SetEqual}" Margin="0"/>
+            <Button Width="50" Content="Set Equal" Command="{Binding SetEqual}" Margin="5"/>
         </StackPanel>
     </StackPanel>
 </UserControl>

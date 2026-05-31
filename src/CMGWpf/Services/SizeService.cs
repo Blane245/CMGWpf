@@ -24,8 +24,10 @@
             {
                 windowHeight = value; OnPropertyChanged();
                 bodyHeight = WindowHeight - ChromeHeight - TimeLineHeight - FooterHeight;
+                playHeight = windowHeight - ChromeHeight - PlayHeaderHeight;
                 OnPropertyChanged(nameof(BodyHeight));
                 OnPropertyChanged(nameof(DialogHeight));
+                OnPropertyChanged(nameof(PlayHeight));
             }
         }
 
@@ -37,10 +39,12 @@
             // Initialize calculated values
             displayWidth = windowWidth - ControlWidth;
             bodyHeight = windowHeight - ChromeHeight - TimeLineHeight - FooterHeight;
+            playHeight = windowHeight - ChromeHeight - PlayHeaderHeight;
         }
         public double ControlWidth { get; } = 200;
         public double ChromeHeight { get; } = 40; // Custom window chrome height
         public double TimeLineHeight { get; } = 40;
+        public double PlayHeaderHeight { get; } = 52;
         public double FooterHeight { get; } = 100;
         public double TrackHeight { get; } = 100;
 
@@ -48,6 +52,8 @@
         public double DisplayWidth { get => displayWidth; }
         private double bodyHeight = 0;
         public double BodyHeight { get => bodyHeight; }
+        private double playHeight = 0;
+        public double PlayHeight { get => playHeight; }
 
         /// <summary>
         /// Gets the available height for dialog content (WindowHeight - ChromeHeight)

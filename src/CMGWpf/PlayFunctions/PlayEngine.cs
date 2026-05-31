@@ -14,11 +14,11 @@ using static CMGWpf.Types.PlayTypes;
 namespace CMGWpf.PlayFunctions
 {
 
-    //this will start the integration of the soundfont BuildVoicesForPresetAtKeyVel routine which is the first step in getting instrument smaples for DSP. It will be used in the PlayEngine and will be called when a note is played to determine which samples to use for that note. 
     public static class PlayEngine
     {
         public static bool CheckActiveGenerators()
         {
+            // check if any generator dialogs are currently open and return true if so. Play and Report are prevented from executing if generators are being added or edited.
             ObservableCollection<TrackViewModel>? trackViewModels = TracksViewModel.Instance.CachedTracks;
             if (trackViewModels == null) return false;
             foreach (var trackVm in trackViewModels)
@@ -52,6 +52,18 @@ namespace CMGWpf.PlayFunctions
             }
 
             // this function is used by both Play and Report. In Play it will generate the audio buffer and the sources for the report writer, and then show the PlayDialog with the sound roll visualization. In Report it will just generate the audio buffer and the sources for the report writer, show an file save dialog, and the build the htm that describes all of the active generators and their sources. The PlayDialog and ReportWriter are separate windows that can be shown independently, but they both use the same PlayViewModel to share data between them. The PlayViewModel is a singleton that holds the state of the play session, including the generators being played, the audio buffer, the current play position, and other relevant information. This allows for a clean separation of concerns between the data processing in the PlayEngine and the UI presentation in the dialogs.
+            // initialize the play/record processing inputs and outputs and launch the generator conversion multi threading process.
+            PlayViewModel.Instance.PlayGenerators = ready.Generators;
+            PlayViewModel.Instance.PlayDuration = ready.Duration;
+            PlayViewModel.Instance.FinalSignal = new AudioBufferWrapper(new double[(int)Math.Ceiling(ready.Duration) * SampleRate]);
+            PlayViewModel.Instance.TimeMidiPresets = [];
+            PlayViewModel.Instance.SF_Presets = [];
+            PlayViewModel.Instance.InstrumentSources = [];
+            Go(isPlay);
+        }
+        public static void Go(bool isPlay)
+        {
+            // this function is used by both Play and Report. In Play it will generate the audio buffer and the sources for the report writer, and then show the PlayDialog with the sound roll visualization. In Report it will just generate the audio buffer and the sources for the report writer, show an file save dialog, and the build the htm that describes all of the active generators and their sources. The PlayDialog and ReportWriter are separate windows that can be shown independently, but they both use the same PlayViewModel to share data between them. The PlayViewModel is a singleton that holds the state of the play session, including the generators being played, the audio buffer, the current play position, and other relevant information. This allows for a clean separation of concerns between the data processing in the PlayEngine and the UI presentation in the dialogs.
             PlayDialog? playDialog = null;
             SaveFileDialog? saveFileDialog = null;
             if (isPlay)
@@ -62,14 +74,10 @@ namespace CMGWpf.PlayFunctions
                     Owner = System.Windows.Application.Current.MainWindow
                 };
 
-                // Set the PlayDialog as the active dialog
-                //FileViewModel.Instance.ActiveDialog = playDialog;
             }
             else
             {
-                string fileNameRoot = string.IsNullOrWhiteSpace(FileViewModel.Instance.FileName)
-    ? "Composition"
-    : Path.GetFileNameWithoutExtension(FileViewModel.Instance.FileName);
+                string fileNameRoot = string.IsNullOrWhiteSpace(FileViewModel.Instance.FileName) ? "Composition" : Path.GetFileNameWithoutExtension(FileViewModel.Instance.FileName);
 
                 saveFileDialog = new()
                 {
@@ -84,164 +92,143 @@ namespace CMGWpf.PlayFunctions
                 if (string.IsNullOrEmpty(saveFileDialog.FileName)) return; // user cancelled
             }
 
-            PlayViewModel.Instance.PlayGenerators = ready.Generators;
-            PlayViewModel.Instance.PlayDuration = ready.Duration;
 
-            // Generate the audio buffer and the sources for the report writer with progress reporting
-            // Show progress window instead of wait cursor
-            ProgressWindow progressWindow = new()
+            // kick off the tasks for each generator and have them update the global state as they go. The generators will be responsible for updating the audio buffer, the sources collection, the presets collection, and the sound roll instruments as they are being processed. The tasks will be monitored for completion and the progress will be reported to the UI. Once all of the tasks are completed, the audio buffer will be normalized and assigned to the PlayViewModel for playback or report generation. The use of multiple threads allows for a responsive UI and efficient processing of the generators, especially when there are multiple generators that can be processed in parallel.
+            List<Task> tasks = new List<Task>();
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+            CancellationToken cancellationToken = tokenSource.Token;
+            foreach (var gen in PlayViewModel.Instance.PlayGenerators)
             {
-                Owner = System.Windows.Application.Current.MainWindow,
-                TotalGenerators = ready.Generators.Count,
-                CompletedGenerators = 0
-            };
-
-            // Create progress reporter
-            Progress<GeneratorProgress> progress = new(p =>
-            {
-                progressWindow.CompletedGenerators = p.CompletedCount;
-                progressWindow.StatusMessage = p.Message;
-            });
-
-            bool processingCompleted = false;
-            float[]? floatBuffer = null;
-            ObservableCollection<InstrumentSource>? sources = null;
-
-            // Process generators on background thread to keep UI responsive
-            Task.Run(() =>
-            {
-                try
+                if (gen is Algorithmic || gen is Stochastic)
                 {
-                    (floatBuffer, sources) = Go(progress, () => progressWindow.IsCancelled);
-                    processingCompleted = true;
+                    // Use LongRunning hint to avoid thread pool starvation for CPU-intensive DSP work
+                    Task aTask = Task.Factory.StartNew(() =>
+                 {
+                     switch (gen)
+                     {
+                         case Algorithmic:
+                             SourcesFromAlgorithmic.Get((gen as Algorithmic)!);
+                             break;
+                         case Stochastic:
+                             SourcesFromStochastic.Get((gen as Stochastic)!);
+                             break;
+                     }
+                     try
+                     {
+                         if (cancellationToken.IsCancellationRequested) cancellationToken.ThrowIfCancellationRequested();
+                     } catch (OperationCanceledException)
+                     {
+                         Debug.WriteLine($"Operation Canceled Exception Thrown");
+                     }
+                 }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                    tasks.Add(aTask);
                 }
-                catch (OperationCanceledException)
-                {
-                    // User cancelled
-                    processingCompleted = false;
-                }
-                finally
-                {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        progressWindow.Close();
-                    });
-                }
-            });
-
-            // Show progress dialog modally
-            progressWindow.ShowDialog();
-
-            // Check if cancelled
-            if (!processingCompleted || floatBuffer == null || sources == null)
-            {
-                FileViewModel.Instance.StatusMessages = [new Types.Message() { Text = "Processing cancelled by user." }];
-                return;
             }
 
-            PlayViewModel.Instance.InstrumentSources = sources;
-            PlayViewModel.Instance.AudioBuffer = floatBuffer;
-
-            if (isPlay)
+            // monitor the progress of the tasks to completion or cancellation once every second
+            DispatcherTimer? progressTimer;
+            Window? progressDialog;
+            InitializeProgress();
+            void InitializeProgress()
             {
-                // Initialize NAudio if we have audio data
-                if (PlayViewModel.Instance.AudioBuffer.Length > 0)
+                // display the progress dialog
+                progressDialog = new ProgressWindow()
                 {
-                    InitializePositionTimer();
-                    InitializeSignalLevelTimer();
-                    var provider = new AudioBufferProvider(
-                        PlayViewModel.Instance.AudioBuffer,
-                        SampleRate);
-                    PlayViewModel.Instance.AudioProvider = provider;
+                    DataContext = PlayViewModel.Instance,
+                    Owner = System.Windows.Application.Current.MainWindow
+                };
+                PlayViewModel.Instance.UserCancelled = false;
+                PlayViewModel.Instance.CompletedGenerators = 0;
+                PlayViewModel.Instance.TotalGenerators = tasks.Count;
+                PlayViewModel.Instance.ProgressMessage = $"Dispatching tasks to process {PlayViewModel.Instance.TotalGenerators} generators...";
+                progressDialog.Show();
 
-                    // Use WaveOut - AudioBufferProvider implements IWaveProvider directly
-                    PlayViewModel.Instance.AudioOutput = new NAudio.Wave.WaveOut();
-                    PlayViewModel.Instance.AudioOutput.Init(provider);
+                progressTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+                progressTimer.Tick += (s, e) => PollProgress();
+                progressTimer.Start();
+                // At this point we relinquish control to the progress timer to monitor the completion of the tasks and to update the UI accordingly. The user can cancel the operation at any time, which will signal the tasks to stop and will update the status messages in the UI to indicate that the operation was cancelled.
+            }
+            // setup a timer to monitor the progress of the tasks and update the UI accordingly. This will allow the user to see the progress of the processing and to cancel it if they wish. The timer will check the status of the tasks at regular intervals and update the progress in the PlayViewModel, which will be reflected in the UI. The user can cancel the operation at any time, which will signal the tasks to stop and will update the status messages in the UI to indicate that the operation was cancelled.
+            void PollProgress()
+            {
+                Debug.WriteLine($"Polling progress at {DateTime.Now}, {PlayViewModel.Instance.CompletedGenerators} of {PlayViewModel.Instance.TotalGenerators} generators completed.");
+                if (PlayViewModel.Instance.UserCancelled)
+                {
+                    tokenSource.Cancel();
+                    tokenSource.Dispose();
+                    progressTimer.Stop();
+                    FileViewModel.Instance.StatusMessages = new ObservableCollection<Types.Message>() { new Types.Message() { Text = $"{(isPlay ? "Play" : "Record")} processing cancelled by user." } };
+                    return;
+                }
+                int completedTasks = tasks.Count(t => t.IsCompleted);
+                int totalTasks = tasks.Count;
+                PlayViewModel.Instance.ProgressMessage = $"Completed {completedTasks} of {totalTasks} generators.";
+                PlayViewModel.Instance.TotalGenerators = totalTasks;
+                PlayViewModel.Instance.CompletedGenerators = completedTasks;
+                if (completedTasks == totalTasks)
+                {
+                    progressTimer.Stop();
+                    progressDialog.Close();
+                    // adjust the composition duration based on the length of the float buffer. divide by 2 for stereo.
+                    PlayViewModel.Instance.PlayDuration = (PlayViewModel.Instance.FinalSignal != null) ? (PlayViewModel.Instance.FinalSignal.Buffer.Length / (float)(SampleRate * 2)) : 0;
+                    PerformPlayReport();
+                }
 
-                    // Set up playback stopped event
-                    PlayViewModel.Instance.AudioOutput.PlaybackStopped += (s, e) =>
+            }
+
+            // once all data is available perform play or report
+            void PerformPlayReport()
+            {
+                if (isPlay)
+                {
+                    // convert the final signal from the generators from double to float and normalize
+                    PlayViewModel.Instance.AudioBuffer = NormalizeBuffer(PlayViewModel.Instance.FinalSignal.Buffer);
+                    // prepare the palette for the sound roll
+                    SoundRollBuilder.TimeMidiPresets = PlayViewModel.Instance.TimeMidiPresets;
+                    PlayViewModel.Instance.PresetColors = SoundRollBuilder.DefineVoicePalette(PlayViewModel.Instance.SF_Presets);
+                    // Initialize NAudio if we have audio data
+                    if (PlayViewModel.Instance.AudioBuffer!.Length > 0)
                     {
-                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        InitializePositionTimer();
+                        InitializeSignalLevelTimer();
+                        var provider = new AudioBufferProvider(
+                            PlayViewModel.Instance.AudioBuffer,
+                            SampleRate);
+                        PlayViewModel.Instance.AudioProvider = provider;
+
+                        // Use WaveOut - AudioBufferProvider implements IWaveProvider directly
+                        PlayViewModel.Instance.AudioOutput = new NAudio.Wave.WaveOut();
+                        PlayViewModel.Instance.AudioOutput.Init(provider);
+
+                        // Set up playback stopped event
+                        PlayViewModel.Instance.AudioOutput.PlaybackStopped += (s, e) =>
                         {
-                            PlayViewModel.Instance.IsPlaying = false;
-                        });
-                    };
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                PlayViewModel.Instance.IsPlaying = false;
+                            });
+                        };
+                    }
+                    playDialog!.ShowDialog();
+
+                    // Clean up when dialog closes
+                    StopTimers();
+                    PlayViewModel.Instance.AudioOutput?.Stop();
+                    PlayViewModel.Instance.AudioOutput?.Dispose();
+                    PlayViewModel.Instance.AudioOutput = null;
                 }
-                // adjust the composition duration based on the length of the float buffer.
-                PlayViewModel.Instance.PlayDuration = (floatBuffer != null) ? (floatBuffer.Length / (float)(SampleRate * 2)) : 0; // divide by 2 for stereo
-                playDialog!.ShowDialog();
+                else
+                {
+                    // Generate the report using the active generators and sources
+                    ReportWriter.WriteReport(saveFileDialog!.FileName);
+                    FileViewModel.Instance.StatusMessages = new ObservableCollection<Types.Message>() { new Types.Message() { Text = $"HTML report written to {saveFileDialog.FileName}." } };
+                }
 
-                // Clean up when dialog closes
-                positionTimer?.Stop();
-                PlayViewModel.Instance.AudioOutput?.Stop();
-                PlayViewModel.Instance.AudioOutput?.Dispose();
-                PlayViewModel.Instance.AudioOutput = null;
-            }
-            else
-            {
-                // adjust the composition duration based on the length of the float buffer.
-                PlayViewModel.Instance.PlayDuration = (floatBuffer != null) ? (floatBuffer.Length / (float)(SampleRate * 2)) : 0; // divide by 2 for stereo
-                // Generate the report using the active generators and sources
-                ReportWriter.WriteReport(saveFileDialog!.FileName);
-                FileViewModel.Instance.StatusMessages = [new Types.Message() { Text = $"HTML report written to {saveFileDialog.FileName}." }];
-            }
+                return;
 
+            }
         }
-        public static (float[], ObservableCollection<InstrumentSource>) Go(IProgress<GeneratorProgress>? progress = null, Func<bool>? isCancelled = null)
-        {
-            int totalSamples = (int)Math.Ceiling(PlayViewModel.Instance.PlayDuration) * PlayTypes.SampleRate;
-            double[] stereoBuffer = new double[totalSamples * 2]; // the sample buffer for the entire composition with interlaced stereo
-            List<SF_Preset> sF_Presets = []; // this will be populated with the sounfont/preset unique list for later assigning colors
-            ObservableCollection<InstrumentSource> sources = new();
-            PlayFunctions.SoundRollBuilder.ClearInstruments();
 
-            int totalGenerators = PlayViewModel.Instance.PlayGenerators.Count;
-            int completedGenerators = 0;
-
-            foreach (Generator gen in PlayViewModel.Instance.PlayGenerators)
-            {
-                // Check for cancellation
-                if (isCancelled?.Invoke() == true)
-                {
-                    throw new OperationCanceledException("Processing cancelled by user");
-                }
-
-                // Report progress
-                progress?.Report(new GeneratorProgress
-                {
-                    CompletedCount = completedGenerators,
-                    TotalCount = totalGenerators,
-                    CurrentGeneratorName = gen.Name,
-                    Message = $"Processing generator {completedGenerators + 1} of {totalGenerators}: {gen.Name}"
-                });
-
-                switch (gen)
-                {
-                    case Algorithmic:
-                        _ = SourcesFromAlgorithmic.Get(gen as Algorithmic, ref stereoBuffer, sF_Presets, sources);
-                        break;
-                    case Stochastic:
-                        _ = SourcesFromStochastic.Get(gen as Stochastic, ref stereoBuffer, sF_Presets, sources);
-                        break;
-                }
-
-                completedGenerators++;
-            }
-
-            // Report completion before normalization
-            progress?.Report(new GeneratorProgress
-            {
-                CompletedCount = completedGenerators,
-                TotalCount = totalGenerators,
-                Message = "Normalizing audio buffer..."
-            });
-
-            // build the color palette for the presets that are to be played based on the sF_Presets collection that was populated while processing the generators. This will be used to assign colors to the notes in the UI so that the user can see which notes correspond to which presets. For now it just shows debug output with the preset names and their assigned colors.
-            PlayViewModel.Instance.PresetColors = SoundRollBuilder.DefineVoicePalette(sF_Presets);
-            // normalize the stereo buffer to prevent clipping
-            float[] floatBuffer = NormalizeBuffer(stereoBuffer);
-            return (floatBuffer, sources);
-        }
         /// <summary>
         /// Normalize the output so that the rms value of the nonzero samples becomes 0.5, but clip anything outside of -1 and +1 to prevent distortion. This is a simple normalization approach that can be improved in the future with more advanced techniques like dynamic range compression or limiting. For now it just ensures that the output is not too quiet or too loud on average, while allowing for some variation in the sample values. The buffer is converted to single precision to be compatible with the audio output system, which typically uses 32-bit float samples. 
         /// </summary>
@@ -284,7 +271,7 @@ namespace CMGWpf.PlayFunctions
             return floatBuffer;
         }
         #region Play Timers
-        public static DispatcherTimer? positionTimer;
+        private static DispatcherTimer? positionTimer;
         public static void InitializePositionTimer()
         {
             positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(10) };
@@ -299,7 +286,7 @@ namespace CMGWpf.PlayFunctions
             positionTimer.Start();
             Debug.WriteLine($"Position timer started at {DateTime.Now}");
         }
-        public static DispatcherTimer? signalTimer;
+        private static DispatcherTimer? signalTimer;
         public static void InitializeSignalLevelTimer()
         {
             signalTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000) };
@@ -318,7 +305,14 @@ namespace CMGWpf.PlayFunctions
                 }
             };
             signalTimer.Start();
-            Debug.WriteLine($"Signal Timer timer started at {DateTime.Now}");
+            Debug.WriteLine($"Signal Timer started at {DateTime.Now}");
+        }
+
+        public static void StopTimers()
+        {
+            positionTimer?.Stop();
+            signalTimer?.Stop();
+            Debug.WriteLine($"Timers stopped at {DateTime.Now}");
         }
         #endregion
 

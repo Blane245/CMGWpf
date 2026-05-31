@@ -1,17 +1,18 @@
-﻿<UserControl x:Class="CMGWpf.Panels.Algorithmic.OscillatorPanel"
+﻿<UserControl x:Class="CMGWpf.Panels.Algorithmic.PoissonPanel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CMGWpf.Panels.Algorithmic"
-             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:model="clr-namespace:CMGWpf.Model"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:viewmodel="clr-namespace:CMGWpf.View"
-             d:DataContext="{d:DesignInstance Type=model:Oscillator}"
+             d:DataContext="{d:DesignInstance Type=model:Poisson}"
              mc:Ignorable="d" 
              d:DesignHeight="80" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
@@ -23,57 +24,48 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-            <Label Content="Modulator"/>
+            <Label Content="Seed"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="0">
-            <Label Content="Center"/>
+            <Label Content="Point Count"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="0">
-            <Label Content="Frequency"/>
+            <Label Content="Lo"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Column="3" Grid.Row="0">
-            <Label Content="Amplitude"/>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Column="4" Grid.Row="0">
-            <Label Content="Phase"/>
+            <Label Content="Hi"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1">
-            <ComboBox ItemsSource="{x:Static viewmodel:GeneratorViewModel.ModulatorTypes}" SelectedItem="{Binding Modulator, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True"/>
+            <Button Content="New Seed" Background="Green" Foreground="White"
+                    Command="{Binding DataContext.PoissonSeedCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                    CommandParameter="{Binding}"/>
+            <TextBox Text="{Binding Seed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="1">
-            <xctk:DoubleUpDown 
-                FormatString="{Binding ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                Value="{Binding Center, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                Minimum="{Binding Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                Maximum="{Binding Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                Increment="{Binding Increment, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-            <Label Content="{Binding FormattedCenter, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+            <xctk:IntegerUpDown
+                Value="{Binding PointCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Minimum="1" 
+                Maximum="100" 
+                Increment="1"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="1">
             <xctk:DoubleUpDown
-                FormatString="F4"
-                Value="{Binding Frequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                Minimum="0" 
-                Maximum="100000" 
-                Increment=".0001"/>
-            <Label Content="mHz"/>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Column="3" Grid.Row="1">
-            <xctk:DoubleUpDown 
-                FormatString="{Binding AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                Value="{Binding Amplitude, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                FormatString="{Binding ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Value="{Binding Lo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Minimum="{Binding Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                 Maximum="{Binding Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                 Increment="{Binding Increment, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-            <Label Content="{Binding FormattedAmplitude, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+            <Label Content="{Binding FormattedLo, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Column="4" Grid.Row="1">
-            <xctk:DoubleUpDown 
-                Value="{Binding Phase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                Minimum="0" 
-                Maximum="359" 
-                Increment="1"/>
-            <Label Content="degrees"/>
+        <StackPanel Orientation="Horizontal" Grid.Column="3" Grid.Row="1">
+            <xctk:DoubleUpDown
+                FormatString="{Binding ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Value="{Binding Hi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Minimum="{Binding Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                Maximum="{Binding Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                Increment="{Binding Increment, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+            <Label Content="{Binding FormattedHi, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
         </StackPanel>
+
     </Grid>
 </UserControl>

@@ -501,6 +501,7 @@ namespace CMGWpf.View
                     if (AlgorithmicGenerator.SoundFont != null)
                     {
                         AlgorithmicPresetNames = new ObservableCollection<string>(AlgorithmicGenerator.SoundFont.Presets.Select(preset => SoundFontUtilities.BankPresetToName(preset)).OrderBy(name => name));
+                        AlgorithmicPresets = new(AlgorithmicGenerator.SoundFont.Presets);
                     }
                 }
                 return algorithmicSoundFontFileName;
@@ -605,6 +606,20 @@ namespace CMGWpf.View
                     // Notify that the algorithm changed so UI updates
                     OnPropertyChanged(nameof(AlgorithmicGenerator));
                     Messages.Clear(); Messages.Add(new Message { Text = "New Markovian seed assigned.", Error = false });
+                }
+            });
+
+        private RelayCommand<Algorithm>? _poissonSeedCommand;
+        public RelayCommand<Algorithm> PoissonSeedCommand =>
+            _poissonSeedCommand ??= new RelayCommand<Algorithm>(algorithm =>
+            {
+                if (algorithm is Poisson poisson)
+                {
+                    string newSeed = StringUtils.GenerateRandomString(10);
+                    poisson.Seed = newSeed;
+                    // Notify that the algorithm changed so UI updates
+                    OnPropertyChanged(nameof(AlgorithmicGenerator));
+                    Messages.Clear(); Messages.Add(new Message { Text = "New Poisson seed assigned.", Error = false });
                 }
             });
 
@@ -812,8 +827,8 @@ namespace CMGWpf.View
                         AmplitudeUnits = (value) => "dB",
                         ValueFormat = "F0",
                         AmplitudeFormat = "F0",
-                        Minimum = -10,
-                        Maximum = 10,
+                        Minimum = -100,
+                        Maximum = 100,
                         Increment = 1,
                         Algorithm = AlgorithmicGenerator.VolumeAlgorithm,
                     };
@@ -1292,6 +1307,7 @@ namespace CMGWpf.View
                     Wiener => ALGORITHMTYPE.Wiener,
                     Markovian => ALGORITHMTYPE.Markovian,
                     Autoregressive => ALGORITHMTYPE.Autoregressive,
+                    Poisson => ALGORITHMTYPE.Poisson,
                     Sequencer => ALGORITHMTYPE.Sequencer,
                     _ => ALGORITHMTYPE.Constant
                 };

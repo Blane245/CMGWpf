@@ -32,6 +32,7 @@ namespace CMGWpf.MVVM
                 vm.Status = [new Message { Text = $"Deleted track: '{vm.Track.Name}'", Error = false }];
                 TracksViewModel.Instance.Tracks = newTracks;
                 TracksViewModel.Instance.NotifyTracksChanged(newTracks);
+                ToolsViewModel.Instance?.NotifyGeneratorListChanged();
                 vm.IsDirty = true;
             }
             else
@@ -83,6 +84,7 @@ namespace CMGWpf.MVVM
             vm.NotifyTrackChanged(vm.Track);
             vm.ActiveRenameDialog?.Close();
             vm.ActiveRenameDialog = null;
+            ToolsViewModel.Instance?.NotifyGeneratorListChanged();
         }
         public void Mute()
         {
@@ -228,7 +230,6 @@ namespace CMGWpf.MVVM
             vm.NotifyTrackChanged(newTrack);
             vm.IsDirty = true;
             vm.Status = [new Message { Text = $"Generators for track '{vm.Track.Name} shifted by {vm.ShiftAmount} seconds", Error = false }];
-            vm.NotifyTrackChanged(vm.Track);
             vm.ActiveShiftDialog?.Close();
             vm.ActiveShiftDialog = null;
         }
@@ -274,6 +275,7 @@ namespace CMGWpf.MVVM
             FileViewModel.Instance.File = newFile;
 
             Services.GlobalService.Instance.StatusMessages = [new Message() { Text = $"Track '{vm.Track.Name}' duplicated to Track '{newTrack.Name}'.", Error = false }];
+            ToolsViewModel.Instance?.NotifyGeneratorListChanged();
         }
         public void Volume()
         {

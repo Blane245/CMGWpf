@@ -86,8 +86,8 @@ namespace CMGWpf.MVVM
             // Get the record format from GlobalService
             string format = GlobalService.Instance.RecordFormat.ToLower();
 
-            string fileNameRoot = string.IsNullOrWhiteSpace(FileViewModel.Instance.FileName) 
-                ? "Composition" 
+            string fileNameRoot = string.IsNullOrWhiteSpace(FileViewModel.Instance.FileName)
+                ? "Composition"
                 : Path.GetFileNameWithoutExtension(FileViewModel.Instance.FileName);
 
             // Create SaveFileDialog
@@ -153,11 +153,11 @@ namespace CMGWpf.MVVM
 
             if (vm.AudioBuffer == null || vm.AudioBuffer.Length == 0)
             {
-                MessageBox.Show("No audio to record. Please play a composition first.", "No Audio", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("No video to record. Please play a composition first.", "No Video", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Check if owner is PlayDialog to access soundroll
+            // Check if owner is PlayDialog to access Sound Roll
             if (owner is not PlayDialog playDialog)
             {
                 MessageBox.Show("Video recording can only be initiated from the Play dialog.", "Invalid Context", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -238,7 +238,7 @@ namespace CMGWpf.MVVM
             const int channels = 2; // Stereo
 
             byte[] wavBytes;
-            
+
             // Create a temporary WAV in memory with 32-bit IEEE float format
             using (var memoryStream = new MemoryStream())
             {
@@ -247,11 +247,11 @@ namespace CMGWpf.MVVM
                 {
                     waveWriter.WriteSamples(vm.AudioBuffer, 0, vm.AudioBuffer.Length);
                 }
-                
+
                 // Get the bytes before the stream is disposed
                 wavBytes = memoryStream.ToArray();
             }
-            
+
             // Create a new stream from the bytes and convert to MP3
             using var wavStream = new MemoryStream(wavBytes);
             using var reader = new WaveFileReader(wavStream);
@@ -269,7 +269,7 @@ namespace CMGWpf.MVVM
 
             progressDialog.SetTotalFrames(totalFrames);
 
-            // Create temp directory for frames and audio
+            // Create temp directory for audio only (frames stay in memory)
             string tempDir = Path.Combine(Path.GetTempPath(), $"CMGVideo_{Guid.NewGuid():N}");
             Directory.CreateDirectory(tempDir);
 
@@ -283,55 +283,108 @@ namespace CMGWpf.MVVM
                 if (progressDialog.IsCancelled)
                     return false;
 
-                // Generate frames
+                // PRE-RENDER the entire sound roll canvas once to avoid repeated WPF layout costs
+                progressDialog.SetStatus("Pre-rendering sound roll...");
+
+                RenderTargetBitmap? fullCanvasBitmap = null;
+                int viewportWidth = 0;
+                int viewportHeight = 0;
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (playDialog.FindName("SoundRollScrollViewer") is System.Windows.Controls.ScrollViewer scrollViewer &&
+                        scrollViewer.Content is System.Windows.Controls.Canvas canvas)
+                    {
+                        viewportWidth = (int)scrollViewer.ViewportWidth;
+                        viewportHeight = (int)scrollViewer.ViewportHeight;
+
+                        // Render the ENTIRE canvas once (this is expensive but only happens once)
+                        int fullWidth = (int)Math.Ceiling(canvas.Width);
+                        int fullHeight = (int)Math.Ceiling(canvas.Height);
+
+                        fullCanvasBitmap = new RenderTargetBitmap(
+                            fullWidth,
+                            fullHeight,
+                            96, 96,
+                            PixelFormats.Pbgra32);
+
+                        fullCanvasBitmap.Render(canvas);
+                        fullCanvasBitmap.Freeze(); // Make the bitmap thread-safe for background processing
+                    }
+                }, System.Windows.Threading.DispatcherPriority.Normal);
+
+                if (fullCanvasBitmap == null || progressDialog.IsCancelled)
+                    return false;
+
+                // Now extract frames from the pre-rendered bitmap (FAST - no WPF layout!)
+                progressDialog.SetStatus("Generating frames...");
+                List<byte[]> frameData = new List<byte[]>(totalFrames);
+
+                await Task.Run(() =>
+                {
+                    for (int frameIndex = 0; frameIndex < totalFrames; frameIndex++)
+                    {
+                        if (progressDialog.IsCancelled)
+                            return;
+
+                        double timePosition = frameIndex / (double)frameRate;
+                        double scrollOffset = SoundRollBuilder.TimeToX(timePosition);
+
+                        // Extract a viewport-sized rectangle from the pre-rendered bitmap
+                        byte[] framePng = ExtractFrameFromBitmap(
+                            fullCanvasBitmap, 
+                            (int)scrollOffset, 
+                            0, 
+                            viewportWidth, 
+                            viewportHeight);
+
+                        frameData.Add(framePng);
+
+                        // Update progress on UI thread periodically
+                        if (frameIndex % 10 == 0)
+                        {
+                            int current = frameIndex;
+                            Application.Current.Dispatcher.InvokeAsync(() =>
+                            {
+                                vm.CurrentPlayPosition = current / (double)frameRate;
+                                progressDialog.UpdateProgress(current + 1);
+                            }, System.Windows.Threading.DispatcherPriority.Background);
+                        }
+                    }
+                });
+
+                // Final progress update
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    progressDialog.UpdateProgress(totalFrames);
+                });
+
+                if (progressDialog.IsCancelled)
+                    return false;
+
+                // Write frames to disk just before encoding
+                progressDialog.SetStatus("Writing frames to disk...");
                 string frameFilePattern = Path.Combine(tempDir, "frame_{0:D4}.png");
 
-                for (int frameIndex = 0; frameIndex < totalFrames; frameIndex++)
+                await Task.Run(() =>
                 {
-                    if (progressDialog.IsCancelled)
-                        return false;
-
-                    double timePosition = frameIndex / (double)frameRate;
-                    int currentFrame = frameIndex;
-
-                    // Update UI on main thread and render frame
-                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    for (int i = 0; i < frameData.Count; i++)
                     {
-                        vm.CurrentPlayPosition = timePosition;
+                        if (progressDialog.IsCancelled)
+                            return;
 
-                        // Get scrollviewer and render
-                        if (playDialog.FindName("SoundRollScrollViewer") is System.Windows.Controls.ScrollViewer scrollViewer)
-                        {
-                            // Manually scroll to the correct position for this frame
-                            double scrollOffset = SoundRollBuilder.TimeToX(timePosition);
-                            double maxScroll = Math.Max(0, playDialog.FindName("SoundRollCanvas") is System.Windows.Controls.Canvas canvas 
-                                ? canvas.Width - scrollViewer.ViewportWidth 
-                                : 0);
-                            scrollOffset = Math.Clamp(scrollOffset, 0, maxScroll);
-                            scrollViewer.ScrollToHorizontalOffset(scrollOffset);
+                        File.WriteAllBytes(string.Format(frameFilePattern, i), frameData[i]);
+                    }
+                });
 
-                            // Force layout update
-                            scrollViewer.UpdateLayout();
-
-                            RenderFrameToPng(scrollViewer, string.Format(frameFilePattern, currentFrame));
-                        }
-
-                        // Update progress
-                        progressDialog.UpdateProgress(currentFrame + 1);
-
-                    }, System.Windows.Threading.DispatcherPriority.Background);
-
-                    // Yield to allow UI events (like Cancel button clicks) to be processed
-                    await Task.Yield();
-                }
+                // Clear frame data from memory
+                frameData.Clear();
 
                 if (progressDialog.IsCancelled)
                     return false;
 
                 // Encode video with FFmpeg
                 progressDialog.SetStatus("Encoding video...");
-
-                bool cancelledBeforeEncoding = progressDialog.IsCancelled;
 
                 await Task.Run(() =>
                 {
@@ -367,7 +420,7 @@ namespace CMGWpf.MVVM
                     }
                 }
 
-                // Return true only if we weren't cancelled (or if cancellation happened before encoding started)
+                // Return true only if we weren't cancelled
                 return !progressDialog.IsCancelled;
             }
             finally
@@ -428,28 +481,85 @@ namespace CMGWpf.MVVM
             }
         }
 
-        private void RenderFrameToPng(System.Windows.Controls.ScrollViewer scrollViewer, string outputPath)
+        private byte[] RenderFrameToPngBytes(System.Windows.Controls.ScrollViewer scrollViewer)
         {
+            // Get the viewport dimensions (visible area only)
             int width = (int)scrollViewer.ViewportWidth;
             int height = (int)scrollViewer.ViewportHeight;
 
             if (width <= 0 || height <= 0)
-                return;
+                return Array.Empty<byte>();
 
-            RenderTargetBitmap renderBitmap = new(
+            // Get the canvas inside the scroll viewer
+            if (scrollViewer.Content is not System.Windows.Controls.Canvas canvas)
+                return Array.Empty<byte>();
+
+            // Create a visual brush that shows only the visible portion
+            VisualBrush visualBrush = new VisualBrush(canvas)
+            {
+                // Calculate which portion of the canvas is currently visible
+                Viewbox = new Rect(
+                    scrollViewer.HorizontalOffset,  // X offset in canvas coordinates
+                    scrollViewer.VerticalOffset,    // Y offset in canvas coordinates
+                    width,                          // Width of visible area
+                    height                          // Height of visible area
+                ),
+                ViewboxUnits = BrushMappingMode.Absolute,
+                Stretch = Stretch.None,
+                AlignmentX = AlignmentX.Left,
+                AlignmentY = AlignmentY.Top
+            };
+
+            // Create a drawing visual with the viewport dimensions
+            DrawingVisual drawingVisual = new DrawingVisual();
+            using (DrawingContext drawingContext = drawingVisual.RenderOpen())
+            {
+                // Draw only the visible portion at the actual size
+                drawingContext.DrawRectangle(visualBrush, null, new Rect(0, 0, width, height));
+            }
+
+            // Render to bitmap at viewport size
+            RenderTargetBitmap renderBitmap = new RenderTargetBitmap(
                 width,
                 height,
                 96, // DPI
                 96,
                 PixelFormats.Pbgra32);
 
-            renderBitmap.Render(scrollViewer);
+            renderBitmap.Render(drawingVisual);
 
-            PngBitmapEncoder encoder = new();
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
 
-            using var fileStream = new FileStream(outputPath, FileMode.Create);
-            encoder.Save(fileStream);
+            using var memoryStream = new MemoryStream();
+            encoder.Save(memoryStream);
+            return memoryStream.ToArray();
+        }
+
+        private byte[] ExtractFrameFromBitmap(RenderTargetBitmap sourceBitmap, int x, int y, int width, int height)
+        {
+            // Clamp to source bitmap bounds
+            int sourceWidth = sourceBitmap.PixelWidth;
+            int sourceHeight = sourceBitmap.PixelHeight;
+
+            x = Math.Clamp(x, 0, sourceWidth - width);
+            y = Math.Clamp(y, 0, sourceHeight - height);
+            width = Math.Min(width, sourceWidth - x);
+            height = Math.Min(height, sourceHeight - y);
+
+            if (width <= 0 || height <= 0)
+                return Array.Empty<byte>();
+
+            // Create a cropped bitmap from the source
+            CroppedBitmap croppedBitmap = new CroppedBitmap(sourceBitmap, new Int32Rect(x, y, width, height));
+
+            // Encode to PNG
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(croppedBitmap));
+
+            using var memoryStream = new MemoryStream();
+            encoder.Save(memoryStream);
+            return memoryStream.ToArray();
         }
 
         private void SaveAsWavPcm16(string filePath)

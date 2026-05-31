@@ -473,7 +473,7 @@ namespace CMGWpf.View
             double offsetChange = x - _bodyDragOffset;
             double newStartOffset = TimeLine.TimeInterval.StartOffset + offsetChange;
             double newEndOffset = TimeLine.TimeInterval.EndOffset + offsetChange;
-            // we need to prevent the move if either the start or end offsets go beyond the timeline boundaries, which ensures that the time interval remains visible and interactable within the timeline, and prevents it from being dragged off-screen where it cannot be accessed by the user.
+            // we need to prevent the move if either the start or end offsets go beyond the timeline boundaries, which ensures that the time interval remains visible within the timeline, and prevents it from being dragged off-screen where it cannot be accessed by the user.
             if (newStartOffset < 0 || newEndOffset > SizeService.Instance.DisplayWidth)
                 return;
             TimeInterval interval = TimeLine.TimeInterval.Clone();
@@ -489,13 +489,13 @@ namespace CMGWpf.View
         }
         public void TimeToOffset(TimeInterval interval)
         {
-            // convert the timeinterval start and end times to pixel offsets on the timeline, which allows the time interval to be displayed correctly on the timeline. This conversion is based on the current zoom level and the display width of the timeline, ensuring that the time interval is accurately represented in the UI.
+            // convert the time interval start and end times to pixel offsets on the timeline, which allows the time interval to be displayed correctly on the timeline. This conversion is based on the current zoom level and the display width of the timeline, ensuring that the time interval is accurately represented in the UI.
             interval.StartOffset = (interval.StartTime - TimeLine.StartTime) / TimeLineScales[TimeLine.CurrentZoomLevel].Extent * SizeService.Instance.DisplayWidth;
             interval.EndOffset = (interval.EndTime - TimeLine.StartTime) / TimeLineScales[TimeLine.CurrentZoomLevel].Extent * SizeService.Instance.DisplayWidth;
             interval.StartOffset = Math.Clamp(interval.StartOffset, 0, SizeService.Instance.DisplayWidth);
             interval.EndOffset = Math.Clamp(interval.EndOffset, interval.StartOffset, SizeService.Instance.DisplayWidth);
         }
-        // go through all of the generators and update their colors based on a new timeinterval.
+        // go through all of the generators and update their colors based on a new time interval.
         private void UpdateGeneratorColors()
         {
             var trackviewmodels = TracksViewModel.Instance.Tracks;

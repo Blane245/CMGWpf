@@ -46,6 +46,7 @@ namespace CMGWpf.MVVM
             TimeLineViewModel.Instance.TimeLine = vm.File.TimeLine.Clone();
             vm.IsDirty = false;
             vm.FileName = string.Empty;
+            ToolsViewModel.Instance?.NotifyGeneratorListChanged();
             vm.StatusMessages = [new Message { Text = "New File created.", Error = false }];
         }
         public void Save()
@@ -168,6 +169,7 @@ namespace CMGWpf.MVVM
                 vm.AddRecentFile(fileName);
                 vm.File = file;
                 TimeLineViewModel.Instance.TimeLine = vm.File.TimeLine.Clone();
+                ToolsViewModel.Instance?.NotifyGeneratorListChanged();
             }
         }
         public async void OpenRecent(string fileName)
@@ -210,6 +212,7 @@ namespace CMGWpf.MVVM
                 vm.File = file;
                 TimeLineViewModel.Instance.TimeLine = vm.File.TimeLine.Clone();
                 vm.AddRecentFile(fileName);
+                ToolsViewModel.Instance?.NotifyGeneratorListChanged();
             }
             else
             {

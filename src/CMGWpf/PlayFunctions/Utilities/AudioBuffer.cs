@@ -10,9 +10,10 @@ namespace CMGWpf.PlayFunctions.Utilities
         /// <param name="inputBuffer" type="double[]">The buffer containing the audio samples to be added.</param>
         /// <param name="outputBuffer" type="double[]">The buffer to which the audio samples will be added.</param>
         /// <param name="location" type="int">The starting index in the output buffer where the input buffer will be added.</param>
-        public static void Add(double[] inputBuffer, ref double[] outputBuffer, int location)
+        /// <returns>The output buffer, potentially resized if needed.</returns>
+        public static double[] Add(double[] inputBuffer, double[] outputBuffer, int location)
         {
-            if (location < 0) return;
+            if (location < 0) return outputBuffer;
             int excessLength = (location + inputBuffer.Length) - outputBuffer.Length;
             if (excessLength > 0) {
                 // extend the output buffer to accommodate the additional samples
@@ -27,6 +28,7 @@ namespace CMGWpf.PlayFunctions.Utilities
             {
                 outputBuffer[i] += inputBuffer[i - location];
             }
+            return outputBuffer;
         }
     }
 }

@@ -3,6 +3,7 @@ using CMGWpf.MVVM;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Shell;
 
 namespace CMGWpf.View
 {
@@ -28,6 +29,7 @@ namespace CMGWpf.View
                 if (ToolDialog == null)
                 {
                     ToolDialog = new GeneratorAndCalculatorTools();
+                    ToolDialog.BringIntoView();
                     ToolDialog.Show();
                 }
             });
@@ -121,7 +123,7 @@ namespace CMGWpf.View
             set
             {
                 _amplitude = value; OnPropertyChanged();
-                _oscillatorFrequency = (_BPM * _amplitude) != 0 ? Math.Round(60_000 / (_BPM * _amplitude)) : 0;
+                _oscillatorFrequency = (_BPM * _amplitude) != 0 ? 1000 / Math.Round(60 * (_amplitude + 1) / _BPM) : 0;
                 OnPropertyChanged(nameof(OscillatorFrequency));
             }
         }
@@ -173,13 +175,41 @@ namespace CMGWpf.View
             get => staggerGeneratorList;
             set { staggerGeneratorList = value; OnPropertyChanged(); }
         }
-        public void NotifyStaggerListChanged(ObservableCollection<StaggerGeneratorsSelection> newList)
+        // when any updates are made to the generators of a file, generator lists need to be updated
+        // transactions that affect these lists are 
+        // load a file
+        // new file
+        // delete a track
+        // rename a track
+        // duplicate a track
+        // add a generator
+        // modify a generator (name could have changed)
+        // delete a generator
+        // copy a generator
+        // move a generator
+        // other generator transactions modify contents of a generator and not the number of generators or their track assignments
+        public void NotifyGeneratorListChanged ()
+        {
+            OnPropertyChanged(nameof(GeneratorList));
+            LoadStaggerGeneratorList();
+        }
+        public void LoadStaggerGeneratorList()
+        {
+            ObservableCollection<StaggerGeneratorsSelection> tempList = [];
+            foreach (var track in FileViewModel.Instance.File.Tracks)
+            {
+                foreach (var generator in track.Generators)
+                {
+                    tempList.Add(new StaggerGeneratorsSelection() { TrackName = track.Name, GeneratorName = generator.Name, IsSelected = false });
+                }
+            }
+            StaggerGeneratorList = tempList;
+        }
+
+public void NotifyStaggerListChanged(ObservableCollection<StaggerGeneratorsSelection> newList)
         {
             StaggerGeneratorList = newList;
         }
-
-        public bool StaggerSelectAll { get; set; } = false;
-
         // generator calculator properties
         public static ObservableCollection<string> MaintainAlignTimeOptions { get => ["Start Time", "Stop Time"]; }
         private string _maintainTimeOption = "Start Time";

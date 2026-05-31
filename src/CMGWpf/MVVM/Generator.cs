@@ -38,6 +38,7 @@ namespace CMGWpf.MVVM
                         generator.Parent.Generators[index] = newGenerator;
                         vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated successfully.", Error = false });
                         vm.IsDirty = true;
+                        ToolsViewModel.Instance?.NotifyGeneratorListChanged();
                     }
 
                 }
@@ -49,6 +50,7 @@ namespace CMGWpf.MVVM
                     generator.Parent.Generators.Add(newGenerator);
                     vm.IsDirty = true;
                     vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated added.", Error = false });
+                    ToolsViewModel.Instance?.NotifyGeneratorListChanged();
                 }
                 else // this should not happen, but if it does, display an error
                 {
@@ -59,9 +61,7 @@ namespace CMGWpf.MVVM
                 vm.ActiveGeneratorDialog?.Close();
                 vm.ActiveGeneratorDialog = null;
                 vm.UIGenerator.Name = vm.NewGeneratorName;
-                //vm.UIGenerator.StartTime = vm.NewStartTime;
                 vm.UpdateGenerator(vm.UIGenerator);
-                //vm.NotifyGeneratorChanged(nameof(vm.Generator));
                 vm.NotifyTrackChanged();
             }
 
@@ -92,6 +92,7 @@ namespace CMGWpf.MVVM
                 vm.IsDirty = true;
                 vm.NotifyTrackChanged();
                 vm.Status = [new Message { Text = $"Generator '{generator.Name}' deleted from track '{parentTrack.Name}'.", Error = false }];
+                ToolsViewModel.Instance?.NotifyGeneratorListChanged();
             }
         }
         public void Mute()

@@ -13,7 +13,15 @@ namespace CMGWpf.PlayFunctions
         {
             InitializeComponent();
             Loaded += PlayDialog_Loaded;
+            Closing += PlayDialog_Closing;
         }
+
+        private void PlayDialog_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            PlayEngine.StopTimers();
+            PlayViewModel.Instance.UnregisterSignalCanvases();
+        }
+
         private void Cancel_Click(object? sender, RoutedEventArgs e)
         {
             FileViewModel.Instance.StatusMessages = [new Types.Message() { Text = "Play complete.", Error = false }];
@@ -24,9 +32,10 @@ namespace CMGWpf.PlayFunctions
             if (DataContext is PlayViewModel vm)
             {
                 vm.Messages = [];
+                vm.RegisterSignalCanvases(LeftSignalLevel, RightSignalLevel); 
                 GlobalService.Instance.StatusMessages.Clear();
                 double displayWidth = SizeService.Instance.DisplayWidth;
-                double displayHeight = SizeService.Instance.BodyHeight;
+                double displayHeight = SizeService.Instance.PlayHeight;
                 double totalDuration = PlayViewModel.Instance.PlayDuration;
 
                 // Calculate base canvas width, then add viewport width so we can scroll until content reaches left edge
@@ -74,5 +83,6 @@ namespace CMGWpf.PlayFunctions
         private void SoundRollCanvas_Initialized(object sender, EventArgs e)
         {
         }
+
     }
 }

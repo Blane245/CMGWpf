@@ -61,6 +61,14 @@
                 ValueFormat="{Binding DataContext.ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 AmplitudeFormat="{Binding DataContext.AmplitudeFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type model:Poisson}">
+            <local:PoissonPanel 
+                ValueUnits="{Binding DataContext.ValueUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Minimum="{Binding DataContext.Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Maximum="{Binding DataContext.Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}"         
+                Increment="{Binding DataContext.Increment, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ValueFormat="{Binding DataContext.ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        </DataTemplate>
         <DataTemplate DataType="{x:Type model:Sequencer}">
             <local:SequencerPanel 
                 ValueUnits="{Binding DataContext.ValueUnits, RelativeSource={RelativeSource AncestorType=UserControl}}"         

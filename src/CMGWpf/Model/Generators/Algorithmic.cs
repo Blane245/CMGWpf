@@ -2,6 +2,7 @@
 using CMGWpf.Types;
 using CMGWpf.Utilities;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace CMGWpf.Model.Generators
@@ -96,6 +97,14 @@ namespace CMGWpf.Model.Generators
         {
             beatSequence = EuclideanRhythm.Get(BeatCount, MeasureLength, OffsetSequence);
             currentRhythmEntry = 0;
+            Random = MathUtilities.StartFastRandom(NoiseSeed);
+            // Initialize all of the attribute algorithms
+            NoteAlgorithm.Initialize();
+            AttackAlgorithm.Initialize();
+            SpeedAlgorithm.Initialize();
+            DurationAlgorithm.Initialize();
+            VolumeAlgorithm.Initialize();
+            PanAlgorithm.Initialize();
         }
 
         private double GetSelectedNote(double note)
@@ -150,7 +159,7 @@ namespace CMGWpf.Model.Generators
             double duration = DurationAlgorithm.GetCurrentValue(time, beats);
             duration = Math.Clamp(duration, 0.01, 100);
             double volume = VolumeAlgorithm.GetCurrentValue(time, beats);
-            volume = Math.Clamp(volume, -10, 10);
+            volume = Math.Clamp(volume, -100, 100);
             double pan = PanAlgorithm.GetCurrentValue(time, beats);
             pan = Math.Clamp(pan, -1, 1);
             return new CurrentValues()
@@ -294,6 +303,7 @@ namespace CMGWpf.Model.Generators
                             ALGORITHMTYPE.Wiener => new Wiener(),
                             ALGORITHMTYPE.Oscillator => new Oscillator(),
                             ALGORITHMTYPE.Sequencer => new Sequencer(),
+                            ALGORITHMTYPE.Poisson => new Poisson(),
                             ALGORITHMTYPE.Autoregressive => new Autoregressive(),
                             _ => new Constant(),
                         };

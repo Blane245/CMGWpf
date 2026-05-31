@@ -261,5 +261,9 @@ namespace CMGWpf.Services
         //public string DbServer { get; set; } = "http://10.17.1.23"; // Current network IP
         public readonly string DbPort = "8081";
 
+        // lock used to synchronize changes to the final stereo buffer, the source information for report writing, the scroll roll contents, and the active tasks.
+        private object _playResultsLock = new();
+        public object PlayResultsLock { get { return _playResultsLock; } set { _playResultsLock = value; OnPropertyChanged(); } }
+
     }
 }

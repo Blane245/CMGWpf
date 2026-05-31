@@ -2,8 +2,10 @@
 using CMGWpf.Model.Generators;
 using CMGWpf.Services;
 using CMGWpf.View;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.IO;
+using static CMGWpf.Types.DBTypes;
 using static CMGWpf.Types.PlayTypes;
 using Track = CMGWpf.Model.Track;
 
@@ -11,7 +13,7 @@ namespace CMGWpf.PlayFunctions.Utilities
 {
     public static class ReportWriter
     {
-        private static ObservableCollection<InstrumentSource> InstrumentSources => PlayViewModel.Instance.InstrumentSources;
+        private static ConcurrentBag<InstrumentSource> InstrumentSources => PlayViewModel.Instance.InstrumentSources;
         /// <summary>
         /// This will use the information gathered during the play process to write a report to a file in HTML format. 
         /// The report will include details about the instruments used, their parameters, and any relevant information 
@@ -35,13 +37,14 @@ namespace CMGWpf.PlayFunctions.Utilities
         private static string BuildHtmlReport()
         {
             string fileName = GlobalService.Instance.FileName;
-            string version = CMGWpf.Properties.Settings.Default.Version;
+            string version = Properties.Settings.Default.Version;
             CMGFile file = FileViewModel.Instance.File;
             ObservableCollection<Generator> generators = PlayViewModel.Instance.PlayGenerators;
+
             double duration = PlayViewModel.Instance.PlayDuration;
 
             // sort the sources by start time for better readability
-            List<InstrumentSource> sources = [.. InstrumentSources.OrderBy(s => s.StartTime)];
+            List<InstrumentSource> sources = InstrumentSources.OrderBy(s => s.StartTime).ToList();
 
             string html = $$"""
                 <!DOCTYPE html>
@@ -185,7 +188,7 @@ namespace CMGWpf.PlayFunctions.Utilities
 
             return $$"""
                 <div class="track">
-                    <h3>Track: {{track.Name}} {{ (track.Mute? "Muted" : "") }} {{ (track.Solo? "Soloed" : "") }} Volume (dB): {{track.Volume}} Active Generators {{trackGenerators.Count}}</h3>
+                    <h3>Track: {{track.Name}} {{(track.Mute ? "Muted" : "")}} {{(track.Solo ? "Soloed" : "")}} Volume (dB): {{track.Volume}} Active Generators {{trackGenerators.Count}}</h3>
                     {{RenderGenerators(trackGenerators, sources)}}
                 </div>
                 """;
@@ -218,7 +221,7 @@ namespace CMGWpf.PlayFunctions.Utilities
             return $$"""
                 <div class="generator">
                     <strong>{{gen.Name}}</strong>
-                    <span class="generator-type {{typeClass}}">{{typeName}}</span> Time: {{gen.StartTime:F2}}s — {{gen.StopTime:F2}}s ({{gen.StopTime - gen.StartTime:F2}}s)
+                    <span class="generator-type {{typeClass}}">{{typeName}}</span> Time: {{gen.StartTime:F4}}s — {{gen.StopTime:F4}}s ({{gen.StopTime - gen.StartTime:F4}}s)
                 </div>
                 {{RenderGeneratorDetails(gen)}}
                 <hr/>
@@ -238,7 +241,8 @@ namespace CMGWpf.PlayFunctions.Utilities
 
         private static string RenderAlgorithmicDetails(Algorithmic algo)
         {
-            return $$"""
+            string details = string.Empty;
+            details += $$"""
                 <table>
                     <thead>
                         <th>Start Time (sec)</th>
@@ -256,12 +260,14 @@ namespace CMGWpf.PlayFunctions.Utilities
                         <th>Noise Seed</th>
                         <th>Noise Frequency (Hz)</th>
                         <th>Noise Amplitude (dB)</th>
-                        <th>Reverb Duration (sec)</th>
+                        <th>Reverb Delay (sec)</th>
                         <th>Reverb Decay (dB)</th>
                         <th>Tremolo Frequency (Hz)</th>
                         <th>Tremolo Depth (dB)</th>
+                        <th>Tremolo Modulator> (dB)</th>
                         <th>Vibrato Frequency (Hz)</th>
                         <th>Vibrato Depth (dB)</th>
+                        <th>Vibrato Modulator (dB)</th>
                     </thead>
                     <tbody>
                         <tr>
@@ -271,9 +277,11 @@ namespace CMGWpf.PlayFunctions.Utilities
                             <td>{{algo.PresetName}}</td>
                             <td>{{(algo.Microtones ? "Yes" : "No")}}</td>
                             <td>{{(algo.IsLooping ? "Yes" : "No")}}</td>
+                            <td>{{(algo.AttackEnabled ? "Yes" : "No")}}</td>
                             <td>{{algo.MeasureLength}}</td>
+                            <td>{{algo.BeatCount}}</td>
                             <td>{{algo.OffsetSequence}}</td>
-                            <td>{{algo.NoteCount}}</td>
+                            <td>{{algo.NoteCount}}</td> 
                             <td>{{algo.OffsetNotes}}</td>
                             <td>{{algo.NoiseSeed}}</td>
                             <td>{{algo.NoiseFrequency:F2}}</td>
@@ -282,13 +290,247 @@ namespace CMGWpf.PlayFunctions.Utilities
                             <td>{{algo.ReverbDecay}}</td>
                             <td>{{algo.Tremolo.Speed:F2}}</td>
                             <td>{{algo.Tremolo.Depth:F2}}</td>
+                            <td>{{algo.Tremolo.WaveForm}}</td>
                             <td>{{algo.Vibrato.Speed:F2}}</td>
                             <td>{{algo.Vibrato.Depth:F2}}</td>
+                            <td>{{algo.Vibrato.WaveForm}}</td>
                         </tr>   
+                        </tbody>
+                </table>
+                """;
+
+            // render the note through pan algorithms
+            details += $$"""
+                    <div>
+                        <strong>Note Algorithm: </strong>
+                        <p>{{algo.NoteAlgorithm}}</p>
+                        {{RenderAlgorithmicDetails(algo.NoteAlgorithm)}}
+                    </div>
+                    <div>
+                        <strong>Attack Algorithm: </strong>
+                        <p>{{algo.AttackAlgorithm}}</p>
+                        {{RenderAlgorithmicDetails(algo.AttackAlgorithm)}}
+                    </div>
+                    <div>
+                        <strong>Speed Algorithm: </strong>
+                        <p>{{algo.SpeedAlgorithm}}</p>
+                        {{RenderAlgorithmicDetails(algo.SpeedAlgorithm)}}
+                    </div>
+                    <div>
+                        <strong>Duration Algorithm: </strong>
+                        <p>{{algo.DurationAlgorithm}}</p>
+                        {{RenderAlgorithmicDetails(algo.DurationAlgorithm)}}
+                    </div>
+                    <div>
+                        <strong>Volume Algorithm: </strong>
+                        <p>{{algo.VolumeAlgorithm}}</p>
+                        {{RenderAlgorithmicDetails(algo.VolumeAlgorithm)}}
+                    </div>
+                    <div>
+                        <strong>Pan Algorithm: </strong>
+                        <p>{{algo.PanAlgorithm}}</p>
+                        {{RenderAlgorithmicDetails(algo.PanAlgorithm)}}
+                    </div>
+                    """;
+            return details;
+        }
+        private static string RenderAlgorithmicDetails(Algorithm algo)
+        {
+            if (algo is null)
+                return "<p>No algorithm details found.</p>";
+            return algo switch
+            {
+                Constant => RenderConstantDetails(algo),
+                Oscillator => RenderOscillatorDetails(algo),
+                Markovian => RenderMarkovianDetails(algo),
+                Wiener => RenderWienerDetails(algo),
+                Autoregressive => RenderAutoregressiveDetails(algo),
+                Poisson => RenderPoissonDetails(algo),
+                Sequencer => RenderSequencerDetails(algo),
+                _ => ""
+            };
+        }
+        private static string RenderConstantDetails(Algorithm algo)
+        {
+            if (algo is not Constant c)
+                return "<p>No constant details found.</p>";
+            return $$"""
+                <table>
+                    <thead>
+                        <th>Value</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{c.Value}}</td>
+                        </tr>
+                    </tbody>
                 </table>
                 """;
         }
-
+        private static string RenderOscillatorDetails(Algorithm algo)
+        {
+            if (algo is not Oscillator o)
+                return "<p>No oscillator details found.</p>";
+            return $$"""
+                <table>
+                    <thead>
+                        <th>Modulator</th>
+                        <th>Frequency (Hz)</th>
+                        <th>Amplitude</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{o.Modulator}}</td>
+                            <td>{{o.Frequency:F2}}</td>
+                            <td>{{o.Amplitude:F2}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                """;
+        }
+        private static string RenderMarkovianDetails(Algorithm algo)
+        {
+            if (algo is not Markovian m)
+                return "<p>No Markovian details found.</p>";
+            string result = $$"""
+                <table>
+                    <thead>
+                        <th>Seed</th>
+                        <th>Start Value</th>
+                        <th>Lo</th>
+                        <th>Hi</th>
+                        <th>Step</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{m.Seed}}</td>
+                            <td>{{m.Start}}</td>
+                            <td>{{m.Lo}}</td>
+                            <td>{{m.Hi}}</td>
+                            <td>{{m.Step}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                """;
+            result += "<table><thead><tr><th>From/To</th><th>Same</th><th>Up</th><th>Down</th></thead>";
+            result += "<tbody><tr>";
+            for (int i = 0; i < m.TransitionRows.Count; i++)
+            {
+                switch (i) { case 0: result += "<td>Same</td>"; break; case 1: result += "<td>Up</td>"; break; case 2: result += "<td>Down</td>"; break; }
+                result += $"<td>{m.TransitionRows[i].Values[0]:F2}</td>";
+                result += $"<td>{m.TransitionRows[i].Values[1]:F2}</td>";
+                result += $"<td>{m.TransitionRows[i].Values[2]:F2}</td>";
+            }
+            result += "</tr></tbody></table>";
+            return result;
+        }
+        private static string RenderWienerDetails(Algorithm algo)
+        {
+            if (algo is not Wiener w)
+                return "<p>No Wiener details found.</p>";
+            return $$"""
+                <table>
+                    <thead>
+                        <th>Seed</th>
+                        <th>Initial Value</th>
+                        <th>Lo</th>
+                        <th>Hi</th>
+                        <th>Dispersion</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{w.Seed}}</td>
+                            <td>{{w.Initial}}</td>
+                            <td>{{w.Lo}}</td>
+                            <td>{{w.Hi}}</td>
+                            <td>{{w.Dispersion}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                """;
+        }
+        private static string RenderAutoregressiveDetails(Algorithm algo)
+        {
+            if (algo is not Autoregressive a)
+                return "<p>No autoregressive details found.</p>";
+            return $$"""
+                <table>
+                    <thead>
+                        <th>Seed</th>
+                        <th>Initial Value</th>
+                        <th>Lo</th>
+                        <th>Hi</th>
+                        <th>Alpha</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{a.Seed}}</td>
+                            <td>{{a.Initial}}</td>
+                            <td>{{a.Lo}}</td>
+                            <td>{{a.Hi}}</td>
+                            <td>{{a.Alpha}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                """;
+        }
+        private static string RenderPoissonDetails(Algorithm algo)
+        {
+            if (algo is not Poisson p)
+                return "<p>No Poisson details found.</p>";
+            return $$"""
+                <table>
+                    <thead>
+                        <th>Seed</th>
+                        <th>PointCount</th>
+                        <th>Lo</th>
+                        <th>Hi</th>
+                                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{p.Seed}}</td>
+                            <td>{{p.PointCount}}</td>
+                                            <td>{{p.Lo}}</td>
+                            <td>{{p.Hi}}</td>
+                                        </tr>
+                    </tbody>
+                </table>
+                """;
+        }
+        private static string RenderSequencerDetails(Algorithm algo)
+        {
+            if (algo is not Sequencer s)
+                return "<p>No sequencer details found.</p>";
+            string result = $$"""
+                <table>
+                    <thead>
+                        <th>Name</th>
+                        <th>Notes</th>
+                        <th>Transpose?</th>
+                        <th>Reverse Sequence?</th>
+                        <th>Reflect Sequence?</th>
+                        <th>Reflect Pitch</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{s.Name}}</td>
+                            <td>{{SequencerItems(s.Items)}}</td>
+                            <td>{{s.Transpose}}</td>
+                            <td>{{s.ReverseSequence}}</td>
+                            <td>{{s.ReflectSequence}}</td>
+                            <td>{{s.ReflectPitch}}</td>
+                                        </tr>
+                    </tbody>
+                </table>
+                """;
+            return result;
+        }
+        private static string SequencerItems(ObservableCollection<SequenceItem> items)
+        {
+            if (items.Count == 0)
+                return "No items in sequence.";
+            return string.Join(", ", items.Select(i => i.value.ToString("F2")+":"+i.beats.ToString("F2")));
+        }
         private static string RenderStochasticDetails(Stochastic stoch)
         {
             return $$"""
@@ -296,15 +538,15 @@ namespace CMGWpf.PlayFunctions.Utilities
                 <strong>Composition Parameters</strong>
                 <table>
                     <thead>
-                        <th>Ensemble Type</th>
+                        <th>Ensemble</th>
                         <th>Composition Duration (sec)</th>
                         <th>Number of Time Cells</th>
-                        <th>Lambda</th>
+                        <th>Lambda (events/cell)</th>
                         <th>Composition Seed</th>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>{{stoch.Ensemble}}</td>
+                            <td>{{stoch.Ensemble.Name}}</td>
                             <td>{{stoch.CompositionDuration:F2}}</td>
                             <td>{{stoch.NumberOfTimeCells}}</td>
                             <td>{{stoch.Lambda:F2}}</td>
@@ -317,6 +559,7 @@ namespace CMGWpf.PlayFunctions.Utilities
                 <strong>Dynamic Parameters</strong>
                 <table>
                     <thead>
+                            <th>Delta (events/sec)</th>
                             <th>Intensity Option</th>
                             <th>Intensity Transition Option</th>
                             <th>Intensity Cycle Time (sec)</th>
@@ -328,8 +571,9 @@ namespace CMGWpf.PlayFunctions.Utilities
                                         </thead>
                         <tbody>
                             <tr>
+                                <td>{{stoch.Delta}}</td>
                                 <td>{{stoch.IntensityOption}}</td>
-                                <td>{{stoch.IntensityTransitionOption}}</td>
+                                                <td>{{stoch.IntensityTransitionOption}}</td>
                                 <td>{{stoch.IntensityParameters.CycleTime:F2}}</td>
                                 <td>{{stoch.PanOption}}</td>
                                 <td>{{stoch.PanAlgorithm}}</td>
@@ -346,14 +590,28 @@ namespace CMGWpf.PlayFunctions.Utilities
                         <thead>
                             <th>Voice Name</th>
                             <th>Description</th>
-                            <th>SoundFont</th>
-                            <th>Preset</th>
+                            <th>Muted?</th>
+                            <th>Volume</th>
+                            <th>Velocity</th>
                             <th>Timbre</th>
                             <th>Register</th>
                             <th>Duration</th>
-                        </thead>
+                            <th>SoundFont</th>
+                            <th>Preset</th>
+                                        </thead>
                         <tbody>
-                            {{string.Join("\n", stoch.Voices.Select(v => $"<tr><td>{v.Name}</td><td>{v.Description}</td><td>{v.SoundFontFileName}</td><td>{v.PresetName}</td><td>{v.Timbre}</td><td>{v.RegisterLo:F1} → {v.RegisterHi:F1}</td><td>{v.Duration:F1}</td></tr>"))}}
+                            {{string.Join("\n", stoch.Voices.Select(v =>
+                            $"<tr><td>{v.Name}</td>" +
+                            $"<td>{v.Description}</td>" +
+                            $"<td>{(v.Muted ? "True" : "False")}</td>" +
+                            $"<td>{v.Volume:F0}</td>" +
+                            $"<td>{v.Velocity:F0}</td>" +
+                            $"<td>{v.Timbre}</td>" +
+                            $"<td>{v.RegisterLo:F2} → {v.RegisterHi:F2}</td>" +
+                            $"<td>{v.Duration:F1}</td>" +
+                            $"<td>{v.SoundFontFileName}</td>" +
+                            $"<td>{v.PresetName}</td>" +
+                            $"</tr>"))}}
                         </tbody>
                     </table>
                 </div>
@@ -368,9 +626,10 @@ namespace CMGWpf.PlayFunctions.Utilities
             if (stoch.Composition.Length == 0)
                 return "<p>No composition details found.</p>";
 
-            // build the header which has a time column and one columf for each unmuted voice
+            // build the header which has a time column and one column for each unmuted voice
             string header = "<thead><tr><th>Time (sec)</th>";
-            foreach(var voice in stoch.Voices.Where(v => !v.Muted) ) {
+            foreach (var voice in stoch.Voices.Where(v => !v.Muted))
+            {
                 header += $"<th>{voice.Name}</th>";
             }
             header += "<th>Sum</th></tr></thead>";
@@ -378,21 +637,26 @@ namespace CMGWpf.PlayFunctions.Utilities
             double time = 0;
             double deltaT = stoch.GetDeltaT();
             string body = "<tbody>";
-            foreach (var row in stoch.Composition) {
-                body+= $"<tr><td>{time:F2}</td>";
-                foreach((var voice, var i) in stoch.Voices.Select((v, i) => (v, i))) {
-                    if (!voice.Muted) {
-                        body+= $"<td>{row[i]}</td>";
+            foreach (var row in stoch.Composition)
+            {
+                int sum = 0;
+                body += $"<tr><td>{time:F2}</td>";
+                foreach ((var voice, var i) in stoch.Voices.Select((v, i) => (v, i)))
+                {
+                    if (!voice.Muted)
+                    {
+                        body += $"<td>{row[i]}</td>";
+                        sum += row[i];
                     }
                 }
-                body += $"<td>{row.Sum():F0}</td</tr>";
+                body += $"<td>{sum:F0}</td</tr>";
                 time += deltaT;
             }
             body += "</tr></tbody>";
             return $$"""
                 <table>
-                    {{ header }}
-                    {{ body }}
+                    {{header}}
+                    {{body}}
                 </table>
                 """;
         }
@@ -428,7 +692,7 @@ namespace CMGWpf.PlayFunctions.Utilities
                                         </tr>
                     </thead>
                     <tbody>
-                        {{string.Join("\n", sources.Select(RenderSourceRow))}}
+                        {{string.Join("\n", genSources.Select(RenderSourceRow))}}
                     </tbody>
                 </table>
                 """;
@@ -486,7 +750,7 @@ namespace CMGWpf.PlayFunctions.Utilities
             string Path(GainEnvelope[] envelope)
             {
                 string path = $"M0 {ENVELOPEHEIGHT} ";
-                foreach(var e in envelope)
+                foreach (var e in envelope)
                 {
                     path += LineTo(e.Time, e.Gain);
                 }
@@ -503,7 +767,7 @@ namespace CMGWpf.PlayFunctions.Utilities
                     >
                         <path d="{{Path(source.Envelope)}}" fill="Black" />
                     </svg>
-                    <p style="text-align:right;">{{maxTime:F2}} (sec)</p>
+                    <p style="text-align:right;">{{maxTime:F3}} (sec)</p>
                     """;
             }
 
