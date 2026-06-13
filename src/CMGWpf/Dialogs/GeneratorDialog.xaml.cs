@@ -33,6 +33,7 @@ namespace CMGWpf.Dialogs
             // the user has either submitted the changes, or selected the "X" or Cancel button to close the dialog. We so we restore the UIGenerator to the original generator, which is what is currently in the track.
             if (userCancel) RestoreUIGenerator();
             if (DataContext is GeneratorViewModel vm) vm.ActiveGeneratorDialog = null;
+            Application.Current.MainWindow.Activate();
         }
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {

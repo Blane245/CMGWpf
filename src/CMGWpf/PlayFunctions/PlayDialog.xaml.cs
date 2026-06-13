@@ -21,6 +21,7 @@ namespace CMGWpf.PlayFunctions
         {
             PlayEngine.StopTimers();
             PlayViewModel.Instance.UnregisterSignalCanvases();
+            Application.Current.MainWindow.Activate();
         }
 
         private void Cancel_Click(object? sender, RoutedEventArgs e)

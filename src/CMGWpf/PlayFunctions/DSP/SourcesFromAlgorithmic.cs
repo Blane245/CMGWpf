@@ -24,6 +24,7 @@ namespace CMGWpf.PlayFunctions.DSP
             var soundFontName = algorithmic.SoundFontFileName;
             var soundFont = algorithmic.SoundFont;
             var preset = algorithmic.Preset;
+            var microtones = algorithmic.Microtones;
             var noteAlgorithm = algorithmic.NoteAlgorithm;
             var attackAlgorithm = algorithmic.AttackAlgorithm;
             var speedAlgorithm = algorithmic.SpeedAlgorithm;
@@ -52,7 +53,7 @@ namespace CMGWpf.PlayFunctions.DSP
                     DebugLog.Write($"At time {time}: Note={currentValues.Note}, Attack={currentValues.Attack}, Speed={currentValues.Speed}, Duration={currentValues.Duration}, Pan={currentValues.Pan}, Volume={currentValues.Volume}");
                     var hitBeat = currentValues.Beat;
                     var note = currentValues.Note;
-                    if (!algorithmic.Microtones) note = Math.Round(note);
+                    if (!microtones) note = Math.Round(note);
                     var velocity = currentValues.Attack;
                     var speed = currentValues.Speed;
                     var durationPercent = currentValues.Duration;

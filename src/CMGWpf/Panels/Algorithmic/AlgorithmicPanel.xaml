@@ -36,7 +36,7 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
             <Label Content="Attack?:"/>
             <CheckBox Content=""  IsChecked="{Binding AlgorithmicGenerator.AttackEnabled}" ToolTip="Enable or disable attack for the algorithmic generator" />
             <Label Content="Microtones?:"/>
-            <CheckBox Content=""  IsChecked="{Binding AlgorithmicGenerator.MicrotonesEnabled}" ToolTip="Enable or disable microtones for the algorithmic generator" />
+            <CheckBox Content=""  IsChecked="{Binding AlgorithmicGenerator.Microtones}" ToolTip="Enable or disable microtones for the algorithmic generator" />
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
                 <Label Content="Noise:"/>

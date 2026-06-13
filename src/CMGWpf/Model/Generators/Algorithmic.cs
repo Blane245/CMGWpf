@@ -29,7 +29,6 @@ namespace CMGWpf.Model.Generators
         public double NoiseAmplitude { get; set; } = 0;
         public bool NoiseEnabled { get; set; } = false;
         public bool AttackEnabled { get; set; } = true;
-        public bool MicrotonesEnabled { get; set; } = true;
         public double ReverbDelay { get; set; } = 0; //msec
         public int ReverbDecay { get; set; } = 1;
         public Tremolo Tremolo { get; set; } = new Tremolo();
@@ -190,8 +189,8 @@ namespace CMGWpf.Model.Generators
             else
                 generatorElem.SetAttribute("soundFontFile", SoundFontFileName);
             generatorElem.SetAttribute("presetName", PresetName);
-            generatorElem.SetAttribute("microtones", Microtones ? "true" : "false");
-            generatorElem.SetAttribute("isLooping", IsLooping ? "true" : "false");
+            generatorElem.SetAttribute("microtones", Microtones.ToString());
+            generatorElem.SetAttribute("isLooping", IsLooping.ToString());
             generatorElem.SetAttribute("measureLength", MeasureLength.ToString());
             generatorElem.SetAttribute("beatCount", BeatCount.ToString());
             generatorElem.SetAttribute("offsetSequence", OffsetSequence.ToString());
@@ -250,7 +249,7 @@ namespace CMGWpf.Model.Generators
                 Preset = SoundFont.Presets.FirstOrDefault(p => SoundFontUtilities.BankPresetToName(p) == PresetName);
             }
             Microtones = XMLFunctions.GetAttributeBool(elem, "microtones", true);
-            IsLooping = XMLFunctions.GetAttributeBool(elem, "isLooping", false);
+            IsLooping = XMLFunctions.GetAttributeBool(elem, "isLooping", true);
             MeasureLength = XMLFunctions.GetAttributeInt(elem, "measureLength", 4);
             BeatCount = XMLFunctions.GetAttributeInt(elem, "beatCount", 4);
             OffsetSequence = XMLFunctions.GetAttributeInt(elem, "offsetSequence", 0);

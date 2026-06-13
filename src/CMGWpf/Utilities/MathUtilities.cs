@@ -295,7 +295,7 @@ namespace CMGWpf.Utilities
         {
             // Convert seed string to ulong using hash code
             ulong hash = (ulong)seed.GetHashCode();
-            return hash ^ hash;
+            return hash;
         }
     }
     /// <summary>
