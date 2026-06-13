@@ -6,6 +6,7 @@
         WindowStyle="None"
         ResizeMode="NoResize"
         AllowsTransparency="True"
+        Icon="/Assets/CMG-Logo.ico"
         Background="Transparent"
         Width="500"
         Height="300"

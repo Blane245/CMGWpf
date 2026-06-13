@@ -1,6 +1,5 @@
 ﻿using CMGWpf.Model.Database;
 using CMGWpf.MVVM;
-using CMGWpf.MVVM.Database;
 using CMGWpf.Panels.Database;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;
@@ -9,7 +8,10 @@ using static CMGWpf.View.EnsembleView;
 
 namespace CMGWpf.View
 {
-    public class NoteSequencesView :ViewModelBase
+    /// <summary>
+    /// Singleton ViewModel for the Note Sequences management panel. This includes managing the list of note sequences, the current note sequence being edited, and related tags. It also handles commands for adding, editing, deleting, and listing note sequences and tags.
+    /// </summary>
+    public class NoteSequencesView : ViewModelBase
     {
         private static NoteSequencesView? _instance;
         public static NoteSequencesView Instance => _instance ??= new NoteSequencesView();
@@ -39,7 +41,7 @@ namespace CMGWpf.View
         {
             get { return _noteSequenceList; }
             set { _noteSequenceList = value; OnPropertyChanged(); }
-        } 
+        }
         private ObservableCollection<Tag> _tagList = [];
         public ObservableCollection<Tag> TagList
         {
@@ -54,9 +56,9 @@ namespace CMGWpf.View
         }
         private string _newTagName = "";
         public string NewTagName { get => _newTagName; set { _newTagName = value; OnPropertyChanged(); } }
-        public string NoteSequenceEditorTitle => ModifyMode == "Add" ? "Add Note Sequence" : $"Modify Note Sequence: {NewNoteSequenceName}";    
+        public string NoteSequenceEditorTitle => ModifyMode == "Add" ? "Add Note Sequence" : $"Modify Note Sequence: {NewNoteSequenceName}";
         private NoteSequence? _UINoteSequence;
-        public NoteSequence? UINoteSequence 
+        public NoteSequence? UINoteSequence
         {
             get { return _UINoteSequence; }
             set { _UINoteSequence = value; OnPropertyChanged(); }
@@ -66,7 +68,7 @@ namespace CMGWpf.View
         private string _newTagListString = "";
         public string NewTagListString { get => _newTagListString; set { _newTagListString = value; OnPropertyChanged(); } }
         private ObservableCollection<NoteItem> _newNoteItems = new ObservableCollection<NoteItem>();
-        public ObservableCollection<NoteItem> NewNoteItems 
+        public ObservableCollection<NoteItem> NewNoteItems
         {
             get => _newNoteItems;
             set { _newNoteItems = value; OnPropertyChanged(); }

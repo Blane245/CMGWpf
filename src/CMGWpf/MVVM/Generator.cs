@@ -12,8 +12,9 @@ namespace CMGWpf.MVVM
     public class GeneratorCommands(GeneratorViewModel vm, Generator generator)
     {
         private readonly GeneratorViewModel vm = vm;
-        private Generator generator = generator;
+        private readonly Generator generator = generator;
         #region Generator Control Commands
+        // handle add generator initiated from the track context menu and modify (edit) initiated from the generator context menu.
         public void Submit()
         {
             if (generator == null) return;
@@ -26,7 +27,7 @@ namespace CMGWpf.MVVM
                 {
                     // find the generator in the parent track and update its properties based on the UI generator
                     int index = generator.Parent.Generators.FindIndex((Generator g) => g.Name == generator.Name);
-                    if (index < 0) // this should not happen, but if it does, add the generator to the track
+                    if (index < 0) // this should not happen
                     {
                         vm.Messages.Add(new Message { Text = $"SYSTEM ERROR: Generator '{generator.Name}' not found in track '{generator.Parent.Name}'.", Error = true });
                     }
@@ -34,7 +35,6 @@ namespace CMGWpf.MVVM
                     {
                         Generator newGenerator = vm.UIGenerator.Clone(generator.Parent);
                         newGenerator.Name = vm.NewGeneratorName;
-                        //newGenerator.StartTime = vm.NewStartTime;
                         generator.Parent.Generators[index] = newGenerator;
                         vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated successfully.", Error = false });
                         vm.IsDirty = true;
@@ -49,10 +49,10 @@ namespace CMGWpf.MVVM
                     //newGenerator.StartTime = vm.NewStartTime;
                     generator.Parent.Generators.Add(newGenerator);
                     vm.IsDirty = true;
-                    vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' updated added.", Error = false });
+                    vm.Messages.Add(new Message { Text = $"Generator '{generator.Name}' on track '{generator.Parent.Name}' added successfully.", Error = false });
                     ToolsViewModel.Instance?.NotifyGeneratorListChanged();
                 }
-                else // this should not happen, but if it does, display an error
+                else // this should not happen
                 {
                     vm.Messages.Add(new Message { Text = $"SYSTEM ERROR: Invalid generator edit mode '{vm.Mode}'.", Error = true });
                     return;
@@ -169,7 +169,7 @@ namespace CMGWpf.MVVM
             {
                 DataContext = vm,
                 SizeToContent = SizeToContent.WidthAndHeight,
-                Owner = CMGWpf.MainWindow.GetInstance(),
+                Owner = Application.Current.MainWindow,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             vm.ActiveGeneratorDialog.ShowDialog();

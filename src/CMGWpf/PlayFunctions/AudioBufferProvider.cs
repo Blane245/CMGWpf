@@ -159,7 +159,7 @@ namespace CMGWpf.PlayFunctions
 
                 // Calculate RMS (Root Mean Square)
                 double leftRMS = leftCount > 0 ? Math.Sqrt(leftSum / leftCount) : 0.0;
-                double rightRMS = rightCount > 0 ? Math.Sqrt(rightSum / rightCount): 0.0;
+                double rightRMS = rightCount > 0 ? Math.Sqrt(rightSum / rightCount) : 0.0;
 
                 return [leftRMS * volume, rightRMS * volume];
             }

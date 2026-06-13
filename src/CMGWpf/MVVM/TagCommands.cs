@@ -1,8 +1,6 @@
 ﻿using CMGWpf.Dialogs;
 using CMGWpf.Helpers;
-using CMGWpf.Model;
 using CMGWpf.Model.Database;
-using CMGWpf.Panels;
 using CMGWpf.Panels.Database;
 using CMGWpf.Panels.Tools;
 using CMGWpf.Types;

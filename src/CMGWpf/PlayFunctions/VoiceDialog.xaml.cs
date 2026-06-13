@@ -1,5 +1,5 @@
-﻿using CMGWpf.View;
-using System.Diagnostics;
+﻿using CMGWpf.Utilities;
+using CMGWpf.View;
 using System.Windows;
 
 namespace CMGWpf.PlayFunctions
@@ -31,7 +31,7 @@ namespace CMGWpf.PlayFunctions
             }
             else
             {
-                Debug.WriteLine("[VoiceDialog] Owner is null!");
+                DebugLog.Write("[VoiceDialog] Owner is null!");
             }
         }
 

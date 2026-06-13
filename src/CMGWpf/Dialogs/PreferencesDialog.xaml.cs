@@ -14,13 +14,7 @@ namespace CMGWpf.Dialogs
             InitializeComponent();
             DataContext = vm;
             vm.StatusMessages.Clear();
-            this.Closing += PreferencesDialog_Closing;
         }
-
-        private void PreferencesDialog_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
-        {
-        }
-
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             Close();

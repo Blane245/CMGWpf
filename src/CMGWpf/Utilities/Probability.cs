@@ -41,8 +41,9 @@ namespace CMGWpf.Utilities
             if (r < p[0]) return 0;
             if (x.Length == 0) return 0;
             if (r > 1) return x[^1];
-            int index = Array.FindIndex(p, v => r <= v);
-            if (index == -1) return 0;
+            int index = Array.BinarySearch(p, r);
+            if (index < 0) index = ~index;
+            if (index >= x.Length) return x[^1];
             return x[index];
         }
         // Standard Normal variate using Box-Muller transform.

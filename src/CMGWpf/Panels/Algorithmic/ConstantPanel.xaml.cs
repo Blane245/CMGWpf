@@ -1,4 +1,5 @@
 ﻿using CMGWpf.Model;
+using CMGWpf.Utilities;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -62,12 +63,12 @@ namespace CMGWpf.Panels.Algorithmic
             if (DataContext is Constant constant && ValueUnits != null)
             {
                 FormattedValue = ValueUnits(constant.Value);
-                System.Diagnostics.Debug.WriteLine($"ConstantPanel.UpdateFormattedValue: Value={constant.Value}, Formatted={FormattedValue}");
+                DebugLog.Write($"ConstantPanel.UpdateFormattedValue: Value={constant.Value}, Formatted={FormattedValue}");
             }
             else
             {
                 FormattedValue = string.Empty;
-                System.Diagnostics.Debug.WriteLine($"ConstantPanel.UpdateFormattedValue: Returning empty - DataContext is {DataContext?.GetType().Name ?? "null"}, ValueUnits is {(ValueUnits == null ? "null" : "set")}");
+                DebugLog.Write($"ConstantPanel.UpdateFormattedValue: Returning empty - DataContext is {DataContext?.GetType().Name ?? "null"}, ValueUnits is {(ValueUnits == null ? "null" : "set")}");
             }
         }
 
@@ -81,7 +82,7 @@ namespace CMGWpf.Panels.Algorithmic
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     UpdateFormattedValue();
-                    System.Diagnostics.Debug.WriteLine($"ConstantPanel.Loaded: Forcing refresh. DataContext={DataContext?.GetType().Name}, ValueUnits={(ValueUnits == null ? "null" : "set")}");
+                    DebugLog.Write($"ConstantPanel.Loaded: Forcing refresh. DataContext={DataContext?.GetType().Name}, ValueUnits={(ValueUnits == null ? "null" : "set")}");
                 }), System.Windows.Threading.DispatcherPriority.DataBind);
             };
         }

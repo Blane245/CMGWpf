@@ -1,9 +1,9 @@
-﻿using CMGWpf.Model.Generators;
+﻿using CMGWpf.Helpers;
+using CMGWpf.Model.Generators;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Xml;
@@ -26,12 +26,6 @@ namespace CMGWpf.Model
         SAME,
         UP,
         DOWN,
-    }
-    public enum SEQUENCEATTRIBUTE
-    {
-        attack,
-        duration,
-        volue
     }
     public static class AlgorithmFactory
     {
@@ -373,7 +367,7 @@ namespace CMGWpf.Model
             Random = MathUtilities.StartFastRandom(Seed);
             firstTime = true;
         }
-        public override double GetCurrentValue(double time, double _beat)
+        public override double GetCurrentValue(double _time, double _beat)
         {
             // transition the current state to the next state based on the transition probabilities
             double randomValue = Random.NextDouble();
@@ -425,9 +419,15 @@ namespace CMGWpf.Model
         private string _seed = "";
         public string Seed { get => _seed; set { if (_seed != value) { _seed = value; OnPropertyChanged(); } } }
         public FastRandom Random { get; set; } = MathUtilities.StartFastRandom(null);
-        public int PointCount { get; set; } = 0;
-        public double Lo { get; set; } = 0;
-        public double Hi { get; set; } = 0;
+
+        private int _pointCount = 0;
+        public int PointCount { get => _pointCount; set { if (_pointCount != value) { _pointCount = value; OnPropertyChanged(); } } }
+
+        private double _lo = 0;
+        public double Lo { get => _lo; set { if (_lo != value) { _lo = value; OnPropertyChanged(); } } }
+
+        private double _hi = 0;
+        public double Hi { get => _hi; set { if (_hi != value) { _hi = value; OnPropertyChanged(); } } }
         public override Poisson Clone()
         {
             var clone = (Poisson)MemberwiseClone();
@@ -556,7 +556,7 @@ namespace CMGWpf.Model
         public override double GetCurrentValue(double time, double _beat)
         {
             if (time == 0 || (Trend == 0 && Dispersion == 0)) return Initial;
-            double x = GaussianNoise.Get(Random, 0, Dispersion * Math.Sqrt(time));
+            double x = Probability.GaussianRandom(0, Dispersion * Math.Sqrt(time), Random);
             double value = Math.Clamp(Initial + Trend * time + x, Lo, Hi);
             return value;
         }
@@ -733,10 +733,29 @@ namespace CMGWpf.Model
         {
             if (!string.IsNullOrEmpty(Name))
             {
-                var sequence = await NoteSequenceUtilities.GetNoteSequenceAsync(Name);
-                if (sequence != null) Items = sequence.Items;
+                var sequence = await NoteSequenceHelpers.Get(Name);
+                if (sequence != null) UnPackItems(sequence.Items);
             }
         }
+        public void UnPackItems(string itemsString)
+        {
+            var items = itemsString.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(itemString =>
+                {
+                    var parts = itemString.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 3 &&
+                        double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out double value) &&
+                        double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out double beats))
+                    {
+                        return new SequenceItem { Value = value, Beats = beats};
+                    }
+                    else
+                    {
+                        throw new FormatException($"Invalid item format: {itemString}");
+                    }
+                }).ToList();
+            Items = new ObservableCollection<SequenceItem>(items);
+        } 
         public override void LoadXML(XmlElement elem)
         {
             Name = XMLFunctions.GetAttributeString(elem, "name", "");
@@ -766,9 +785,9 @@ namespace CMGWpf.Model
             if (ReflectSequence)
             {
                 SequenceItems = [.. SequenceItems.Select(item => new SequenceItem {
-                    value = 2 * ReflectPitch - item.value,
-                beats = item.beats,
-                id = item.id})];
+                    Value = 2 * ReflectPitch - item.Value,
+                Beats = item.Beats
+                })];
             }
         }
 
@@ -776,7 +795,7 @@ namespace CMGWpf.Model
         public override double GetCurrentValue(double time, double beat)
         {
             int itemIndex = (int) Math.Clamp(beat, 0, SequenceItems.Count -1);
-            double value = SequenceItems[itemIndex].value + Transpose;
+            double value = SequenceItems[itemIndex].Value + Transpose;
             return value;
         }
         public override string ToString() => "Sequencer";

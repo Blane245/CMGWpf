@@ -11,7 +11,7 @@ namespace CMGWpf.Utilities
         /// <param name="type">"Track" - get a track uid; otherwise get a generator uid "</param>
         /// <param name="tracks">The list of curren tracks in the model.</param>
         /// <returns>a uid</returns>
-        public static int Get (string type, List<Track> tracks)
+        public static int Get(string type, List<Track> tracks)
         {
             if (type == "Track")
             {
@@ -23,8 +23,9 @@ namespace CMGWpf.Utilities
                     if (index < 0)
                     {
                         found = true;
-                    } else 
-                    next++;
+                    }
+                    else
+                        next++;
                 }
                 return next;
             }
@@ -32,7 +33,7 @@ namespace CMGWpf.Utilities
             {
                 // construct a list of all generators on all track and find a uid
                 List<Generator> list = [];
-                foreach(Track t in tracks)
+                foreach (Track t in tracks)
                 {
                     list.AddRange(t.Generators);
                 }

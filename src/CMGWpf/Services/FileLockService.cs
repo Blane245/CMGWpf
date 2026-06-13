@@ -1,11 +1,11 @@
+using CMGWpf.Utilities;
 using System.Diagnostics;
 using System.IO;
 
 namespace CMGWpf.Services
 {
     /// <summary>
-    /// Manages file locking across multiple application instances to prevent the same CMG file 
-    /// from being opened simultaneously by different instances.
+    /// Manages file locking across multiple application instances to prevent the same CMG file from being opened simultaneously by different instances.
     /// </summary>
     public class FileLockService
     {
@@ -22,6 +22,8 @@ namespace CMGWpf.Services
         /// <summary>
         /// Gets the path to the lock file for a given CMG file.
         /// </summary>
+        /// <param name="cmgFilePath">The full path to the CMG file to lock</param>
+        /// <returns>returns the lock file name</returns>
         private static string GetLockFilePath(string cmgFilePath)
         {
             return cmgFilePath + ".lock";
@@ -33,21 +35,21 @@ namespace CMGWpf.Services
         /// If the same file is already locked, returns true immediately.
         /// If lock acquisition fails, the previous lock (if any) is maintained.
         /// </summary>
-        /// <param name="filePath">The full path to the CMG file to lock</param>
+        /// <param name="cmgFilePath">The full path to the CMG file to lock</param>
         /// <returns>True if lock was acquired, false if file is already locked by another process</returns>
-        public bool TryAcquireLock(string filePath)
+        public bool TryAcquireLock(string cmgFilePath)
         {
-            if (string.IsNullOrEmpty(filePath))
+            if (string.IsNullOrEmpty(cmgFilePath))
                 return false;
 
             // If we're trying to lock the same file that's already locked, it's a no-op
-            if (_currentLockedFile == filePath && _lockFileStream != null)
+            if (_currentLockedFile == cmgFilePath && _lockFileStream != null)
             {
-                Debug.WriteLine($"FileLockService: File {filePath} is already locked by this instance");
+                DebugLog.Write($"FileLockService: File {cmgFilePath} is already locked by this instance");
                 return true;
             }
 
-            string lockFilePath = GetLockFilePath(filePath);
+            string lockFilePath = GetLockFilePath(cmgFilePath);
 
             // Save current lock state in case we need to restore it
             var previousLockStream = _lockFileStream;
@@ -73,16 +75,16 @@ namespace CMGWpf.Services
                     writer.WriteLine($"Process ID: {Environment.ProcessId}");
                     writer.WriteLine($"Process Name: {Process.GetCurrentProcess().ProcessName}");
                     writer.WriteLine($"Locked at: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-                    writer.WriteLine($"File: {filePath}");
+                    writer.WriteLine($"File: {cmgFilePath}");
                     writer.Flush();
                 }
 
-                _currentLockedFile = filePath;
+                _currentLockedFile = cmgFilePath;
 
                 // Success! Now release the previous lock if there was one
-                if (previousLockStream != null && previousLockedFile != filePath)
+                if (previousLockStream != null && previousLockedFile != cmgFilePath)
                 {
-                    Debug.WriteLine($"FileLockService: Releasing previous lock on {previousLockedFile}");
+                    DebugLog.Write($"FileLockService: Releasing previous lock on {previousLockedFile}");
                     try
                     {
                         previousLockStream.Close();
@@ -90,17 +92,17 @@ namespace CMGWpf.Services
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"FileLockService: Error releasing previous lock: {ex.Message}");
+                        DebugLog.Write($"FileLockService: Error releasing previous lock: {ex.Message}");
                     }
                 }
 
-                Debug.WriteLine($"FileLockService: Acquired lock on {filePath}");
+                DebugLog.Write($"FileLockService: Acquired lock on {cmgFilePath}");
                 return true;
             }
             catch (IOException)
             {
                 // File is already locked by another process
-                Debug.WriteLine($"FileLockService: File {filePath} is already locked by another process");
+                DebugLog.Write($"FileLockService: File {cmgFilePath} is already locked by another process");
 
                 // Restore previous lock state
                 _lockFileStream = previousLockStream;
@@ -110,7 +112,7 @@ namespace CMGWpf.Services
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"FileLockService: Error acquiring lock: {ex.Message}");
+                DebugLog.Write($"FileLockService: Error acquiring lock: {ex.Message}");
 
                 // Restore previous lock state
                 _lockFileStream = previousLockStream;
@@ -127,8 +129,8 @@ namespace CMGWpf.Services
         {
             if (_lockFileStream != null)
             {
-                Debug.WriteLine($"FileLockService: Releasing lock on {_currentLockedFile}");
-                
+                DebugLog.Write($"FileLockService: Releasing lock on {_currentLockedFile}");
+
                 try
                 {
                     _lockFileStream.Close();
@@ -136,7 +138,7 @@ namespace CMGWpf.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"FileLockService: Error releasing lock: {ex.Message}");
+                    DebugLog.Write($"FileLockService: Error releasing lock: {ex.Message}");
                 }
                 finally
                 {
@@ -153,7 +155,6 @@ namespace CMGWpf.Services
         {
             if (!File.Exists(lockFilePath))
                 return;
-
             try
             {
                 // Try to read the lock file to get process ID
@@ -170,13 +171,13 @@ namespace CMGWpf.Services
                             {
                                 Process process = Process.GetProcessById(processId);
                                 // Process exists, lock is still valid
-                                Debug.WriteLine($"FileLockService: Lock file is valid, process {processId} is running");
+                                DebugLog.Write($"FileLockService: Lock file is valid, process {processId} is running");
                                 return;
                             }
                             catch (ArgumentException)
                             {
                                 // Process doesn't exist anymore, lock is stale
-                                Debug.WriteLine($"FileLockService: Cleaning up stale lock, process {processId} no longer exists");
+                                DebugLog.Write($"FileLockService: Cleaning up stale lock, process {processId} no longer exists");
                             }
                         }
                     }
@@ -184,16 +185,16 @@ namespace CMGWpf.Services
 
                 // If we get here, the lock is stale - try to delete it
                 File.Delete(lockFilePath);
-                Debug.WriteLine($"FileLockService: Deleted stale lock file {lockFilePath}");
+                DebugLog.Write($"FileLockService: Deleted stale lock file {lockFilePath}");
             }
             catch (IOException)
             {
                 // File is locked by another process, which means it's valid
-                Debug.WriteLine($"FileLockService: Lock file is currently in use");
+                DebugLog.Write($"FileLockService: Lock file is currently in use");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"FileLockService: Error cleaning up stale lock: {ex.Message}");
+                DebugLog.Write($"FileLockService: Error cleaning up stale lock: {ex.Message}");
             }
         }
 
@@ -205,7 +206,7 @@ namespace CMGWpf.Services
         public static string? GetLockInfo(string filePath)
         {
             string lockFilePath = GetLockFilePath(filePath);
-            
+
             if (!File.Exists(lockFilePath))
                 return null;
 
@@ -226,7 +227,6 @@ namespace CMGWpf.Services
             {
                 // Ignore other errors
             }
-
             return null;
         }
 

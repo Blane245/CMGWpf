@@ -5,7 +5,11 @@ namespace CMGWpf.Utilities
 {
     public static class StochasticUtilities
     {
-        // this function 
+        /// <summary>
+        /// Create a composition for a stochastic generator based on the stochastic music theory of Iannis Xenakis. All that is needed from the generator is the number of time cells, the number of voices, and the average number of events per time cell. 
+        /// </summary>
+        /// <param name="generator">The stochastic generator to use for creating the composition.</param>
+        /// <returns>A composition generated based on the stochastic music theory of Iannis Xenakis.</returns>
         public static Composition BuildComposition(Stochastic generator)
         {
             generator.InitializeComposition();
@@ -17,7 +21,7 @@ namespace CMGWpf.Utilities
 
             // develop the distribution of the frequency among the cells (N)
             (int[] N, _) = BuildCellDistribution(nColumns * nRows, lambda);
-            Debug.WriteLine($"Buildcomposition: Cell Frequencies for {nRows * nColumns}, lambda = {lambda}:");
+            DebugLog.Write($"BuildComposition: Cell Frequencies for {nRows * nColumns}, lambda = {lambda}:");
             foreach (var item in N)
             {
                 Debug.Write($"{item}, ");
@@ -37,34 +41,30 @@ namespace CMGWpf.Utilities
             // construct an array that provides an urn to draw out random row numbers.
             int[] rowUrn = [];
             int rowPick = 0;
-            // loop through the cell distriution table by occurrence (i) to determine the distribution of the cells in each row
+            // loop through the cell distribution table by occurrence (i) to determine the distribution of the cells in each row
             foreach (var (cellCount, i) in N.Select((v, i) => (v, i)))
             {
                 if (i == 0 || cellCount == 0) { } // skip the zero count and a distribution point with no occurrences
                 else
                 {
                     // get the distribution within a row
-                    Debug.WriteLine($"buildcomposition: allocating {cellCount}, cells to row with {i} events");
+                    DebugLog.Write($"BuildComposition: allocating {cellCount}, cells to row with {i} events");
                     (int[] Nc, _) = BuildCellDistribution(cellCount, (double)cellCount / (double)nRows);
-                    Debug.WriteLine($"buildcomposition: frequency distribution for cell count, lambda ({cellCount},{(double)cellCount / (double)nRows})"); foreach (var item in Nc) { Debug.Write($"{item},"); }
+                    DebugLog.Write($"BuildComposition: frequency distribution for cell count, lambda ({cellCount},{(double)cellCount / (double)nRows})"); foreach (var item in Nc) { Debug.Write($"{item},"); }
                     ;
 
                     // get a randomized list of rows to draw row from 
                     rowUrn = RandomizeIntegers(nRows, rN);
                     rowPick = 0;
-                    Debug.WriteLine($"New Row Urn:"); for (int iUrn = 0; iUrn < rowUrn.Length; iUrn++) { Debug.Write($"{rowUrn[iUrn]}, "); }
-                    ; Debug.WriteLine("");
+                    DebugLog.Write($"New Row Urn:"); for (int iUrn = 0; iUrn < rowUrn.Length; iUrn++) { Debug.Write($"{rowUrn[iUrn]}, "); }
+                    ; DebugLog.Write("");
                     foreach (var (rowCount, frequency) in Nc.Select((v, i) => (v, i)))
                     {
                         if (frequency == 0) continue;
-                        Debug.WriteLine($"buildcomposition: processing {rowCount} rows needing {frequency} cells");
+                        DebugLog.Write($"BuildComposition: processing {rowCount} rows needing {frequency} cells");
                         for (int iRow = 0; iRow < rowCount && rowPick < rowUrn.Length; iRow++)
                         {
-                            // skip the zero frequency cells. They will be handled later. For now, let's processing it to see how it effects the rest of the frequency assignments
-                            //if (frequency == 0)                            {                                rowPick++;                            }
-                            //else
-                            //{
-                            Debug.WriteLine($"buildComposition: processing row {rowPick} of {rowCount} rows with event frequency {frequency}");
+                            DebugLog.Write($"BuildComposition: processing row {rowPick} of {rowCount} rows with event frequency {frequency}");
                             // find a row that contains at least frequency cells available for assignment and but that list in an urn 
                             int[] cellUrn = [];
                             bool rowFound = false;
@@ -87,14 +87,14 @@ namespace CMGWpf.Utilities
                             }
                             if (rowPick < nRows)
                             {
-                                Debug.WriteLine($"buildcompopsition: found row {nRow} having {cellUrn.Length} available cells");
+                                DebugLog.Write($"BuildComposition: found row {nRow} having {cellUrn.Length} available cells");
                                 // randomize the cellUrn so we can pick the first available cell randomly
                                 cellUrn = RandomizeIntegers(cellUrn, rN);
-                                // there are at least frequency available cells, so place them in random columns by drawing from the randonized cellUrn
+                                // there are at least frequency available cells, so place them in random columns by drawing from the randomized cellUrn
                                 for (int k = 0; k < frequency; k++)
                                 {
                                     int nColumn = cellUrn[k];
-                                    Debug.WriteLine($"Assigning {i} events to row, col ({nRow},{nColumn})");
+                                    DebugLog.Write($"BuildComposition: assigning {i} events to row, col ({nRow},{nColumn})");
                                     composition[nRow][nColumn] = i;
                                 }
                                 rowPick++;
@@ -120,7 +120,7 @@ namespace CMGWpf.Utilities
                 {
                     //pick a random column and put a cloud there
                     int column = (int)Math.Floor(rN.NextDouble() * nColumns);
-                    Debug.WriteLine($"buildcomposition: putting a single cloud in row, colunm ({i}, {column} ");
+                    DebugLog.Write($"BuildComposition: putting a single cloud in row, column ({i}, {column})");
                     composition[i][column] = 1;
                 }
             }
@@ -163,7 +163,7 @@ namespace CMGWpf.Utilities
             return Math.Exp(-lambda) * Math.Pow(lambda, k) / Factorial(k);
         }
 
-        // create an array of the integerfrom 0 to n-1 and randomize it
+        // create an array of the integers from 0 to n-1 and randomize it
         private static int[] RandomizeIntegers(int n, FastRandom rN)
         {
             int[] arr = new int[n]; for (int i = 0; i < n; i++) { arr[i] = i; }

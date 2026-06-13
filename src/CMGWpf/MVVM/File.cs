@@ -15,15 +15,14 @@ namespace CMGWpf.MVVM
     {
         private readonly FileViewModel vm = vm;
         private CMGFile file = file;
-        //private TimeLine timeLine = timeLine;
 
         #region File Menu Commands
         public void New()
         {
-            Debug.WriteLine("FileNew command executed.");
+            DebugLog.Write("FileNew command executed.");
             if (vm.IsDirty)
             {
-                Debug.WriteLine("FileNew: File is dirty.");
+                DebugLog.Write("FileNew: File is dirty.");
                 // ask the user if they want to save the file
                 MessageBoxResult result = MessageBox.Show("The current file has been modified and the changes will be lost. Do you want to proceed?", "File Dirty", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result != MessageBoxResult.Yes)
@@ -32,7 +31,7 @@ namespace CMGWpf.MVVM
                     return;
                 }
             }
-            Debug.WriteLine("FileNew: File is not dirty or old file saved first.");
+            DebugLog.Write("FileNew: File is not dirty or old file saved first.");
 
             // Release lock on current file
             FileLockService.Instance.ReleaseLock();
@@ -53,9 +52,8 @@ namespace CMGWpf.MVVM
         {
             if (vm.FileName != "")
             {
-                // copy the UIModel to the model and the UIModel in the TimeLineView to the model before saving the file
+                // pick up the timeline changes before saving
                 file.TimeLine = TimeLineViewModel.Instance.TimeLine;
-                //TODO the same will be done for the tracks when that viewmodel is developed
                 _ = FileHandlers.Write(file, vm.FileName);
                 vm.IsDirty = false;
                 vm.StatusMessages = [new Message { Text = $"File {vm.FileName} saved.", Error = false }];
@@ -90,9 +88,7 @@ namespace CMGWpf.MVVM
                     return;
                 }
 
-                // clone the
                 file.TimeLine = TimeLineViewModel.Instance.TimeLine;
-                //TODO the same will be done for the tracks when that viewmodel is developed
                 string writeStatus = FileHandlers.Write(file, newFileName);
 
                 if (writeStatus == string.Empty)
@@ -119,7 +115,7 @@ namespace CMGWpf.MVVM
         {
             if (vm.IsDirty)
             {
-                Debug.WriteLine("FileOpen: File is dirty.");
+                DebugLog.Write("FileOpen: File is dirty.");
                 vm.StatusMessages = [new Message { Text = "File is dirty.", Error = true }] ;
                 // ask the user if they want to save the file
                 MessageBoxResult result = MessageBox.Show("The current file has been modified and the changes will be lost. Do you want to proceed?", "File Dirty", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -129,7 +125,7 @@ namespace CMGWpf.MVVM
                     return;
                 }
             }
-            Debug.WriteLine("FileOpen command being executed.");
+            DebugLog.Write("FileOpen command being executed.");
             // open a file dialog and load the file
             OpenFileDialog dlg = new()
             {
@@ -174,16 +170,16 @@ namespace CMGWpf.MVVM
         }
         public async void OpenRecent(string fileName)
         {
-            Debug.WriteLine($"OpenRecentFile: {fileName}");
+            DebugLog.Write($"OpenRecentFile: {fileName}");
             if (vm.IsDirty)
             {
-                Debug.WriteLine("FileOpen: File is dirty.");
+                DebugLog.Write("FileOpen: File is dirty.");
                 vm.StatusMessages = [new Message { Text = "File is dirty.", Error = true }];
                 // ask the user if they want to save the file
                 MessageBoxResult result = MessageBox.Show("The current file has been modified and the changes will be lost. Do you want to proceed?", "File Dirty", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result != MessageBoxResult.Yes)
                 {
-                    vm.StatusMessages = [new Message { Text = "File is dirty. No changed has been made", Error = true }];
+                    vm.StatusMessages = [new Message { Text = "File is dirty. No changes have been made.", Error = true }];
                     return;
                 }
             }
@@ -224,7 +220,7 @@ namespace CMGWpf.MVVM
         {
             if (vm.IsDirty)
             {
-                Debug.WriteLine("Exit: File is dirty.");
+                DebugLog.Write("Exit: File is dirty.");
                 vm.StatusMessages = [new Message { Text = "File is dirty.", Error = true }];
                 MessageBoxResult result = MessageBox.Show("The current file has been modified and the changes will be lost. Do you want to exit?", "File Dirty", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result != MessageBoxResult.Yes)
@@ -238,41 +234,37 @@ namespace CMGWpf.MVVM
         }
         #endregion
         #region Edit Menu Commands
+        static CommentDialog? commentDialog;
         public void EditComment()
         {
-            Debug.WriteLine("EditComment command being executed.");
-
             // display the comment dialog
             vm.NewComment = vm.File.Comment;
-            CommentDialog activeDialog = new()
+            commentDialog = new()
             {
                 DataContext = vm,
                 Owner = Application.Current.MainWindow
             };
-            activeDialog.ShowDialog();
+            commentDialog.ShowDialog();
         }
         public void EditCommentOk()
         {
             if (vm.NewComment != vm.File.Comment)
             {
-                Debug.WriteLine("Comment has changed.");
                 vm.File.Comment = vm.NewComment;
                 vm.IsDirty = true;
                 vm.StatusMessages = [new Message { Text = "Comment has changed.", Error = false }];
             }
             else
             {
-                Debug.WriteLine("Comment has not changed.");
                 vm.StatusMessages = [new Message { Text = "Comment has not changed.", Error = false }];
             }
+            commentDialog?.Close();
         }
 
         public void EditPreferences()
         {
-            Debug.WriteLine("EditPreferences command being executed.");
+            DebugLog.Write("EditPreferences command being executed.");
 
-            // display the preferences dialog
-            //vm.NewComment = vm.File.Comment;
             PreferencesDialog dialog = new PreferencesDialog
             {
                 DataContext = vm,
@@ -282,7 +274,7 @@ namespace CMGWpf.MVVM
         }
         public void AddTrack()
         {
-            Debug.WriteLine("Add Track command being executed.");
+            DebugLog.Write("Add Track command being executed.");
             int uid = Uid.Get("Track", vm.File.Tracks);
             Track newTrack = new(uid);
             List<Track> newTracks = [.. vm.File.Tracks];
@@ -291,26 +283,17 @@ namespace CMGWpf.MVVM
             vm.StatusMessages = [new Message { Text = $"new Track named T{uid} added.", Error = false }];
             vm.IsDirty = true;
         }
-        /// <summary>
-        /// Run the PlayEngine for playing the file. If a generator is provided, the PlayEngine will start up with that generator selected and the UI will be in play mode. If no generator is provided, the PlayEngine will start up with active generators and the UI will not be in play mode.
-        /// </summary>
-        /// <param name="generator"></param>
         public void Play(Generator? generator)
         {
             PlayFunctions.PlayEngine.StartUp(generator, true, false);
         }
-        /// <summary>
-        /// Run the PlayEngine for reporting the file. If a generator is provided, the PlayEngine will start up with that generator selected and the UI will be in report mode. If no generator is provided, the PlayEngine will start up with active generators and the UI will not be in report mode.
-        /// </summary>
-        /// <param name="generator"></param>
         public void Report(Generator? generator)
         {
             PlayFunctions.PlayEngine.StartUp(generator, false, false);
         }
         public void About(object? param)
         {
-            Debug.WriteLine("About command being executed.");
-            // display the about dialog
+            DebugLog.Write("About command being executed.");
             AboutDialog dialog = new()
             {
                 Owner = Application.Current.MainWindow
@@ -319,8 +302,6 @@ namespace CMGWpf.MVVM
         }
         public void UG(object? param)
         {
-            Debug.WriteLine("User's Guide command being executed.");
-
             // Try multiple locations for the User's Guide
             string? ugPath = null;
 

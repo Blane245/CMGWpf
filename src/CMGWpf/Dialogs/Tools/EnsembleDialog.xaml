@@ -16,9 +16,10 @@
         WindowStyle="None"
         ResizeMode="CanResize"
         AllowsTransparency="False"
+        Icon="/Assets/CMG-Logo.ico"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
-        d:DesignHeight="450" d:DesignWidth="800"
-        MaxWidth="1200" MaxHeight="800"
+        d:DesignHeight="450" d:DesignWidth="750"
+        MinHeight="800" MinWidth="1000"
         >
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="40"
@@ -40,15 +41,15 @@
                                    />
         <Grid Grid.Row="1" >
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
                 <StackPanel Margin="5">
                     <Label FontWeight="Bold" FontSize="14" Content="Ensembles" HorizontalAlignment="Center"/>
                     <Button Command="{Binding AddEnsembleCommand}" Margin="0" Padding="0" Width="100">Add Ensemble</Button>
-                    <DataGrid ItemsSource="{Binding EnsembleList}" AutoGenerateColumns="False" IsReadOnly="True" MinHeight="500">
+                    <DataGrid ItemsSource="{Binding EnsembleList}" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="600">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="True" CanUserResize="True" CanUserSort="True"/>
                             <DataGridTextColumn Header="Description" Binding="{Binding Description}" CanUserReorder="True" CanUserResize="True" CanUserSort="True"/>
@@ -74,7 +75,7 @@
                 <StackPanel Margin="5">
                     <Label FontWeight="Bold" FontSize="14" Content="Voices" HorizontalAlignment="Center"/>
                     <Button Command="{Binding AddVoiceCommand}" Margin="0" Padding="0" Width="100">Add Voice</Button>
-                    <DataGrid ItemsSource="{Binding VoiceList}" AutoGenerateColumns="False" IsReadOnly="True" MinHeight="500">
+                    <DataGrid ItemsSource="{Binding VoiceList}" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="600">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserResize="True" CanUserReorder="True" CanUserSort="True"/>
                             <DataGridTextColumn Header="Description" Binding="{Binding Description}" CanUserResize="True" CanUserReorder="True" CanUserSort="True"/>

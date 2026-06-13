@@ -64,6 +64,8 @@ namespace CMGWpf.Model.Generators
                     SpeedAlgorithm.Equals(g.SpeedAlgorithm) &&
                     VolumeAlgorithm.Equals(g.VolumeAlgorithm) &&
                     PanAlgorithm.Equals(g.PanAlgorithm) &&
+                    ReverbDecay.Equals(g.ReverbDecay) &&
+                    ReverbDelay.Equals(g.ReverbDelay) &&
                     Tremolo.Equals(g.Tremolo) &&
                     Vibrato.Equals(g.Vibrato)
                     )
@@ -76,18 +78,18 @@ namespace CMGWpf.Model.Generators
         public override Algorithmic Clone(Track parent)
         {
             Algorithmic n = (Algorithmic)MemberwiseClone();
-            n.Parent = parent;  // FIX: Set the correct parent track
+            n.Parent = parent; 
             n.NoteAlgorithm = NoteAlgorithm.Clone();
             n.AttackAlgorithm = AttackAlgorithm.Clone();
             n.DurationAlgorithm = DurationAlgorithm.Clone();
             n.SpeedAlgorithm = SpeedAlgorithm.Clone();
             n.VolumeAlgorithm = VolumeAlgorithm.Clone();
             n.PanAlgorithm = PanAlgorithm.Clone();
-            n.Tremolo = Tremolo.Clone();  // Clone Tremolo
-            n.Vibrato = Vibrato.Clone();  // Clone Vibrato
+            n.Tremolo = Tremolo.Clone(); 
+            n.Vibrato = Vibrato.Clone(); 
             n.Random = MathUtilities.StartFastRandom(NoiseSeed);  // Create new FastRandom instance
-            n.activeNotes = (int[])activeNotes.Clone();  // Clone array
-            n.beatSequence = (int[])beatSequence.Clone();  // Clone array
+            n.activeNotes = (int[])activeNotes.Clone();
+            n.beatSequence = (int[])beatSequence.Clone();
             return n;
         }
 
@@ -109,8 +111,6 @@ namespace CMGWpf.Model.Generators
 
         private double GetSelectedNote(double note)
         {
-            //int noteIndex = (int)((note + OffsetNotes) % NoteCount);
-            //return activeNotes[noteIndex] + 12 * Math.Floor((note + OffsetNotes) / NoteCount);
             // get the pitch integer and fraction parts
             double pitch = this.Microtones ? note : Math.Round(note);
             double midiFraction = note - pitch;
@@ -123,7 +123,7 @@ namespace CMGWpf.Model.Generators
             // if the note is on, return the original note
             if (activeNotes[normalizedMidiOffset] == 1) return note;
 
-            // find the two selected notes surrounding this nonselected note
+            // find the two selected notes surrounding this non-selected note
             // this assumes that the first note in the sequence is selected
             int first = normalizedMidiOffset;
             int last = normalizedMidiOffset;
@@ -224,6 +224,8 @@ namespace CMGWpf.Model.Generators
             Vibrato.AppendXML(doc, vibratoAlgorithmElem);
             generatorElem.AppendChild(tremeloAlgorithmElem);
             generatorElem.AppendChild(vibratoAlgorithmElem);
+            generatorElem.SetAttribute("reverbDelay", ReverbDelay.ToString());
+            generatorElem.SetAttribute("reverbDecay", ReverbDecay.ToString());
         }
         private struct AlgorithmDesignator(string name, Algorithm type)
         {
@@ -259,6 +261,8 @@ namespace CMGWpf.Model.Generators
             NoiseFrequency = XMLFunctions.GetAttributeDouble(elem, "noiseFrequency", 0);
             NoiseAmplitude = XMLFunctions.GetAttributeDouble(elem, "noiseAmplitude", 0);
             AttackEnabled = XMLFunctions.GetAttributeBool(elem, "attackEnabled", true);
+            ReverbDecay = XMLFunctions.GetAttributeInt(elem, "reverbDecay", 1);
+            ReverbDelay = XMLFunctions.GetAttributeDouble(elem, "reverbDelay", 0);
             XmlElement? tremoloElem = elem.GetElementsByTagName("tremolo").Cast<XmlElement?>().FirstOrDefault();
             if (tremoloElem == null) Tremolo = new Tremolo();
             else Tremolo.LoadXML(tremoloElem);

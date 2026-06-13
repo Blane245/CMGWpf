@@ -4,6 +4,7 @@ using System.IO;
 
 namespace CMGWpf.Data
 {
+    // Defines the CMG database context using Entity Framework Core. This class manages the connection to the SQLite database and provides DbSet properties for each entity type (Ensemble, Voice, Tag, NoteSequence). It also configures the database connection and the entity relationships using the Fluent API in the OnModelCreating method.
     public class CmgDbContext : DbContext
     {
         public CmgDbContext()

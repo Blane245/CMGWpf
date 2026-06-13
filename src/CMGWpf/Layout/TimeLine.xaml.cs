@@ -1,6 +1,6 @@
 ﻿using CMGWpf.Services;
+using CMGWpf.Utilities;
 using CMGWpf.View;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -19,7 +19,7 @@ namespace CMGWpf.Layout
         private void TimeLineDisplay_Loaded(object sender, RoutedEventArgs e)
         {
             // When the TimeLineDisplay is loaded, it checks if the DataContext is of type TimeLineViewModel. If it is, it registers the TimeLineCanvas with the view model and calls the DrawTimeLine method to render the timeline based on the current UI model's properties such as StartTime, DisplayWidth, TimeLineHeight, CurrentZoomLevel, and TimeInterval.
-            Debug.WriteLine($"TimeLineDisplay Loaded, DataContext {DataContext}");
+            DebugLog.Write($"TimeLineDisplay Loaded, DataContext {DataContext}");
             if (DataContext is TimeLineViewModel viewModel)
             {
                 viewModel.RegisterCanvas(TimeLineCanvas);

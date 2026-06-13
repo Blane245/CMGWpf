@@ -1,5 +1,8 @@
 ﻿namespace CMGWpf.Services
 {
+    /// <summary>
+    /// A singleton service that manages the current window size and calculates available space for different UI components based on predefined dimensions for controls, chrome, timeline, etc. It provides properties for the main window dimensions and calculated dimensions for display area, body area, play area, and dialog content. The service raises property change notifications when dimensions are updated to allow the UI to react accordingly.
+    /// </summary>
     public class SizeService : ServiceBase
     {
         private static SizeService? _instance;
@@ -27,7 +30,6 @@
                 playHeight = windowHeight - ChromeHeight - PlayHeaderHeight;
                 OnPropertyChanged(nameof(BodyHeight));
                 OnPropertyChanged(nameof(DialogHeight));
-                OnPropertyChanged(nameof(PlayHeight));
             }
         }
 
@@ -53,7 +55,6 @@
         private double bodyHeight = 0;
         public double BodyHeight { get => bodyHeight; }
         private double playHeight = 0;
-        public double PlayHeight { get => playHeight; }
 
         /// <summary>
         /// Gets the available height for dialog content (WindowHeight - ChromeHeight)

@@ -45,7 +45,7 @@ namespace CMGWpf.View
                     CachedTracks = tracks == null ? [] : new ObservableCollection<TrackViewModel>(tracks.Select(t => new TrackViewModel(t)));
                 }
                 return CachedTracks;
-            }   
+            }
             set
             {
                 FileViewModel.Instance.File.Tracks = [.. value.Select(vm => vm.Track)];
@@ -87,11 +87,11 @@ namespace CMGWpf.View
         // when the mouse enters a track select the track and update the selected track field, which will be used for some of the commands. When the mouse leaves a track, deselect the track and set the selected track field to null. Note that this behavior may need to be modified based on UI needs, but this is a starting point.
         private RelayCommand<TrackViewModel>? _mouseEnterCommand;
         public RelayCommand<TrackViewModel> MouseEnterCommand =>
-            _mouseEnterCommand ??= new RelayCommand<TrackViewModel>(trackVM => {SelectedTrack = trackVM; });
+            _mouseEnterCommand ??= new RelayCommand<TrackViewModel>(trackVM => { SelectedTrack = trackVM; });
 
         private RelayCommand<TrackViewModel>? _mouseLeaveCommand;
         public RelayCommand<TrackViewModel> MouseLeaveCommand =>
-            _mouseLeaveCommand ??= new RelayCommand<TrackViewModel>(trackVM => {SelectedTrack = null; });
+            _mouseLeaveCommand ??= new RelayCommand<TrackViewModel>(trackVM => { SelectedTrack = null; });
 
         public void NotifyTracksChanged(ObservableCollection<TrackViewModel> newTracks)
         {
@@ -127,11 +127,11 @@ namespace CMGWpf.View
                 // Update the parent reference and add to target track
                 generator.Parent = targetTrack;
                 targetTrack.Generators.Add(generator);
-                Status = [new Message { Text = $"Generator '{generator.Name}' moved from track '{sourceTrack.Name}' to track '{targetTrack.Name}'.", Error = false } ];
+                Status = [new Message { Text = $"Generator '{generator.Name}' moved from track '{sourceTrack.Name}' to track '{targetTrack.Name}'.", Error = false }];
             }
             else
             {
-                Status = [ new Message { Text = $"SYSTEM ERROR: Invalid move/copy mode '{mode}'.", Error = true }];
+                Status = [new Message { Text = $"SYSTEM ERROR: Invalid move/copy mode '{mode}'.", Error = true }];
                 return;
             }
 

@@ -90,16 +90,16 @@ namespace CMGWpf.Model.Generators
         };
         public static readonly Dictionary<INTENSITY, IntensityValue> IntensityProfiles = new Dictionary<INTENSITY, IntensityValue>
         {
-            { INTENSITY.pppp, new IntensityValue { DB = -5, Velocity = 30 } },
-            { INTENSITY.ppp, new IntensityValue { DB = -4, Velocity = 40 } },
-            { INTENSITY.pp, new IntensityValue { DB = -2, Velocity = 50 } },
-            { INTENSITY.p, new IntensityValue { DB = -1, Velocity = 60 } },
+            { INTENSITY.pppp, new IntensityValue { DB = -25, Velocity = 30 } },
+            { INTENSITY.ppp, new IntensityValue { DB = -20, Velocity = 40 } },
+            { INTENSITY.pp, new IntensityValue { DB = -10, Velocity = 50 } },
+            { INTENSITY.p, new IntensityValue { DB = -5, Velocity = 60 } },
             { INTENSITY.mp, new IntensityValue { DB = -0, Velocity = 70 } },
-            { INTENSITY.mf, new IntensityValue { DB = 1, Velocity = 80 } },
-            { INTENSITY.f, new IntensityValue { DB = 2, Velocity = 90 } },
-            { INTENSITY.ff, new IntensityValue { DB = 3, Velocity = 100 } },
-            { INTENSITY.fff, new IntensityValue { DB = 4, Velocity = 110 } },
-            { INTENSITY.ffff, new IntensityValue { DB = 5, Velocity = 120 } }
+            { INTENSITY.mf, new IntensityValue { DB = 5, Velocity = 80 } },
+            { INTENSITY.f, new IntensityValue { DB = 10, Velocity = 90 } },
+            { INTENSITY.ff, new IntensityValue { DB = 15, Velocity = 100 } },
+            { INTENSITY.fff, new IntensityValue { DB = 20, Velocity = 110 } },
+            { INTENSITY.ffff, new IntensityValue { DB = 25, Velocity = 120 } }
         };
         public class IntensityTransition
         {
@@ -197,19 +197,19 @@ namespace CMGWpf.Model.Generators
         {
             get => voices;
             set { if (value.Count != voices.Count) { Composition = []; voices = value; } else voices = [.. value]; }
-        } // the voices in the ensemble. The voices are read from the database, XML or provided by the user. The voices are used to determine the sound of the events in the composition. The voices are determined by the ensemble, but the user can change which voices are used in the composition, and can also change the settings for each voice, such as whether it is muted or not, and the volume and velocity. If the number of voices changes, clear the composition.
+        } // the voices in the ensemble. The voices are read from the database and augmented with generator specific data. The voices are used to determine the sound of the events in the composition. user can change the settings for each voice, such as whether it is muted or not, and the volume and velocity. If the number of voices changes, clear the composition.
         // Signal Processing parameters
-        public double Delta { get; set; } = 0; // The average number of sounds/second for each voice. This is determined by the user and can be changed during the composition process.
-        public bool Microtones { get; set; } = false; // whether microtones are allowed in the composition. This is determined by the user and can be changed during the composition process.
-        public string DynamicsSeed { get; set; } = String.Empty; // the seed for the random number generator used to determine the dynamics of events in the composition. The seed is provided by the user and can be changed during the composition process.
-        public FastRandom DynamicsRn = MathUtilities.StartFastRandom(null); // the random number generator used to determine the dynamics of events in the composition. The random number generator is initialized with the dynamics seed provided by the user. If no seed is provided, the random number generator is initialized with a seed determined from the current time.
-        public INTENSITYOPTION IntensityOption { get; set; } = INTENSITYOPTION.none; // the option for determining the intensity of events in the composition. The intensity of events can be determined by the composition, by the voice, or by a cloud of events. This is determined by the user and can be changed during the composition process.
-        public INTENSITYTRANSITIONOPTION IntensityTransitionOption { get; set; } = INTENSITYTRANSITIONOPTION.none; // the option for determining the transition of intensity of events in the composition. The transition of intensity can be random, persistent, or none. This is determined by the user and can be changed during the composition process.
-        public IntensityParameters IntensityParameters { get; set; } = new() { CycleTime = 0 }; // the parameters for determining the intensity of events in the composition. The parameters are used to determine the cycle time for changing the intensity of events in the composition. This is determined by the user and can be changed during the composition process.
-        public PANOPTION PanOption { get; set; } = PANOPTION.none; // the option for determining the pan of events in the composition. The pan of events can be determined by the composition, by the voice, or by a cloud of events. This is determined by the user and can be changed during the composition process.
-        public PANALGORITHM PanAlgorithm { get; set; } = PANALGORITHM.none; // the option for determining the algorithm for changing the pan of events in the composition. The algorithm for changing the pan can be glide, walk, or none. This is determined by the user and can be changed during the composition process.
-        public PanParameters PanParameters { get; set; } = new() { CycleTime = 0 }; // the parameters for determining the pan of events in the composition. The parameters are used to determine the cycle time for changing the pan of events in the composition. This is determined by the user and can be changed during the composition process.
-        public ReverbParameters ReverbParameters { get; set; } = new() { Delay = 0, Decay = 1 }; // the parameters for determining the reverb of events in the composition. The parameters are used to determine the delay and decay for the reverb effect. This is determined by the user and can be changed during the composition process.
+        public double Delta { get; set; } = 0; // The average number of sounds/second for each voice. 
+        public bool Microtones { get; set; } = false; // whether microtones are allowed in the composition. 
+        public string DynamicsSeed { get; set; } = String.Empty; // the seed for the random number generator used to determine the dynamics of events in the composition. 
+        public FastRandom DynamicsRn = MathUtilities.StartFastRandom(null); // the random number generator used to determine the dynamics of events in the composition. 
+        public INTENSITYOPTION IntensityOption { get; set; } = INTENSITYOPTION.none; // the option for determining the intensity of events in the composition. The intensity of events can be determined by the composition, by the voice, or by a cloud of events. 
+        public INTENSITYTRANSITIONOPTION IntensityTransitionOption { get; set; } = INTENSITYTRANSITIONOPTION.none; // the option for determining the transition of intensity of events in the composition. The transition of intensity can be random, persistent, or none. 
+        public IntensityParameters IntensityParameters { get; set; } = new() { CycleTime = 0 }; // the parameters for determining the intensity of events in the composition. The parameters are used to determine the cycle time for changing the intensity of events in the composition. 
+        public PANOPTION PanOption { get; set; } = PANOPTION.none; // the option for determining the pan of events in the composition. The pan of events can be determined by the composition, by the voice, or by a cloud of events. 
+        public PANALGORITHM PanAlgorithm { get; set; } = PANALGORITHM.none; // the option for determining the algorithm for changing the pan of events in the composition. The algorithm for changing the pan can be glide, walk, or none. 
+        public PanParameters PanParameters { get; set; } = new() { CycleTime = 0 }; // the parameters for determining the pan of events in the composition. The parameters are used to determine the cycle time for changing the pan of events in the composition. 
+        public ReverbParameters ReverbParameters { get; set; } = new() { Delay = 0, Decay = 1 }; // the parameters for determining the reverb of events in the composition. The parameters are used to determine the delay and decay for the reverb effect. 
 
         // The Composition part
         private Composition composition = [];
@@ -220,14 +220,14 @@ namespace CMGWpf.Model.Generators
             if (!string.IsNullOrEmpty(CompositionSeed))
             {
                 CompositionRn = MathUtilities.StartFastRandom(CompositionSeed);
-            }
+            } else CompositionRn = MathUtilities.StartFastRandom(null);
         }
         public void InitializeDynamics()
         {
             if (!string.IsNullOrEmpty(DynamicsSeed))
             {
                 DynamicsRn = MathUtilities.StartFastRandom(DynamicsSeed);
-            }
+            } else DynamicsRn = MathUtilities.StartFastRandom(null);
         }
 
         public double GetDeltaT() { return NumberOfTimeCells == 0 ? Double.PositiveInfinity : CompositionDuration / NumberOfTimeCells; }
@@ -269,7 +269,6 @@ namespace CMGWpf.Model.Generators
             {
                 Name = this.Ensemble.Name,
                 Description = this.Ensemble.Description,
-                Voices = this.Ensemble.Voices
             };
 
             // Deep copy the voices so changes don't affect the original
@@ -306,8 +305,8 @@ namespace CMGWpf.Model.Generators
             }
 
             // Create new Random instances
-            clone.CompositionRn = MathUtilities.StartFastRandom(CompositionSeed);
-            clone.DynamicsRn = MathUtilities.StartFastRandom(DynamicsSeed);
+            clone.CompositionRn = CompositionRn;
+            clone.DynamicsRn = DynamicsRn;
 
             // Deep copy IntensityParameters
             clone.IntensityParameters = new IntensityParameters
@@ -319,6 +318,13 @@ namespace CMGWpf.Model.Generators
             clone.PanParameters = new PanParameters
             {
                 CycleTime = this.PanParameters.CycleTime
+            };
+
+            // Deep copy ReverbParameters
+            clone.ReverbParameters = new ReverbParameters
+            {
+                Delay = this.ReverbParameters.Delay,
+                Decay = this.ReverbParameters.Decay
             };
 
             return clone;
@@ -371,6 +377,10 @@ namespace CMGWpf.Model.Generators
             panElem.SetAttribute("panOption", PanOption.ToString());
             panElem.SetAttribute("panAlgorithm", PanAlgorithm.ToString());
             panElem.SetAttribute("cycleTime", PanParameters.CycleTime.ToString());
+            XmlElement reverbElem = doc.CreateElement("reverb");
+            elem.AppendChild(reverbElem);
+            reverbElem.SetAttribute("delay", ReverbParameters.Delay.ToString());
+            reverbElem.SetAttribute("decay", ReverbParameters.Decay.ToString());
             // add the composition as a string in row/column order
             string compositiostring = String.Empty;
             for (int i = 0; i < Composition.Length; i++)
@@ -484,6 +494,16 @@ namespace CMGWpf.Model.Generators
                     PanParameters = new PanParameters
                     {
                         CycleTime = XMLFunctions.GetAttributeDouble(panElem, "cycleTime", 0)
+                    };
+                }
+                // Load reverb parameters
+                XmlElement? reverbElem = generatorElem.GetElementsByTagName("reverb").Cast<XmlElement?>().FirstOrDefault();
+                if (reverbElem != null)
+                {
+                    ReverbParameters = new ReverbParameters
+                    {
+                        Delay = XMLFunctions.GetAttributeDouble(reverbElem, "delay", 0),
+                        Decay = XMLFunctions.GetAttributeDouble(reverbElem, "decay", 0)
                     };
                 }
                 Composition = [];

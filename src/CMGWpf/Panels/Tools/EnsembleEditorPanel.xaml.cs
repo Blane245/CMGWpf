@@ -11,7 +11,7 @@ namespace CMGWpf.Panels
     /// </summary>
     public partial class EnsembleEditorPanel : UserControl
     {
-        private Ensemble? _vm;
+        private readonly Ensemble? _vm;
         public EnsembleEditorPanel(EnsembleView vm)
         {
             InitializeComponent();

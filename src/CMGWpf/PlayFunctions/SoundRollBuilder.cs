@@ -7,14 +7,17 @@ using static CMGWpf.Types.PlayTypes;
 
 namespace CMGWpf.PlayFunctions
 {
+    /// <summary>
+    /// The SoundRollBuilder class is responsible for constructing a visual representation of MIDI events on a canvas, often referred to as a "sound roll". It calculates the necessary dimensions for the canvas based on the total duration of the MIDI events and the display size. The class provides methods to draw grid lines for octaves and time intervals, as well as labels for both. It also includes functionality to convert MIDI note values and time values into corresponding pixel positions on the canvas. Additionally, it defines a method to create a color palette for different voices based on their generator and voice names, and a method to add MIDI events (instruments) to the canvas using the defined color palette.
+    /// </summary>
     public static class SoundRollBuilder
     {
         private static double PixelsPerNote = 0;
         private static double PixelsPerSecond = 0;
         private const int MinNote = 0;   // C-1
         private const int MaxNote = 127; // G9
-        public static ConcurrentBag<TimeMidiPreset> TimeMidiPresets = new ConcurrentBag<TimeMidiPreset>(); // user responsible for populating this list with the MIDI events to be displayed on the sound roll
-        public static void ClearInstruments() { TimeMidiPresets = new ConcurrentBag<TimeMidiPreset>(); }
+        public static ConcurrentBag<TimeMidiVoice> TimeMidiVoices = new ConcurrentBag<TimeMidiVoice>(); // user responsible for populating this list with the MIDI events to be displayed on the sound roll
+        public static void ClearInstruments() { TimeMidiVoices = new ConcurrentBag<TimeMidiVoice>(); }
 
         /// <summary>
         /// Calculate canvas width based on total duration
@@ -140,28 +143,28 @@ namespace CMGWpf.PlayFunctions
 
         public static double NoteToY(double note) => (MaxNote - note) * PixelsPerNote;
         public static double TimeToX(double seconds) => seconds * PixelsPerSecond;
-        public static ObservableCollection<PresetColor> DefineVoicePalette(ConcurrentBag<SF_Preset> sF_Presets)
+        public static ObservableCollection<VoiceColor> DefineVoicePalette(ConcurrentBag<GeneratorVoice> generatorVoices)
         {
             int i = 0;
-            int count = sF_Presets.Count;
-            ObservableCollection<PresetColor> presetColors = [];
-            foreach (SF_Preset preset in sF_Presets)
+            int count = generatorVoices.Count;
+            ObservableCollection<VoiceColor> voiceColors = [];
+            foreach (GeneratorVoice generatorVoice in generatorVoices)
             {
-                // check if the soundfont/preset exists and then skip it if it does, otherwise add it with a new color
-                PresetColor? found = Array.Find(presetColors.ToArray(), ((p) => p.SoundFontName == preset.SoundFontName && p.PresetName == preset.PresetName));
+                // check if the generator/voice exists and then skip it if it does, otherwise add it with a new color
+                VoiceColor? found = Array.Find(voiceColors.ToArray(), ((p) => p.GeneratorName == generatorVoice.GeneratorName && p.VoiceName == generatorVoice.VoiceName));
                 if (found != null) continue;
                 double hue = (double)i / count * 360.0;
                 Color color = HslToRgb(hue, 0.9, 0.5);
-                PresetColor newOne = new()
+                VoiceColor newOne = new()
                 {
-                    SoundFontName = preset.SoundFontName,
-                    PresetName = preset.PresetName,
+                    GeneratorName = generatorVoice.GeneratorName,
+                    VoiceName = generatorVoice.VoiceName,
                     Color = color
                 };
-                presetColors.Add(newOne);
+                voiceColors.Add(newOne);
                 i++;
             }
-            return presetColors;
+            return voiceColors;
         }
 
         private static Color HslToRgb(double h, double s, double l)
@@ -185,16 +188,16 @@ namespace CMGWpf.PlayFunctions
                 (byte)Math.Round((b + m) * 255)
             );
         }
-        public static void AddInstrumentsToCanvas(Canvas canvas, ObservableCollection<PresetColor> presetColors)
+        public static void AddInstrumentsToCanvas(Canvas canvas, ObservableCollection<VoiceColor> voiceColors)
         {
-            foreach (var _timeMidiPreset in TimeMidiPresets)
+            foreach (var _timeMidiVoice in TimeMidiVoices)
             {
-                Color color = presetColors.FirstOrDefault((p) => p.SoundFontName == _timeMidiPreset.SoundFontName && p.PresetName == _timeMidiPreset.PresetName)!.Color;
-     
-                double x1 = TimeToX(_timeMidiPreset.Line.Start.Time);
-                double y1 = NoteToY(_timeMidiPreset.Line.Start.Midi);
-                double x2 = TimeToX(_timeMidiPreset.Line.End.Time);
-                double y2 = NoteToY(_timeMidiPreset.Line.End.Midi);
+                Color color = voiceColors.FirstOrDefault((p) => p.GeneratorName == _timeMidiVoice.GeneratorName && p.VoiceName == _timeMidiVoice.VoiceName)!.Color;
+
+                double x1 = TimeToX(_timeMidiVoice.Line.Start.Time);
+                double y1 = NoteToY(_timeMidiVoice.Line.Start.Midi);
+                double x2 = TimeToX(_timeMidiVoice.Line.End.Time);
+                double y2 = NoteToY(_timeMidiVoice.Line.End.Midi);
                 if (Math.Abs(x1 - x2) < 0.01) // if it's essentially the same time, draw a rectangle instead of a line
                 {
                     double circleSize = PixelsPerNote * 1.5; // Adjust size as needed
@@ -202,7 +205,7 @@ namespace CMGWpf.PlayFunctions
                     {
                         Width = circleSize,
                         Height = circleSize,
-                        Fill = new SolidColorBrush (color) { Opacity = 0.7},
+                        Fill = new SolidColorBrush(color) { Opacity = 0.7 },
                         Stroke = Brushes.Black,
                         StrokeThickness = 0.5
                     };

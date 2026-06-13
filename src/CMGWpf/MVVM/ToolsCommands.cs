@@ -11,7 +11,7 @@ namespace CMGWpf.MVVM
     public class ToolsCommands(ToolsViewModel vm, CMGFile file)
     {
         private readonly ToolsViewModel vm = vm;
-        private CMGFile file = file;
+        private readonly CMGFile file = file;
         private class TrackGeneratorName
         {
             public string TrackName = "";

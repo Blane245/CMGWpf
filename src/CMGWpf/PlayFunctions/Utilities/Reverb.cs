@@ -1,8 +1,5 @@
 namespace CMGWpf.PlayFunctions.Utilities
 {
-    /// <summary>
-    /// Applies a feedback-delay reverb effect to a 2-channel interleafed channel audio
-    /// </summary>
     public static class Reverb
     {
         /// <summary>

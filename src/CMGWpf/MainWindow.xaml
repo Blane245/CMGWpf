@@ -12,7 +12,7 @@
         mc:Ignorable="d"
         WindowStyle="None"
         ResizeMode="CanResize"
-        Icon="Assets/CMG-Logo.ico"
+        Icon="/Assets/CMG-Logo.ico"
         Title="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=WindowTitle}"
         AllowsTransparency="False"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"

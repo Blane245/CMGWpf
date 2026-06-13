@@ -1,3 +1,4 @@
+using CMGWpf.Utilities;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Shell;
@@ -5,7 +6,7 @@ using System.Windows.Shell;
 namespace CMGWpf.Services
 {
     /// <summary>
-    /// Manages the Windows 7+ Jump List (recent files shown in taskbar)
+    /// A singleton service that manages the Windows 7+ Jump List (recent files shown in taskbar)
     /// </summary>
     public class JumpListService
     {
@@ -37,11 +38,11 @@ namespace CMGWpf.Services
 
                 JumpList.SetJumpList(System.Windows.Application.Current, _jumpList);
 
-                System.Diagnostics.Debug.WriteLine("JumpListService: Initialized");
+                DebugLog.Write("JumpListService: Initialized");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"JumpListService: Error initializing: {ex.Message}");
+                DebugLog.Write($"JumpListService: Error initializing: {ex.Message}");
             }
         }
 
@@ -59,11 +60,11 @@ namespace CMGWpf.Services
                 // Add to Windows recent documents - this automatically updates the jump list
                 SHAddToRecentDocs(SHARD_PATHW, filePath);
 
-                System.Diagnostics.Debug.WriteLine($"JumpListService: Added {filePath} to recent files");
+                DebugLog.Write($"JumpListService: Added {filePath} to recent files");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"JumpListService: Error adding to recent files: {ex.Message}");
+                DebugLog.Write($"JumpListService: Error adding to recent files: {ex.Message}");
             }
         }
 
@@ -89,11 +90,11 @@ namespace CMGWpf.Services
                 _jumpList.JumpItems.Add(task);
                 _jumpList.Apply();
 
-                System.Diagnostics.Debug.WriteLine($"JumpListService: Added custom task '{title}'");
+                DebugLog.Write($"JumpListService: Added custom task '{title}'");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"JumpListService: Error adding custom task: {ex.Message}");
+                DebugLog.Write($"JumpListService: Error adding custom task: {ex.Message}");
             }
         }
 
@@ -108,11 +109,11 @@ namespace CMGWpf.Services
             try
             {
                 _jumpList.Apply();
-                System.Diagnostics.Debug.WriteLine("JumpListService: Jump list refreshed");
+                DebugLog.Write("JumpListService: Jump list refreshed");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"JumpListService: Error refreshing: {ex.Message}");
+                DebugLog.Write($"JumpListService: Error refreshing: {ex.Message}");
             }
         }
 

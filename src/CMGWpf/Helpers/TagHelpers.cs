@@ -1,5 +1,6 @@
 ﻿using CMGWpf.Data;
 using CMGWpf.Model.Database;
+using CMGWpf.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace CMGWpf.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error adding tag: {ex.Message}");
+                DebugLog.Write($"Error adding tag: {ex.Message}");
                 return false;
             }
         }
@@ -72,7 +73,7 @@ namespace CMGWpf.Helpers
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Error removing tag: {ex.Message}");
+                        DebugLog.Write($"Error removing tag: {ex.Message}");
                         return false;
 
                     }
@@ -84,7 +85,7 @@ namespace CMGWpf.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error modifying tag: {ex.Message}");
+                DebugLog.Write($"Error modifying tag: {ex.Message}");
                 return false;
             }
         }

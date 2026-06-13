@@ -1,5 +1,4 @@
 ﻿
-using CMGWpf.Services;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
 using System.Globalization;

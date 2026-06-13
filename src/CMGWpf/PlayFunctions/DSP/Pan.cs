@@ -7,7 +7,14 @@ namespace CMGWpf.PlayFunctions.DSP
 {
     public static class Pan
     {
-        public static void Apply (double[] sample, PANALGORITHM algorithm, PanParameters parameters, FastRandom Rn)
+        /// <summary>
+        /// Applies a panning algorithm to a sample based on the provided parameters and random number generator. Panning results are kept between -1 (full left) and 1 (full right). The walk algorithm creates a random walk of panning values, while the glide algorithm creates smooth transitions between randomly selected pan points.
+        /// </summary>
+        /// <param name="sample">The audio sample array to which the panning will be applied.</param>
+        /// <param name="algorithm">The panning algorithm to use, which can be walk or glide.</param>
+        /// <param name="parameters">The average cycle time for the panning changes.</param>
+        /// <param name="Rn">A random number generator used for selecting panning values and durations.</param>
+        public static void Apply(double[] sample, PANALGORITHM algorithm, PanParameters parameters, FastRandom Rn)
         {
             switch (algorithm)
             {
@@ -24,13 +31,13 @@ namespace CMGWpf.PlayFunctions.DSP
             }
 
         }
-        private static double Bounce(double last, double delta, double low, double high )
+        private static double Bounce(double last, double delta, double low, double high)
         {
             double test = last + delta;
             if (test > high || test < low) return Math.Max(low, Math.Min(high, last - delta));
             return test;
         }
-        private static (double, double) PanToLeftRight (double pan)
+        private static (double, double) PanToLeftRight(double pan)
         {
             return ((1 - pan) / 2, (1 + pan) / 2);
         }
@@ -44,7 +51,8 @@ namespace CMGWpf.PlayFunctions.DSP
             double pan1 = 2 * (Rn.NextDouble() - 0.5);
             double pan2 = Bounce(pan1, walk, -1, 1);
             // loop through all of the samples applying the walking pan
-            for (int i = 0; i < sample.Length / 2; i++) {
+            for (int i = 0; i < sample.Length / 2; i++)
+            {
                 if (currentInterval >= interval)
                 {
                     currentInterval = 0;
@@ -59,11 +67,11 @@ namespace CMGWpf.PlayFunctions.DSP
                 currentInterval += deltaT;
             }
         }
-        // apply the pan glaide algorithm to the smaple. Pan seqment durations are defined by the parameter cyctime. The number of point on this time line is 10. Pan glides from one point to the next
+        // apply the pan glide algorithm to the sample. Pan segment durations are defined by the parameter cycleTime. The number of points on this timeline is 10. Pan glides from one point to the next
         private static void PanGlide(double[] sample, PanParameters parameters, FastRandom rN)
         {
             double deltaT = 1.0 / PlayTypes.SampleRate;
-            (var Nd, var Pd) = Probability.Continuous(10, parameters.CycleTime, 0.01); 
+            (var Nd, var Pd) = Probability.Continuous(10, parameters.CycleTime, 0.01);
             double currentInterval = 0;
             // random first pan
             double pan1 = Probability.Interval(2, rN) - 1; // between -1 and 1;
@@ -78,7 +86,8 @@ namespace CMGWpf.PlayFunctions.DSP
                     currentInterval = 0;
                     pan1 = pan2;
                     duration = 0;
-                    while (duration == 0) { duration = Probability.Lookup(Pd, Nd, rN.NextDouble()); };
+                    while (duration == 0) { duration = Probability.Lookup(Pd, Nd, rN.NextDouble()); }
+                    ;
                     speed = Probability.GaussianRandom(0, StochasticConstants.RMSFACTOR * duration, rN);
                     pan2 = Bounce(pan1, duration * speed, -1, 1);
                 }

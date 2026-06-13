@@ -9,8 +9,6 @@
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d" MinHeight="800"
              d:DesignHeight="450" d:DesignWidth="800">
-    <!-- This panel, which appears in the note sequence panel, contains the properties of a note sequence when one is selected. All properties may be modified including the name, tag list, and sequence items. Tag list is a comma-delimited string, which is validated against the current DB Tags and updated in the notesequence_tag table. The sequence items are decoded from the Items property, managed by a data grid and, then encoded back to the Items property are modified data grids. 
-    -->
     <Grid>
         <Grid.Resources>
             <DataTemplate x:Key="FloatTemplate">

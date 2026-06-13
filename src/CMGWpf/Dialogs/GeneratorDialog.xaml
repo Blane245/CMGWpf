@@ -15,6 +15,7 @@
         WindowStyle="None"
         ResizeMode="CanResize"
         Width="1000" Height="1000"
+        Icon="/Assets/CMG-Logo.ico"
         Background="White"
         d:DesignHeight="450" d:DesignWidth="1000"
         >

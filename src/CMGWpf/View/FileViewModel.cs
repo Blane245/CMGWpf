@@ -9,6 +9,9 @@ using Track = CMGWpf.Model.Track;
 
 namespace CMGWpf.View
 {
+    /// <summary>
+    /// Singleton ViewModel for the File menu and related file operations. This includes managing the current CMG file, recent files list, and status messages. Much of the primary application menu is handled by the view model.
+    /// </summary>
     public class FileViewModel : ViewModelBase
     {
         private static FileViewModel? _instance;
@@ -119,9 +122,6 @@ namespace CMGWpf.View
 
         #region File Menu Commands
 
-        private RelayCommand<object>? _notImplementedCommand;
-        public RelayCommand<object> NotImplementedCommand =>
-            _notImplementedCommand ??= new RelayCommand<object>(execute => StatusMessages = new ObservableCollection<Message> { new Message { Text = "Command not implemented", Error = true } });
         private RelayCommand<object>? _fileNewCommand;
         public RelayCommand<object> FileNewCommand =>
             _fileNewCommand ??= new RelayCommand<object>(execute => new FileCommands(this, File).New());

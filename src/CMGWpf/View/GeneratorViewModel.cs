@@ -1,4 +1,5 @@
 using CMGWpf.Dialogs;
+using CMGWpf.Helpers;
 using CMGWpf.Model;
 using CMGWpf.Model.Generators;
 using CMGWpf.MVVM;
@@ -11,13 +12,17 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Input;
+using System.Windows.Media;
 using static CMGWpf.Model.Generators.StochasticTypes;
-using System.Diagnostics;
 
 namespace CMGWpf.View
 {
+    /// <summary>
+    /// ViewModel for a Generator. This is used to bind the properties of a generator to the UI, and to handle commands related to the generator. Each generator on the timeline will have its own instance of this view model, which will be used to display and edit the generator's properties in the UI. The GeneratorViewModel is responsible for managing the state of the generator as it is being edited in the UI, and for notifying the parent TrackViewModel when changes are made that affect the track (such as changes to start time, stop time, or position). It also manages the generator dialog for editing the generator's properties, and ensures that only one dialog can be open for a given generator at a time.
+    /// </summary>
+    /// <param name="generator"></param>
+    /// <param name="parentViewModel"></param>
     public class GeneratorViewModel(Model.Generators.Generator generator, TrackViewModel parentViewModel) : ViewModelBase
     {
         private Model.Generators.Generator generator = generator;
@@ -370,7 +375,7 @@ namespace CMGWpf.View
         {
             if (_generatorBorder == null) return;
 
-            Debug.WriteLine($"[{Generator.Name}] Mouse down - starting drag");
+            DebugLog.Write($"[{Generator.Name}] Mouse down - starting drag");
             IsDragging = true;
 
             // Capture mouse (same as TimeLineViewModel)
@@ -384,7 +389,7 @@ namespace CMGWpf.View
         {
             if (_generatorBorder == null || !_generatorBorder.IsMouseCaptured) return;
 
-            Debug.WriteLine($"[{Generator.Name}] Mouse move with capture");
+            DebugLog.Write($"[{Generator.Name}] Mouse move with capture");
 
             // Get the Canvas parent to calculate position relative to track
             if (FindParentCanvas(_generatorBorder) is Canvas canvas)
@@ -418,7 +423,7 @@ namespace CMGWpf.View
         {
             if (_generatorBorder == null) return;
 
-            Debug.WriteLine($"[{Generator.Name}] Mouse up - ending drag");
+            DebugLog.Write($"[{Generator.Name}] Mouse up - ending drag");
 
             _generatorBorder.ReleaseMouseCapture();
             _generatorBorder.Cursor = Cursors.Hand;
@@ -435,7 +440,7 @@ namespace CMGWpf.View
             DependencyObject? parent = VisualTreeHelper.GetParent(child);
             while (parent != null)
             {
-                Debug.WriteLine($"Searching for parent: {parent.GetType().Name}");
+                DebugLog.Write($"Searching for parent: {parent.GetType().Name}");
                 if (parent is Canvas canvas)
                     return canvas;
                 parent = VisualTreeHelper.GetParent(parent);
@@ -447,7 +452,7 @@ namespace CMGWpf.View
         {
             // y is already absolute Canvas position, clamp it to track height
             double newPosition = Math.Clamp(y, 0, SizeService.Instance.TrackHeight - SizeService.Instance.TrackHeight / 3);
-            Debug.WriteLine($"move generator to position {newPosition}");
+            DebugLog.Write($"move generator to position {newPosition}");
 
             // Update VerticalOffset which is bound to Canvas.Top in XAML
             // This moves the visual element without causing a track refresh
@@ -650,11 +655,11 @@ namespace CMGWpf.View
                 }
             });
         // reload the list of all ensembles from the database and update the dropdown in the stochastic generator dialog. This is to ensure that if the user adds or removes ensembles from the database while the stochastic generator dialog is open, the dropdown for selecting ensembles is updated in real time to reflect those changes.
-        private RelayCommand<Algorithmic>? _reloadEnsembles;
-        public RelayCommand<Algorithmic> ReloadEnsembles =>
-            _reloadEnsembles ??= new RelayCommand<Algorithmic>(generator =>
+        private RelayCommand<Stochastic>? _reloadEnsembles;
+        public RelayCommand<Stochastic> ReloadEnsembles =>
+            _reloadEnsembles ??= new RelayCommand<Stochastic>(generator =>
             {
-                if (generator is Algorithmic g)
+                if (generator is Stochastic g)
                 {
                     _ = ReloadEnsemblesAsync();
                 }
@@ -664,7 +669,8 @@ namespace CMGWpf.View
         {
             try
             {
-                ObservableCollection<Ensemble> ensembles = await EnsembleUtilities.GetEnsembleListAsync();
+                var ensembles = await EnsembleHelpers.List();
+                //ObservableCollection<Ensemble> ensembles = await EnsembleUtilities.GetEnsembleListAsync();
                 ObservableCollection<string> names = [.. ensembles.Select(ensemble => ensemble.Name)];
                 GlobalService.Instance.EnsembleNames = names;
             }
@@ -881,23 +887,6 @@ namespace CMGWpf.View
         #region Stochastic Generator Specific Properties and Commands
         public ObservableCollection<string> EnsembleNames { get => GlobalService.Instance.EnsembleNames; set { GlobalService.Instance.EnsembleNames = value; OnPropertyChanged(); } }
         public ObservableCollection<string> NoteSequenceNames { get => GlobalService.Instance.NoteSequenceNames; set { GlobalService.Instance.NoteSequenceNames = value; OnPropertyChanged(); } }
-        //private string _newSequenceName = "";
-        //public string NewSequenceName 
-        //{ 
-        //    get => _newSequenceName; 
-        //    set 
-        //    {
-        //        if (AlgorithmicGenerator == null || AlgorithmicGenerator.NoteAlgorithm == null) return;
-        //        if (_newSequenceName == value) return; // Avoid redundant calls
-
-        //        _newSequenceName = value;
-        //        OnPropertyChanged();
-
-        //        // Fire and forget the async load - use discard to indicate intentional non-await
-        //        _ = LoadSequenceAsync(value);
-        //    }
-        //}
-
         private async Task LoadSequenceAsync(string sequenceName)
         {
             if (AlgorithmicGenerator?.NoteAlgorithm is not Sequencer sequencer) return;
@@ -907,27 +896,27 @@ namespace CMGWpf.View
                 // Set the name first
                 sequencer.Name = sequenceName;
 
-                // Load the sequence from the database using NoteSequenceUtilities
-                var sequence = await NoteSequenceUtilities.GetNoteSequenceAsync(sequenceName);
+                // Load the sequence from the database using NoteSequenceHelpers
+                var sequence = await NoteSequenceHelpers.Get(sequenceName);
                 if (sequence != null)
                 {
-                    sequencer.Items = sequence.Items;
+                    sequencer.UnPackItems(sequence.Items);
 
                     // Notify that the sequencer has been updated
                     OnPropertyChanged(nameof(AlgorithmicGenerator));
                     OnPropertyChanged(nameof(SequencerName));
-                    Messages.Clear(); 
-                    Messages.Add(new Message { Text = $"Sequence '{sequenceName}' loaded with {sequence.Items.Count} items.", Error = false });
+                    Messages.Clear();
+                    Messages.Add(new Message { Text = $"Sequence '{sequenceName}' loaded with {sequencer.Items.Count} items.", Error = false });
                 }
                 else
                 {
-                    Messages.Clear(); 
+                    Messages.Clear();
                     Messages.Add(new Message { Text = $"Sequence '{sequenceName}' not found.", Error = true });
                 }
             }
             catch (Exception ex)
             {
-                Messages.Clear(); 
+                Messages.Clear();
                 Messages.Add(new Message { Text = $"Error loading sequence: {ex.Message}", Error = true });
             }
         }
@@ -960,14 +949,28 @@ namespace CMGWpf.View
         {
             try
             {
-                var (ensemble, voices) = await EnsembleUtilities.GetEnsembleAsync(name);
-                if (StochasticGenerator != null)
+                var ensemble = await EnsembleHelpers.Get(name);
+                if (StochasticGenerator != null && ensemble != null)
                 {
                     // Unsubscribe from old voices
                     UnsubscribeFromVoices();
 
-                    StochasticGenerator.Ensemble = ensemble;
-                    StochasticGenerator.Voices = [.. voices];
+                    StochasticGenerator.Ensemble.Name = ensemble.Name;
+                    StochasticGenerator.Ensemble.Description = ensemble.Description;
+                    // Convert database Voice to model Voice
+                    StochasticGenerator.Voices = new ObservableCollection<Model.Voice>(
+                        ensemble.Voices.Select(dbVoice => new Model.Voice
+                        {
+                            Name = dbVoice.Name,
+                            Description = dbVoice.Description,
+                            SoundFontFileName = dbVoice.SoundFontFile,
+                            PresetName = dbVoice.PresetName,
+                            Timbre = dbVoice.Timbre,
+                            RegisterLo = dbVoice.RegisterLo,
+                            RegisterHi = dbVoice.RegisterHi,
+                            Duration = dbVoice.Duration,
+                            SoundFont = SoundFontUtilities.GetSoundFont(dbVoice.SoundFontFile)
+                        }));
                     StochasticGenerator.Composition = [];
 
                     // Subscribe to new voices
@@ -975,7 +978,7 @@ namespace CMGWpf.View
 
                     OnPropertyChanged(nameof(StochasticGenerator));
                     OnPropertyChanged(nameof(stochasticComposition));
-                    Messages.Clear(); Messages.Add(new Message { Text = $"Ensemble {ensemble.Name} read with {voices.Count} voices.", Error = false });
+                    Messages.Clear(); Messages.Add(new Message { Text = $"Ensemble {ensemble.Name} read with {StochasticGenerator.Voices.Count} voices.", Error = false });
                 }
             }
             catch (Exception ex)
@@ -1049,7 +1052,8 @@ namespace CMGWpf.View
         {
             try
             {
-                ObservableCollection<string> names = await NoteSequenceUtilities.GetNoteSequenceNamesAsync();
+                var noteSequences = await NoteSequenceHelpers.List();
+                ObservableCollection<string> names = new(noteSequences.Select(ns => ns.Name).OrderBy(name => name));
                 GlobalService.Instance.NoteSequenceNames = names;
             }
             catch (Exception ex)
@@ -1119,7 +1123,7 @@ namespace CMGWpf.View
                 OnPropertyChanged();
             }
         }
-        // reload the voices for the currently selected ensemble from the database and update the stochastic generator with the new voices. This is to ensure that if the user changes the voices in an ensemble in the database while the stochastic generator dialog is open, the stochastic generator is updated in real time with the new voices for the currently selected ensemble. If a signaificant change has been made to the voices (like the number of them, then invalidate the composition since it may no longer be compatible with the new voices.
+        // reload the voices for the currently selected ensemble from the database and update the stochastic generator with the new voices. This is to ensure that if the user changes the voices in an ensemble in the database while the stochastic generator dialog is open, the stochastic generator is updated in real time with the new voices for the currently selected ensemble. If a significant change has been made to the voices (like the number of them, then invalidate the composition since it may no longer be compatible with the new voices.
         private RelayCommand<Stochastic>? _reloadVoices;
         public RelayCommand<Stochastic> ReloadVoices =>
             _reloadVoices ??= new RelayCommand<Stochastic>(generator =>
@@ -1144,17 +1148,36 @@ namespace CMGWpf.View
 
                 // Unsubscribe from old voices
                 UnsubscribeFromVoices();
-
-                ObservableCollection<Voice> voices = [.. await EnsembleUtilities.GetEnsembleVoicesAsync(StochasticGenerator.Ensemble)];
-                if (g.Voices.Count != voices.Count)
+                StochasticGenerator.Voices.Clear();
+                var ensemble = await EnsembleHelpers.Get(g.Ensemble.Name);
+                if (ensemble == null) return;
+                var dBVoices = ensemble.Voices;
+                g.Composition = [];
+                stochasticComposition = [];
+                OnPropertyChanged(nameof(StochasticComposition));
+                Messages.Clear(); Messages.Add(new Message { Text = "Composition has been invalidated when voices are reloaded.", Error = false });
+                foreach (var dbVoice in dBVoices)
                 {
-                    // if the number of voices has changed, invalidate the composition since it may no longer be compatible with the new voices.
-                    g.Composition = [];
-                    stochasticComposition = [];
-                    OnPropertyChanged(nameof(StochasticComposition));
-                    Messages.Clear(); Messages.Add(new Message { Text = "Composition has been invalidated due to the change in the number of voices in the ensemble.", Error = false });
+                    var soundFont = SoundFontUtilities.GetSoundFont(dbVoice.SoundFontFile);
+                    var preset = soundFont?.Presets.FirstOrDefault(p => SoundFontUtilities.BankPresetToName(p) == dbVoice.PresetName);
+                    Voice voice = new Voice
+                    {
+                        Name = dbVoice.Name,
+                        Description = dbVoice.Description,
+                        SoundFontFileName = dbVoice.SoundFontFile,
+                        PresetName = dbVoice.PresetName,
+                        Preset = preset,
+                        Timbre = dbVoice.Timbre,
+                        RegisterLo = dbVoice.RegisterLo,
+                        RegisterHi = dbVoice.RegisterHi,
+                        Duration = dbVoice.Duration,
+                        SoundFont = SoundFontUtilities.GetSoundFont(dbVoice.SoundFontFile),
+                        Muted = false,
+                        Volume = 0,
+                        Velocity = 63,
+                    };
+                    StochasticGenerator.Voices.Add(voice);
                 }
-                StochasticGenerator.Voices = voices;
 
                 // Subscribe to new voices
                 SubscribeToVoices();
@@ -1167,7 +1190,7 @@ namespace CMGWpf.View
             }
         }
 
-        // this is the business end of the stocahstic generator construction of the composition. When the user clicks the button to build the composition in the stochastic generator dialog, this command is executed to build the composition based on the currently selected ensemble and voices, and the composition parameters of the stochastic generator.
+        // this is the business end of the stochastic generator construction of the composition. When the user clicks the button to build the composition in the stochastic generator dialog, this command is executed to build the composition based on the currently selected ensemble and voices, and the composition parameters of the stochastic generator.
         private RelayCommand<Stochastic>? _buildComposition;
         public RelayCommand<Stochastic> BuildComposition =>
             _buildComposition ??= new RelayCommand<Stochastic>(generator =>

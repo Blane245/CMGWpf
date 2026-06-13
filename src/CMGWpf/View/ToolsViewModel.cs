@@ -1,12 +1,15 @@
 ﻿using CMGWpf.Dialogs.Tools;
 using CMGWpf.MVVM;
 using CMGWpf.Types;
+using CMGWpf.Utilities;
 using System.Collections.ObjectModel;
 using System.Windows;
-using System.Windows.Shell;
 
 namespace CMGWpf.View
 {
+    /// <summary>
+    /// Singleton ViewModel for the Tools menu and related dialogs. This includes managing the state of various tool dialogs (e.g., generator and calculator tools, ensemble voice editor, note sequence editor) to ensure that only one instance of each dialog can be open at a time. It also manages properties and commands related to the functionality of these tools, such as MIDI to frequency conversion, beat count and BPM calculations, and generator alignment and staggering operations.
+    /// </summary>
     public class ToolsViewModel : ViewModelBase
     {
         private static ToolsViewModel? _instance;
@@ -188,7 +191,7 @@ namespace CMGWpf.View
         // copy a generator
         // move a generator
         // other generator transactions modify contents of a generator and not the number of generators or their track assignments
-        public void NotifyGeneratorListChanged ()
+        public void NotifyGeneratorListChanged()
         {
             OnPropertyChanged(nameof(GeneratorList));
             LoadStaggerGeneratorList();
@@ -206,7 +209,7 @@ namespace CMGWpf.View
             StaggerGeneratorList = tempList;
         }
 
-public void NotifyStaggerListChanged(ObservableCollection<StaggerGeneratorsSelection> newList)
+        public void NotifyStaggerListChanged(ObservableCollection<StaggerGeneratorsSelection> newList)
         {
             StaggerGeneratorList = newList;
         }

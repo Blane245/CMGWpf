@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Windows;
-using CMGWpf.Services;
 using CMGWpf.View;
 
 namespace CMGWpf.Dialogs

@@ -4,11 +4,13 @@ using CMGWpf.MVVM;
 using CMGWpf.Services;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;
-using System.Windows;
 using Track = CMGWpf.Model.Track;
 
 namespace CMGWpf.View
 {
+    /// <summary>
+    /// ViewModel for an individual track in the track display. This manages the state and behavior of a single track, including its generators and related commands. Each track in the composition will have a corresponding TrackViewModel that handles the display and interaction logic for that track. This includes commands for renaming, deleting, muting, soloing, moving, adding generators, duplicating, shifting, and adjusting volume for the track. It also manages the display of the track's generators in the track display canvas. The TrackViewModel is created and managed by the TracksViewModel, which handles the collection of all tracks in the composition. The TrackViewModel will subscribe to changes in its underlying Track model to update the view accordingly. It also interacts with global services to manage status messages and dirty state for the application.
+    /// </summary>
     public class TrackViewModel : ViewModelBase
     {
         private Track track;
@@ -21,7 +23,9 @@ namespace CMGWpf.View
         }
 
         #region View Properties
-        public Track Track { get => track;
+        public Track Track
+        {
+            get => track;
             set { track = value; OnPropertyChanged(nameof(Track)); }
         }
 
@@ -86,7 +90,7 @@ namespace CMGWpf.View
             set { newTrackName = value; }
         }
         private double _shiftAmount = 0;
-        public double ShiftAmount { get => _shiftAmount; set { _shiftAmount = Math.Round(value,2); OnPropertyChanged(); } }
+        public double ShiftAmount { get => _shiftAmount; set { _shiftAmount = Math.Round(value, 2); OnPropertyChanged(); } }
         private int _newVolume = 0;
         public int NewVolume { get => _newVolume; set { _newVolume = value; OnPropertyChanged(); } }
         public void NotifyTrackChanged(Track newTrack)

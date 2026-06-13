@@ -12,6 +12,7 @@
         WindowStyle="None"
         ResizeMode="CanResize"
         MinWidth="750" MinHeight="430"
+        Icon="/Assets/CMG-Logo.ico"
         Title="{Binding WindowTitle}"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
         >

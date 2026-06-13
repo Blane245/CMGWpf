@@ -1,10 +1,6 @@
 ﻿using CMGWpf.Model;
-using CMGWpf.Services;
-using CMGWpf.Types;
-using CMGWpf.Utilities;
 using CMGWpf.View;
 using System.Collections.ObjectModel;
-using System.Net.Http;
 using System.Windows.Controls;
 using System.Windows.Data;
 
@@ -35,29 +31,6 @@ namespace CMGWpf.Panels.Stochastic
                 newVm.PropertyChanged += ViewModel_PropertyChanged;
                 UpdateDynamicColumns(newVm);
                 newVm.Messages.Clear();
-            }
-        }
-
-        private async Task LoadEnsembleNamesAsync(GeneratorViewModel vm)
-        {
-            vm.Messages = [];
-            try
-            {
-                vm.Messages.Add(new Message { Text = "Loading ensembles...", Error = false });
-                var ensembles = await EnsembleUtilities.GetEnsembleListAsync();
-                vm.Messages.Add(new Message { Text = $"Loaded {ensembles.Count} ensembles", Error = false });
-            }
-            catch (HttpRequestException ex)
-            {
-                vm.Messages.Add(new Message { Text = $"HTTP Error: {ex.Message}", Error = true }  );
-            }
-            catch (TaskCanceledException ex)
-            {
-                vm.Messages.Add(new Message { Text = $"Request timeout error {ex.Message} - check if DB server is running at {GlobalService.Instance.DbServer}:{GlobalService.Instance.DbPort}", Error = true });
-            }
-            catch (Exception ex)
-            {
-                vm.Messages.Add(new Message { Text = $"Error loading ensemble names: {ex.Message}", Error = true });
             }
         }
 
@@ -158,7 +131,7 @@ namespace CMGWpf.Panels.Stochastic
             return stackPanel;
         }
 
-        private void MoveColumn(int currentIndex, int direction, GeneratorViewModel viewModel)
+        private static void MoveColumn(int currentIndex, int direction, GeneratorViewModel viewModel)
         {
             // This should swap voices composition values in the StochasticGenerator.Composition array, leaving the voices themselves unchanged, and trigger regeneration of the composition both in the generator and the UI. The direction parameter indicates whether to move left (-1) or right (+1).
 
@@ -221,7 +194,7 @@ namespace CMGWpf.Panels.Stochastic
             }
         }
 
-        private void MoveRow(GeneratorViewModel.StochasticCompositionRow row, int direction, GeneratorViewModel viewModel)
+        private static void MoveRow(GeneratorViewModel.StochasticCompositionRow row, int direction, GeneratorViewModel viewModel)
         {
             if (viewModel.StochasticGenerator == null) return;
 

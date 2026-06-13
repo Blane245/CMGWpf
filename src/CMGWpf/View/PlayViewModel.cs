@@ -4,9 +4,9 @@ using CMGWpf.PlayFunctions;
 using CMGWpf.PlayFunctions.Utilities;
 using CMGWpf.Services;
 using CMGWpf.Types;
+using CMGWpf.Utilities;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Shapes;
@@ -14,6 +14,9 @@ using static CMGWpf.Types.PlayTypes;
 
 namespace CMGWpf.View
 {
+    /// <summary>
+    /// Singleton ViewModel for the Play dialog and related play/record operations. This includes managing the current play state, progress, and results. It also handles commands for controlling playback and recording. The Play dialog is a central part of the application where users can listen to their compositions and see visual feedback on the audio signal levels. The ViewModel manages the complex state of the play process, including the list of generators being processed, the final audio buffer, and the current playback position. It also provides properties for binding to the UI elements in the Play dialog, such as the progress message, play duration, and signal level dials.
+    /// </summary>
     public class PlayViewModel : ViewModelBase
     {
         private static PlayViewModel? _instance;
@@ -31,12 +34,16 @@ namespace CMGWpf.View
         public AudioBufferWrapper FinalSignal { get { return finalSignal; } set { finalSignal = value; OnPropertyChanged(); } }
 
         // Use concurrent collections for lock-free parallel access during generator processing
-        private ConcurrentBag<TimeMidiPreset> timeMidiPresets = [];
-        public ConcurrentBag<TimeMidiPreset> TimeMidiPresets { get { return timeMidiPresets; } set { timeMidiPresets = value; OnPropertyChanged(); } }
+        private ConcurrentBag<TimeMidiVoice> timeMidiVoices = [];
+        public ConcurrentBag<TimeMidiVoice> TimeMidiVoices { get { return timeMidiVoices; } set { timeMidiVoices = value; OnPropertyChanged(); } }
         private ConcurrentBag<InstrumentSource> instrumentSources = [];
         public ConcurrentBag<InstrumentSource> InstrumentSources { get { return instrumentSources; } set { instrumentSources = value; OnPropertyChanged(); } }
-        private ConcurrentBag<SF_Preset> sF_Presets = [];
-        public ConcurrentBag<SF_Preset> SF_Presets { get { return sF_Presets; } set { sF_Presets = value; OnPropertyChanged(); } }
+        private ConcurrentBag<GeneratorVoice> generatorVoices = [];
+        public ConcurrentBag<GeneratorVoice> GeneratorVoices { get { return generatorVoices; } set { generatorVoices = value; OnPropertyChanged(); } }
+        // lock used to synchronize changes to the final stereo buffer as the stereo buffer is built asynchronously by multiple threads.
+        private object _playResultsLock = new();
+        public object PlayResultsLock { get { return _playResultsLock; } set { _playResultsLock = value; OnPropertyChanged(); } }
+
         #endregion
         private string progressMessage = string.Empty;
         public string ProgressMessage { get { return progressMessage; } set { progressMessage = value; OnPropertyChanged(); } }
@@ -98,12 +105,12 @@ namespace CMGWpf.View
                     linearVolume = Math.Max(0.0f, Math.Min(linearVolume, 1.0f));
 
                     AudioOutput.Volume = linearVolume;
-                    Debug.WriteLine($"Volume changed: {audioVolume:F1} dB -> {linearVolume:F3} linear");
+                    DebugLog.Write($"Volume changed: {audioVolume:F1} dB -> {linearVolume:F3} linear");
                 }
             }
         }
-        private ObservableCollection<PresetColor> presetColors = [];
-        public ObservableCollection<PresetColor> PresetColors { get { return presetColors; } set { presetColors = value; OnPropertyChanged(); } }
+        private ObservableCollection<VoiceColor> voiceColors = [];
+        public ObservableCollection<VoiceColor> VoiceColors { get { return voiceColors; } set { voiceColors = value; OnPropertyChanged(); } }
         private bool showVoices = false;
         public bool ShowVoices { get { return showVoices; } set { showVoices = value; OnPropertyChanged(); } }
         private VoiceDialog? voiceDialog;
@@ -124,7 +131,7 @@ namespace CMGWpf.View
             // the signal line intersects the dialog ellipse
 
             double theta = Math.Clamp(signalLevel, 0, 1) * Math.PI;
-            //Debug.WriteLine($"SignalDial signalLevel={signalLevel}, theta {theta}");
+            //DebugLog.Write($"SignalDial signalLevel={signalLevel}, theta {theta}");
             double cTheta = Math.Cos(theta);
             double sTheta = Math.Sin(theta);
             double lTheta = Math.Sqrt(width * cTheta * width * cTheta / 4 + height * sTheta * height * sTheta);

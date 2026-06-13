@@ -1,5 +1,4 @@
 ﻿using CMGWpf.Model.Database;
-using CMGWpf.View;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;

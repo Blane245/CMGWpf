@@ -8,6 +8,13 @@ namespace CMGWpf.PlayFunctions.DSP
 {
     public static class Intensity
     {
+        /// <summary>
+        /// Applies an intensity transition to a sample based on the provided option and parameters. The function first builds continuous probability arrays to determine the duration of each intensity transition. It then randomly selects an intensity transition from a predefined list and applies it to the sample. If the option is set to persistent, it ensures that the next transition starts where the previous one ended. The gain for each sample is calculated using linear interpolation based on the current duration and the selected intensity transition's profile.
+        /// </summary>
+        /// <param name="sample">The audio sample array to which the intensity transition will be applied.</param>
+        /// <param name="option">The intensity transition option, which can be random or persistent.</param>
+        /// <param name="parameters">The average cycle time that the intensity will change.</param>
+        /// <param name="Rn">A random number generator used for selecting transitions and durations.</param>
         public static void Apply(double[] sample, INTENSITYTRANSITIONOPTION option, IntensityParameters parameters, FastRandom Rn)
         {
             double cycleTime = parameters.CycleTime;
@@ -24,7 +31,7 @@ namespace CMGWpf.PlayFunctions.DSP
             int nTransitions = IntensityTransitions.Length;
             int index = Rn.Next(0, nTransitions - 1);
             IntensityTransition transition = IntensityTransitions[index];
-            DebugLog.Write($"intensitypersist: transition picked {transition}");
+            DebugLog.Write($"Intensity Apply: transition picked {transition}");
             (var start, var middle, var end) = GetGainFromIntensityProfile(transition);
 
             // get the end intensity for persistence
@@ -53,11 +60,11 @@ namespace CMGWpf.PlayFunctions.DSP
                         transition = IntensityTransitions[Math.Min(Rn.Next(0, nTransitions), nTransitions - 1)];
 
                     }
-                    DebugLog.Write($"intensitypresist: apply intensity transition for option {option} -  ({transition.Start}, {transition.Middle}, {transition.End} at sample {i}");
+                    DebugLog.Write($"Intensity Apply: apply intensity transition for option {option} -  ({transition.Start}, {transition.Middle}, {transition.End} at sample {i}");
 
                     (start, middle, end) = GetGainFromIntensityProfile(transition);
                     endIntensity = transition.End;
-                    DebugLog.Write($"intensitypresist: picked new end transition {endIntensity}");
+                    DebugLog.Write($"Intensity Apply: picked new end transition {endIntensity}");
                     duration = 0;
                     while (duration == 0) duration = Probability.Lookup(Pd, Nd, Rn.NextDouble());
                 }
@@ -74,12 +81,12 @@ namespace CMGWpf.PlayFunctions.DSP
             }
         }
 
-        private static (double, double, double) GetGainFromIntensityProfile (IntensityTransition transition)
+        private static (double, double, double) GetGainFromIntensityProfile(IntensityTransition transition)
         {
             double start = IntensityProfiles[transition.Start].DB;
             double end = IntensityProfiles[transition.End].DB;
             double middle = transition.Middle != null ? IntensityProfiles[transition.Middle.Value].DB : (start + end) / 2;
-            return (Sf2Units.VolumeDbToGain(start), Sf2Units.VolumeDbToGain(middle), Sf2Units.VolumeDbToGain(end)); 
+            return (Sf2Units.VolumeDbToGain(start), Sf2Units.VolumeDbToGain(middle), Sf2Units.VolumeDbToGain(end));
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using CMGWpf.Data;
 using CMGWpf.Model.Database;
+using CMGWpf.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
-using System.Text.Json;
 
 namespace CMGWpf.Helpers
 {
@@ -60,7 +60,7 @@ namespace CMGWpf.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error adding note sequence: {ex.Message}");
+                DebugLog.Write($"Error adding note sequence: {ex.Message}");
                 return false;
             }
         }
@@ -83,7 +83,7 @@ namespace CMGWpf.Helpers
                         await context.SaveChangesAsync();
                     } catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Error removing note sequence: {ex.Message}");
+                        DebugLog.Write($"Error removing note sequence: {ex.Message}");
                         return false;
 
                     }
@@ -117,7 +117,7 @@ namespace CMGWpf.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error modifying ensemble: {ex.Message}");
+                DebugLog.Write($"Error modifying ensemble: {ex.Message}");
                 return false;
             }
         }

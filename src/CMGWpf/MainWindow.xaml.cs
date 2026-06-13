@@ -9,7 +9,7 @@ using WinForms = System.Windows.Forms;
 namespace CMGWpf
 {
     /// <summary>
-    /// Intializes the main window, sets the data context to the FileViewModel, and handles window events for loading, closing, and resizing. On load, it restores the window position and size from saved settings or moves to secondary monitor if first run. On closing, it saves window state and settings. On size change, it updates the SizeService with the new window dimensions.
+    /// Initializes the main window, sets the data context to the FileViewModel, and handles window events for loading, closing, and resizing. On load, it restores the window position and size from saved settings or moves to secondary monitor if first run. On closing, it saves window state and settings. On size change, it updates the SizeService with the new window dimensions.
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -83,7 +83,7 @@ namespace CMGWpf
             this.LocationChanged += MainWindow_LocationChanged;
 
             // Check if this is the first run (no saved position)
-            _isFirstRun = Properties.Settings.Default.WindowLeft == 0 && 
+            _isFirstRun = Properties.Settings.Default.WindowLeft == 0 &&
                          Properties.Settings.Default.WindowTop == 0;
         }
 
@@ -162,9 +162,9 @@ namespace CMGWpf
             foreach (var screen in screens)
             {
                 var workingArea = screen.WorkingArea;
-                if (this.Left >= workingArea.Left && 
+                if (this.Left >= workingArea.Left &&
                     this.Left < workingArea.Right &&
-                    this.Top >= workingArea.Top && 
+                    this.Top >= workingArea.Top &&
                     this.Top < workingArea.Bottom)
                 {
                     isVisible = true;
@@ -238,9 +238,9 @@ namespace CMGWpf
             if (FileViewModel.Instance.IsDirty)
             {
                 MessageBoxResult result = MessageBox.Show(
-                    "The current file has been modified and the changes will be lost. Do you want to exit?", 
-                    "File Dirty", 
-                    MessageBoxButton.YesNo, 
+                    "The current file has been modified and the changes will be lost. Do you want to exit?",
+                    "File Dirty",
+                    MessageBoxButton.YesNo,
                     MessageBoxImage.Warning);
 
                 if (result != MessageBoxResult.Yes)

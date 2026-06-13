@@ -1,6 +1,4 @@
-﻿using CMGWpf.Types;
-using CMGWpf.View;
-using System.ComponentModel;
+﻿using CMGWpf.View;
 using System.Windows;
 
 namespace CMGWpf.Dialogs
@@ -13,7 +11,6 @@ namespace CMGWpf.Dialogs
             InitializeComponent();
             DataContext = vm;
             vm.StatusMessages = [];
-            this.Closing += CommentDialog_Closing;
             this.Loaded += CommentDialog_Loaded;
         }
 
@@ -21,11 +18,6 @@ namespace CMGWpf.Dialogs
         {
             Services.GlobalService.Instance.StatusMessages.Clear();
         }
-
-        private void CommentDialog_Closing(object? sender, CancelEventArgs e)
-        {
-        }
-
         private void Cancel_Click(object? sender, RoutedEventArgs e)
         {
             Close();

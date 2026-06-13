@@ -7,6 +7,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\CMG-Logo.ico</ApplicationIcon>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+
+  <!-- Use RuntimeIdentifier only for Publish, not for regular builds -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
@@ -44,6 +50,11 @@
 	  <None Include="..\..\docs\**\*" Link="docs\%(RecursiveDir)%(Filename)%(Extension)">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <None Remove="..\..\docs\example.cmg" />
+	  <None Remove="..\..\docs\GeneralUser-GSwithgong.sf2" />
+	  <None Remove="..\..\docs\HowToOpenDatabaseMigration.md" />
+	  <None Remove="..\..\docs\Phase9-Cleanup-Complete.md" />
+	  <None Remove="..\..\docs\SQLiteMigration.md" />
 	  <None Include="..\..\README.md" Link="README.md">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
@@ -84,6 +95,9 @@
 
   <ItemGroup>
     <None Update="..\..\docs\.editorconfig" Link=".editorconfig" />
+    <None Update="..\..\docs\UsersGuide.html">
+      <DependentUpon>UsersGuide.md</DependentUpon>
+    </None>
   </ItemGroup>
 
 </Project>

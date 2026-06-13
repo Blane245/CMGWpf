@@ -1,13 +1,11 @@
 ﻿using CMGWpf.Model;
 using CMGWpf.Model.Generators;
 using CMGWpf.PlayFunctions.Utilities;
-using CMGWpf.Services;
 using CMGWpf.SoundFont_2;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
 using CMGWpf.View;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using static CMGWpf.Model.Generators.StochasticTypes;
 using static CMGWpf.Types.PlayTypes;
 
@@ -26,12 +24,17 @@ namespace CMGWpf.PlayFunctions.DSP
             public double offset;
             public double pitch;
         }
+        /// <summary>
+        /// Generate the samples for a stochastic generator by looping through each voice and then through each time cell for the voice, building clouds of sounds based on the generator's dynamic parameters and the voice's preset and timbre. The generated samples are added to the final signal at the end of processing all voices. Intensity, Pan, and Reverb are applied during this process. This is done in a separate thread for each generator so that multiple generators can be processed in parallel.
+        /// </summary>
+        /// <param name="generator"></param>
         public static void Get(Stochastic generator)
         {
             // gather the DSP, etc., information from this generator on a separate thread so that multiple generators can be processed in parallel. 
-            Debug.WriteLine($"Starting stochastic generator processing for generator {generator.Name}...");
+            DebugLog.Write($"SourcesFromStochastic: Starting stochastic generator processing for generator {generator.Name}...");
             // get all of the needed properties from the generator
             double generatorStartTime = generator.StartTime;
+            double generatorStopTime = generator.StopTime;
             int Nt = generator.NumberOfTimeCells;
             double Tc = generator.CompositionDuration;
             ObservableCollection<Voice> voices = generator.Voices;
@@ -64,17 +67,17 @@ namespace CMGWpf.PlayFunctions.DSP
                 if (voice.Preset == null) return;
 
                 // add the voice's soundfont and preset to the global presets list 
-                Debug.WriteLine($"Adding preset {voice.PresetName} from soundfont {voice.SoundFontFileName} to global presets list for voice {voice.Name}...");
+                DebugLog.Write($"SourcesFromStochastic: Adding preset {voice.PresetName} from soundfont {voice.SoundFontFileName} to global presets list for voice {voice.Name}...");
                 // ConcurrentBag is thread-safe, no lock needed
-                PlayViewModel.Instance.SF_Presets.Add(new SF_Preset()
+                PlayViewModel.Instance.GeneratorVoices.Add(new GeneratorVoice()
                 {
-                    SoundFontName = voice.SoundFontFileName,
-                    PresetName = voice.PresetName
+                    GeneratorName = generator.Name,
+                    VoiceName = voice.Name
                 });
 
                 // create a stereo buffer to hold the voice's signal
                 double[] voiceBuffer = new double[voiceCount * 2];
-                Debug.WriteLine($"Created stereo buffer for voice {voice.Name} with {voiceCount * 2} samples.");
+                DebugLog.Write($"SourcesFromStochastic: Created stereo buffer for voice {voice.Name} with {voiceCount * 2} samples.");
                 // initialize the could states so that clouds can extend from one time cell to the next. We first need to know the maximum number of clouds in the voice for all times
                 int maxCloud = 0;
                 for (int iTime = 0; iTime < Nt; iTime++)
@@ -93,8 +96,8 @@ namespace CMGWpf.PlayFunctions.DSP
                 if (maxCloud == 0) continue; // there are no clouds in this voice for any time
 
 
-                // loop through all of the time cells for this voice
-                for (int iTime = 0; iTime < Nt; iTime++)
+                // loop through all of the time cells for this voice, stopping early if the generator has been defined to stop early
+                for (int iTime = 0; iTime < Nt && iTime * cloudDuration < generatorStopTime - generatorStartTime; iTime++)
                 {
                     // generate the audio for all clouds at this time, tracking the cloud state at the end of each cloud
                     int nClouds = composition[iTime][iVoice];
@@ -121,17 +124,17 @@ namespace CMGWpf.PlayFunctions.DSP
             if (generator.PanOption == PANOPTION.composition) Pan.Apply(compositionBuffer, generator.PanAlgorithm, generator.PanParameters, generator.DynamicsRn);
             Reverb.Apply(compositionBuffer, reverbDelay, reverbDecay, sampleRate);
 
-            // update globals that are within scope here. Others are within the BuildCloud routine
-            bool lockTaken2 = false;
+            // update final signal
+            bool lockTaken = false;
             try
             {
-                Monitor.Enter(GlobalService.Instance.PlayResultsLock, ref lockTaken2);
+                Monitor.Enter(PlayViewModel.Instance.PlayResultsLock, ref lockTaken);
                 // now move the composition to the stereo buffer at the start time of the composition
                 PlayViewModel.Instance.FinalSignal.Add(compositionBuffer, (int)(generatorStartTime * sampleRate * 2));
             }
             finally
             {
-                if (lockTaken2) Monitor.Exit(GlobalService.Instance.PlayResultsLock);
+                if (lockTaken) Monitor.Exit(PlayViewModel.Instance.PlayResultsLock);
             }
         }
 
@@ -161,7 +164,11 @@ namespace CMGWpf.PlayFunctions.DSP
             double hi = voice.RegisterHi;
             TIMBRE timbre = voice.Timbre;
             Preset? preset = voice.Preset;
-            if (preset == null) { DebugLog.Write($"buildcloud: preset for voice={voice.Name} is null."); return ([], new CloudState() { offset = -1, pitch = 0 }); }
+            if (preset == null)
+            {
+                DebugLog.Write($"BuildCloud: preset for voice={voice.Name} is null.");
+                return ([], new CloudState() { offset = -1, pitch = 0 });
+            }
 
             // initialize the cloud state
             CloudState newCloudState = cloudState;
@@ -175,7 +182,11 @@ namespace CMGWpf.PlayFunctions.DSP
             (var Nd, var Pd) = Probability.Continuous((int)Math.Round(cloudDuration * delta), cloudDuration, cloudDuration / StochasticConstants.UNIT);
 
             // check that not all duration are 0
-            if (Pd.Length <= 1) { DebugLog.Write($"buildcloud: duration table for timber={timbre}, deltaT={delta}, duration={cloudDuration} has no or only zero values"); return ([], new CloudState() { offset = -1, pitch = 0 }); }
+            if (Pd.Length <= 1)
+            {
+                DebugLog.Write($"BuildCloud: duration table for timber={timbre}, deltaT={delta}, duration={cloudDuration} has no or only zero values");
+                return ([], new CloudState() { offset = -1, pitch = 0 });
+            }
 
             // initialize the starting time and starting pitch based on the current cloud state and the microtone option
             double t1 = cloudState.offset < 0 ?
@@ -195,7 +206,7 @@ namespace CMGWpf.PlayFunctions.DSP
             while (interval == 0 && iteration < 100) { interval = Probability.Lookup(Pd, Nd, rN.NextDouble()); iteration++; }
             if (interval == 0)
             {
-                DebugLog.Write($"buildcloud: could not find non-zero interval for voice {voice.Name}, time={cellTime}, t1={t1}, pitch1={pitch1}. Skipping this cloud.");
+                DebugLog.Write($"BuildCloud: could not find non-zero interval for voice {voice.Name}, time={cellTime}, t1={t1}, pitch1={pitch1}. Skipping this cloud.");
                 return ([], new CloudState() { offset = -1, pitch = 0 });
             }
             while (!finished)
@@ -248,15 +259,15 @@ namespace CMGWpf.PlayFunctions.DSP
 
                     // Use concurrent collections - no lock needed
                     PlayViewModel.Instance.InstrumentSources.Add(source);
-                    PlayViewModel.Instance.TimeMidiPresets.Add(new TimeMidiPreset()
+                    PlayViewModel.Instance.TimeMidiVoices.Add(new TimeMidiVoice()
                     {
                         Line = new TimeMidiLine
                         {
                             Start = new TimeMidiPoint { Time = source.StartTime, Midi = (int)pitch1 },
                             End = new TimeMidiPoint { Time = source.StopTime, Midi = (int)pitch2 }
                         },
-                        SoundFontName = source.SoundFontName,
-                        PresetName = source.PresetName
+                        GeneratorName = generator.Name,
+                        VoiceName = voice.Name,
                     });
 
                     // calculate the start index for the instrument sample in the cloud sample based on the current element start time (t1) and the cloud start time (time)
@@ -271,6 +282,7 @@ namespace CMGWpf.PlayFunctions.DSP
                 {
                     t1 = t2;
                     pitch1 = voice.Timbre == TIMBRE.glissando ? pitch2 : Probability.Interval(hi - lo, rN) + lo;
+                    if (!microTones) pitch1 = Math.Round(pitch1);
                     interval = 0;
                     int iteration2 = 0;
                     while (interval == 0 && iteration2 < 100)
@@ -280,7 +292,7 @@ namespace CMGWpf.PlayFunctions.DSP
                     }
                     if (interval == 0)
                     {
-                        DebugLog.Write($"buildcloud: could not find non-zero interval for voice {voice.Name}, time={cellTime}, t1={t1}, pitch1={pitch1}. Ending this cloud.");
+                        DebugLog.Write($"BuildCloud: could not find non-zero interval for voice {voice.Name}, time={cellTime}, t1={t1}, pitch1={pitch1}. Ending this cloud.");
                         finished = true;
                     }
                 }
@@ -300,6 +312,7 @@ namespace CMGWpf.PlayFunctions.DSP
             // apply cloud level intensity, pan and reverb to the cloud sample
             if (intensityOption == INTENSITYOPTION.cloud) Intensity.Apply(cloudSample, intensityTransitionOption, intensityParameters, rN);
             if (panOption == PANOPTION.cloud) Pan.Apply(cloudSample, panAlgorithm, panParameters, rN);
+            if (reverbDecay > 0 && reverbDelay > 0) Reverb.Apply(cloudSample, reverbDelay, reverbDecay, PlayTypes.SampleRate);
             return (cloudSample, newCloudState);
         }
     }

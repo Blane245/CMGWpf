@@ -4,6 +4,7 @@
         Title="Processing Generators" 
         Height="200" 
         Width="500"
+        Icon="/Assets/CMG-Logo.ico"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         WindowStyle="ToolWindow"

@@ -1,15 +1,17 @@
 using CMGWpf.Dialogs;
+using CMGWpf.Helpers;
 using CMGWpf.Properties;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
 using CMGWpf.View;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows;
-using static CMGWpf.Model.Generators.StochasticTypes;
 
 namespace CMGWpf.Services
 {
+    /// <summary>
+    /// Singleton service that manages global application state, including user preferences, status messages, and lists of ensembles and note sequences. Provides commands for editing preferences and loading data on startup.
+    /// </summary>
     public class GlobalService : ServiceBase
     {
         private static GlobalService? _instance;
@@ -145,7 +147,7 @@ namespace CMGWpf.Services
         public RelayCommand<object> EditPreferencesCommand =>
             _editPreferencesCommand ??= new RelayCommand<object>(execute =>
             {
-                Debug.WriteLine("EditPreferences command being executed.");
+                DebugLog.Write("EditPreferences command being executed.");
 
                 // display the preferences dialog
                 PreferencesDialog activeDialog = new()
@@ -162,7 +164,7 @@ namespace CMGWpf.Services
         public RelayCommand<Window> EditPreferencesOkCommand =>
             _editPreferencesOkCommand ??= new RelayCommand<Window>(window =>
             {
-                Debug.WriteLine("EditPreferencesOK command being executed.");
+                DebugLog.Write("EditPreferencesOK command being executed.");
                 // move all of the preferences properties to the settings
                 Settings.Default.CMGBeatsPerMeasure = BeatsPerMeasure.ToString();
                 Settings.Default.CMGIsSnap = IsSnap ? "true" : "false";
@@ -179,8 +181,8 @@ namespace CMGWpf.Services
         {
             try
             {
-                ObservableCollection<Ensemble> ensembleList = await EnsembleUtilities.GetEnsembleListAsync();
-                ObservableCollection<string> names = [.. ensembleList.Select(x => x.Name).ToArray()];
+                var ensembleList = await EnsembleHelpers.List();
+                ObservableCollection<string> names = new ObservableCollection<string>(ensembleList.Select(x => x.Name).OrderBy(name => name));
                 EnsembleNames = names;
                 StatusMessages.Add(new Message { Text = $"{names.Count} Ensembles loaded.", Error = names.Count == 0 });
             }
@@ -193,7 +195,7 @@ namespace CMGWpf.Services
         {
             try
             {
-                NoteSequenceNames = await NoteSequenceUtilities.GetNoteSequenceNamesAsync();
+                var NoteSequenceNames = await NoteSequenceHelpers.List();
                 StatusMessages.Add(new Message { Text = $"{NoteSequenceNames.Count} Note Sequences loaded.", Error = NoteSequenceNames.Count == 0 });
             }
             catch (Exception ex)
@@ -254,16 +256,5 @@ namespace CMGWpf.Services
         }
         private ObservableCollection<string> noteSequenceNames = [];
         public ObservableCollection<string> NoteSequenceNames { get => noteSequenceNames; set { noteSequenceNames = value; OnPropertyChanged(); } }
-
-        //public string DbServer { get; set; } = "http://blane-latitude-7290";
-        public readonly string DbServer = "http://localhost";
-        //public string DbServer { get; set; } = "http://192.168.1.182"; // IPv4 address
-        //public string DbServer { get; set; } = "http://10.17.1.23"; // Current network IP
-        public readonly string DbPort = "8081";
-
-        // lock used to synchronize changes to the final stereo buffer, the source information for report writing, the scroll roll contents, and the active tasks.
-        private object _playResultsLock = new();
-        public object PlayResultsLock { get { return _playResultsLock; } set { _playResultsLock = value; OnPropertyChanged(); } }
-
     }
 }

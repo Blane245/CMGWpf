@@ -16,7 +16,6 @@ namespace CMGWpf.MVVM
         public void Delete()
         {
             if (vm.Track == null) return;
-            System.Diagnostics.Debug.WriteLine($"Delete track {vm.Track.Name} command executed.");
 
             // need a message here to the user to confirm deletion of the track, as this cannot be undone.
             MessageBoxResult result = MessageBox.Show($"Are you sure you want to delete the track '{vm.Track}'? This action cannot be undone.", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -89,7 +88,6 @@ namespace CMGWpf.MVVM
         public void Mute()
         {
             if (vm.Track == null) return;
-            System.Diagnostics.Debug.WriteLine($"Mute track {vm.Track.Name} command executed.");
             vm.Track.Mute = !vm.Track.Mute;
             vm.IsDirty = true;
             vm.Status = new ObservableCollection<Message> { new Message { Text = $"Track '{vm.Track.Name}' is now {(vm.Track.Mute ? "muted" : "unmuted")}.", Error = false } };
@@ -98,7 +96,6 @@ namespace CMGWpf.MVVM
         public void Solo()
         {
             if (vm.Track == null) return;
-            System.Diagnostics.Debug.WriteLine($"Solo track {vm.Track.Name} command executed.");
             vm.Track.Solo = !vm.Track.Solo;
             vm.IsDirty = true;
             vm.Status = new ObservableCollection<Message> { new Message { Text = $"Track '{vm.Track.Name}' is now {(vm.Track.Solo ? "soloed" : "unsoloed")}.", Error = false } };
@@ -107,7 +104,6 @@ namespace CMGWpf.MVVM
         public void MoveUp()
         {
             if (vm.Track == null) return;
-            System.Diagnostics.Debug.WriteLine($"Move track {vm.Track.Name} up command executed.");
             int index = -1;
             var tracks = TracksViewModel.Instance.Tracks;
             for (int i = 0; i < tracks.Count; i++)
@@ -131,7 +127,6 @@ namespace CMGWpf.MVVM
         public void MoveDown()
         {
             if (vm.Track == null) return;
-            System.Diagnostics.Debug.WriteLine($"Move track {vm.Track.Name} down command executed.");
             int index = -1;
             var tracks = TracksViewModel.Instance.Tracks;
             for (int i = 0; i < tracks.Count; i++)
@@ -181,7 +176,6 @@ namespace CMGWpf.MVVM
         }
         public void Shift()
         {
-            //TBD Notify generators with open dialogs that their start and stop time have changed
             if (vm.Track == null) return;
             // check if a generator on this track is being edited and block if so
             if (vm.CachedGenerators != null)

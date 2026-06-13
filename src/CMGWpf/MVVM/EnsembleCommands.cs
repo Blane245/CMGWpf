@@ -6,8 +6,8 @@ using CMGWpf.Types;
 using System.Windows;
 using CMGWpf.Panels.Database;
 
-namespace CMGWpf.MVVM.Database
-{
+namespace CMGWpf.MVVM 
+{ 
     public class EnsembleCommands(EnsembleView vm)
     {
         private readonly EnsembleView vm = vm;
@@ -25,7 +25,7 @@ namespace CMGWpf.MVVM.Database
             var response = await EnsembleHelpers.Get(name);
             if (response == null)
             {
-                Messages.Add(vm.Errors, $"Ensemble {name} not found." , true );
+                Messages.Add(vm.Errors, $"Error while loading ensemble '{name}'.", true );
                 return;        
             }
             vm.UIEnsemble = response.Clone();
@@ -82,7 +82,7 @@ namespace CMGWpf.MVVM.Database
                 var response = await EnsembleHelpers.Delete(name);
                 if (!response)
                 {
-                    vm.Errors = [new Message() { Text = "Ensemble not found.", Error = true }];
+                    vm.Errors = [new Message() { Text = "Error while deleting ensemble.", Error = true }];
                     return;
                 }
                 vm.Errors = [new Message() { Text = $"Ensemble '{name}' has been deleted successfully.", Error = false }];
@@ -95,7 +95,7 @@ namespace CMGWpf.MVVM.Database
             var response = await EnsembleHelpers.List();
             if (response == null)
             {
-                vm.Errors = [new Message() { Text = "Ensemble not found.", Error = true }];
+                vm.Errors = [new Message() { Text = "Error while loading ensembles.", Error = true }];
                 return;
             }
             vm.EnsembleList = response;

@@ -1,14 +1,18 @@
 ﻿using CMGWpf.Model;
-using CMGWpf.View;
-using static CMGWpf.Types.PlayTypes;
-using System.Collections.ObjectModel;
 using CMGWpf.Types;
+using CMGWpf.View;
+using System.Collections.ObjectModel;
+using static CMGWpf.Types.PlayTypes;
 
 namespace CMGWpf.PlayFunctions.Utilities
 {
     public static class ReadyPlay
     {
-        // first is to select the generators to be played. In the prototype all generators are selected and the duration of the composition si set the to greatest stop time of all of them. Only error is that there aren't any generators.
+        /// <summary>
+        /// Develop the list of generators to be played based in filtering rules. The filtering rules are as follows: If a generator is passed in, it will return that generator. If there is a time interval, return all generators whose start and stop times are within the interval. If there is no time interval, return all generators on tracks that are soloed, unless the track is also muted, in which case skip all generators on that track. If there are no soloed tracks, return all generators on non-muted tracks. In all cases, skip any generators that are muted. Also validate the selected generators and return any error messages.
+        /// </summary>
+        /// <param name="generator">The generator to check.</param>
+        /// <returns>A ReadyPlayOutput object containing the results of the check.</returns>
         public static ReadyPlayOutput Check(Model.Generators.Generator? generator)
         {
             CMGFile file = FileViewModel.Instance.File;
@@ -64,12 +68,12 @@ namespace CMGWpf.PlayFunctions.Utilities
                 {
                     if (track.Solo && !track.Mute) soloedTracks.Add(track);
                 }
-                // if no soloed tracks, include all unmuted tracks
+                // if no soloed tracks, include all non-muted tracks
                 List<Track> selectedTracks = [];
                 if (soloedTracks.Count != 0) selectedTracks = soloedTracks;
                 else
                 {
-                    foreach(var t in file.Tracks)
+                    foreach (var t in file.Tracks)
                     {
                         if (!t.Mute) selectedTracks.Add(t);
                     }

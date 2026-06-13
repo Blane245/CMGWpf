@@ -10,6 +10,7 @@
         WindowStyle="None"
         ResizeMode="NoResize"
         Width="600" Height="500"
+        Icon="/Assets/CMG-Logo.ico"
         Title="About CMG"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"

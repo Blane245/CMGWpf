@@ -1,11 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CMGWpf.Utilities
+﻿namespace CMGWpf.Utilities
 {
     public static class EuclideanRhythm
     {
+        /// <summary>
+        /// `Get` generates a Euclidean rhythm pattern based on the specified parameters. It creates a sequence of 1s (representing "on" notes) and 0s (representing "off" notes) that are distributed as evenly as possible across the total number of notes. The `offset` parameter allows for rotating the resulting pattern to start at a different point in the sequence.
+        /// </summary>
+        /// <param name="onNotes">The number of "on" notes in the rhythm.</param>
+        /// <param name="totalNotes">The total number of notes in the rhythm.</param>
+        /// <param name="offset">The number of positions to rotate the resulting pattern.</param>
+        /// <returns>An array representing the Euclidean rhythm pattern.</returns>
         public static int[] Get(int onNotes, int totalNotes, int offset)
         {
             List<List<int>> groups = [];

@@ -12,7 +12,7 @@ namespace CMGWpf.PlayFunctions.Utilities
         /// <param name="preset" type="Preset">A SF Preset</param>
         /// <param name="key" type="int">The pitch to be selected (0-127)</param>
         /// <param name="vel" type="int">The velocity to be selected (1-127)</param>
-        /// <returns></returns>
+        /// <returns>The instrument's name, header, and merged generators for the specified key and velocity.</returns>
         public static List<FinalVoice> BuildVoicesForPresetAtKeyVel(
             Preset preset,
             int key,
@@ -49,7 +49,8 @@ namespace CMGWpf.PlayFunctions.Utilities
 
                     var merged = MergeGeneratorsClamped(pg, ig);
 
-                    result.Add(new FinalVoice() {
+                    result.Add(new FinalVoice()
+                    {
                         InstrumentName = instrument.Name,
                         SampleHeader = instrumentRegion.Sample,
                         Generators = merged
@@ -357,8 +358,6 @@ namespace CMGWpf.PlayFunctions.Utilities
         }
     }
 
-    //TODO need to routine to convert SF generator values to standard units for processing (eg centibels to gain, volenv to seconds, etc) for the DSP engine. This routine would be used to aide in development of the intensity envelope and playback rate. Each GenOp that is in the final voice will be converted to a standard unit and then the DSP engine can use those standard units to determine how to apply the various effects and envelopes to the sample. This routine would also apply the appropriate tuning adjustments to determine the final pitch of the sample for playback.
-    // 
     public static class Sf2Defaults
     {
         public static short GetDefault(GenOp op)

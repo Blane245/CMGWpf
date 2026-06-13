@@ -13,6 +13,7 @@
         ResizeMode="NoResize"
         AllowsTransparency="False"
         Closed="Window_Closed"
+        Icon="/Assets/CMG-Logo.ico"
         Title="Voices"
         SizeToContent="Width" Height="250"
         >
@@ -25,11 +26,11 @@
                       CanUserReorderColumns="False" 
                       CanUserSortColumns="False" 
                       CanUserResizeColumns="False"
-                      AutoGenerateColumns="False"
-                      ItemsSource="{Binding PresetColors}">
+                      AutoGenerateColumns="False"   
+                      ItemsSource="{Binding VoiceColors}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="SoundFont" Binding="{Binding SoundFontName}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Preset" Binding="{Binding PresetName}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Generator" Binding="{Binding GeneratorName}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Voice" Binding="{Binding VoiceName}" IsReadOnly="True"/>
                     <DataGridTemplateColumn Header="Color" IsReadOnly="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

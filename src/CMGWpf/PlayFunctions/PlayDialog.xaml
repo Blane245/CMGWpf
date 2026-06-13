@@ -15,6 +15,7 @@
         WindowState="Maximized"
         ResizeMode="NoResize"
         AllowsTransparency="False"
+        Icon="/Assets/CMG-Logo.ico"
         Title="Play"
         >
     <Window.Resources>
@@ -30,8 +31,8 @@
     <Grid Margin="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
-            <RowDefinition Height="52"/>
-            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=PlayHeight}"/>
+            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=PlayHeaderHeight}"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <panels:CustomWindowChrome Grid.Row="0"
                                      WindowTitle="{Binding PlayTitle}"
@@ -110,13 +111,12 @@
                     ToolTip="Record video (audio + Sound Roll)"
                     Margin="5"/>
         </StackPanel>
-        <Grid Grid.Row="2" Background="LightGray" Margin="10,0,0,0">
+        <Grid x:Name="SoundRollGrid" Grid.Row="2" Background="LightGray" Margin="10,0,0,0">
             <ScrollViewer x:Name="SoundRollScrollViewer"
                           HorizontalScrollBarVisibility="Hidden" 
                           VerticalScrollBarVisibility="Hidden">
                 <Canvas x:Name="SoundRollCanvas" 
-                        Background="White"
-                        Initialized="SoundRollCanvas_Initialized"/>
+                        Background="White"/>
             </ScrollViewer>
             <Canvas x:Name="SoundRollFixedCanvas" 
                     Background="Transparent"

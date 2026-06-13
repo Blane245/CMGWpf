@@ -1,5 +1,4 @@
-﻿using CMGWpf.Model.Generators;
-using CMGWpf.SoundFont_2;
+﻿using CMGWpf.SoundFont_2;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
 using static CMGWpf.Types.PresetTypes;
@@ -35,11 +34,11 @@ namespace CMGWpf.Types
             public TimeMidiPoint Start { get; init; } = new TimeMidiPoint();
             public TimeMidiPoint End { get; init; } = new TimeMidiPoint();
         }
-        public class TimeMidiPreset
+        public class TimeMidiVoice
         {
             public TimeMidiLine Line { get; set; } = new TimeMidiLine();
-            public string SoundFontName { get; set; } = "";
-            public string PresetName { get; set; } = "";
+            public string GeneratorName { get; set; } = "";
+            public string VoiceName { get; set; } = "";
         }
         /// <summary>
         /// Contains the instrument name, its sample header, and the merged SoundFont generators that apply to the instrument
@@ -80,20 +79,20 @@ namespace CMGWpf.Types
             public GainEnvelope[] Envelope { get; set; } = [];
         }
         /// <summary>
-        /// Represents a preset within a SoundFont, including its associated SoundFont name and preset name.
+        /// Represents Generator/Voice combination name.
         /// </summary>
-        public class SF_Preset
+        public class GeneratorVoice
         {
-            public string SoundFontName { get; set; } = "";
-            public string PresetName { get; set; } = "";
+            public string GeneratorName { get; set; } = "";
+            public string VoiceName { get; set; } = "";
         }
         /// <summary>
         /// 
         /// </summary>
-        public class PresetColor
+        public class VoiceColor
         {
-            public string SoundFontName { get; set; } = "";
-            public string PresetName { get; set; } = "";
+            public string GeneratorName { get; set; } = "";
+            public string VoiceName { get; set; } = "";
             public Color Color { get; set; } = new Color();
             public Brush ColorBrush => new SolidColorBrush(Color);
         }

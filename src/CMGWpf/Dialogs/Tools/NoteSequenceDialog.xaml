@@ -16,6 +16,7 @@
         WindowStyle="None"
         ResizeMode="CanResize"
         AllowsTransparency="False"
+        Icon="/Assets/CMG-Logo.ico"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
         d:DesignHeight="450" d:DesignWidth="800"
 >

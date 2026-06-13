@@ -1,5 +1,6 @@
 ﻿using CMGWpf.Data;
 using CMGWpf.Model.Database;
+using CMGWpf.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 
@@ -44,7 +45,7 @@ namespace CMGWpf.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error adding voice '{voice.Name}': {ex.Message}");
+                DebugLog.Write($"Error adding voice '{voice.Name}': {ex.Message}");
                 return false;
             }
         }
@@ -83,7 +84,7 @@ namespace CMGWpf.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error modifying voice: {ex.Message}");
+                DebugLog.Write($"Error modifying voice: {ex.Message}");
                 return false;
             }
         }

@@ -1,6 +1,4 @@
-﻿using CMGWpf.Model;
-using CMGWpf.View;
-using CMGWpf.SoundFont_2;
+﻿using CMGWpf.View;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,10 +24,10 @@ namespace CMGWpf.Panels
             // trigger the loading of the preset list 
             if (_vm != null && _vm.UIVoice != null && _vm.UIVoice.SoundFontFile != string.Empty)
             {
-                var soundfont = CMGWpf.Utilities.SoundFontUtilities.GetSoundFont(_vm.UIVoice.SoundFontFile);
+                var soundfont = Utilities.SoundFontUtilities.GetSoundFont(_vm.UIVoice.SoundFontFile);
                 if (soundfont != null)
                 {
-                    var list = soundfont.Presets.Select((p) => CMGWpf.Utilities.SoundFontUtilities.BankPresetToName(p)).ToArray();
+                    var list = soundfont.Presets.Select((p) => Utilities.SoundFontUtilities.BankPresetToName(p)).ToArray();
                     list.Sort();
                     _vm.PresetNames = new ObservableCollection<string>(list);
                 }

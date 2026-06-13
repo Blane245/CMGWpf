@@ -34,7 +34,7 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                     <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="1" Value="{Binding StochasticGenerator.CompositionDuration}" ToolTip="The length of the composition in seconds"/>
                     <Label Content="Number of Time Cells:"/>
                     <xctk:IntegerUpDown Margin="5,0,0,0" Minimum="0" Maximum="1000" Increment="1" Value="{Binding StochasticGenerator.NumberOfTimeCells}" ToolTip="The number of equal length time cells in the composition"/>
-                    <Label Content="Events/Cell:"/>
+                    <Label Content="Clouds/Cell:"/>
                     <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="0.01" Value="{Binding StochasticGenerator.Lambda}" ToolTip="The average number of events in each cell"/>
                     <Label Content="Composition Seed:"/>
                     <Button Content="New Seed" Background="Green" Foreground="White" Command="{Binding CompositionSeedCommand}" CommandParameter="{Binding StochasticGenerator}" ToolTip="Click to generate a new random seed"/>
@@ -146,7 +146,7 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                             <DataGridTemplateColumn Header="Volume" ToolTipService.ToolTip="The volume of the voice [-10,+10] dB">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Slider  Minimum="-10" Maximum="10" Interval="1" TickFrequency="1" TickPlacement="TopLeft" IsSnapToTickEnabled="True" Value="{Binding Volume, Mode=TwoWay}" Width="100"/>
+                                        <Slider  Minimum="-100" Maximum="100" Interval="1" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding Volume, Mode=TwoWay}" Width="100"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -173,7 +173,7 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         <!-- The Composition displaying only the unmuted voices -->
         <StackPanel Grid.Row="3" Orientation="Vertical">
             <Label Content="Composition" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
-            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="300">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="250">
             <DataGrid x:Name="CompositionDataGrid" 
                       ItemsSource="{Binding StochasticComposition}" 
                       AutoGenerateColumns="False" 

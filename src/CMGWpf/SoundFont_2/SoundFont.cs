@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -8,7 +6,7 @@ using System.Text;
 namespace CMGWpf.SoundFont_2
 {
     /// <summary>
-    /// Reperesents a SoundFont.
+    /// Represents a SoundFont.
     /// </summary>
     public sealed class SoundFont
     {

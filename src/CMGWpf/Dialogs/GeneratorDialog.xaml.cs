@@ -10,7 +10,7 @@ namespace CMGWpf.Dialogs
     /// </summary>
     public partial class GeneratorDialog : Window
     {
-        // we assume that this window is close by a cancel action. When it is closed for other reasons, this must be made tru to avoid restoring the UIGenerator
+        // we assume that this window is closed by a cancel action. When it is closed for other reasons, this must be made true to avoid restoring the UIGenerator
         public bool userCancel = true;
         public GeneratorDialog()
         {
@@ -47,7 +47,7 @@ namespace CMGWpf.Dialogs
                 {
                     Generator g = vm.Generator;
                     //vm.NewStartTime = g.StartTime; // this will change the UIGenerator.StopTime, which will have to be restored
-                    // the cloning occuring here will restore the UI generator stop time values
+                    // the cloning occurring here will restore the UI generator stop time values
                     switch (vm.Generator.ToString())
                     {
                         case "Algorithmic":

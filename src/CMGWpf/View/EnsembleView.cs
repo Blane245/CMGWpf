@@ -1,6 +1,5 @@
 ﻿using CMGWpf.Model.Database;
 using CMGWpf.MVVM;
-using CMGWpf.MVVM.Database;
 using CMGWpf.Panels.Database;
 using CMGWpf.SoundFont_2;
 using CMGWpf.Types;
@@ -12,6 +11,9 @@ using System.Windows.Controls;
 
 namespace CMGWpf.View
 {
+    /// <summary>
+    /// Singleton EnsembleView class serves as the ViewModel for the EnsemblePanel, which is responsible for managing the ensembles and voices in the application. It provides properties and commands for adding, editing, deleting, and listing ensembles and voices, as well as handling the selection of soundfont files and presets when adding/editing voices. The ViewModel also maintains the state of the current ensemble or voice being edited, as well as any error messages that may arise during validation.
+    /// </summary>
     public class EnsembleView : ViewModelBase
     {
         private static EnsembleView? _instance;
@@ -59,26 +61,32 @@ namespace CMGWpf.View
                 {
                     soundFontFileNames.Add(Path.GetFileName(file));
                 }
+                var sorted = new ObservableCollection<string>(soundFontFileNames.OrderBy(name => name));
+                soundFontFileNames = sorted;
             }
         }
         public ObservableCollection<string> SoundFontFileNames
         {
-            get { if (soundFontFileNames.Count == 0)
+            get
+            {
+                if (soundFontFileNames.Count == 0)
                     LoadSoundFontFileNames();
-                return soundFontFileNames; }
+                return soundFontFileNames;
+            }
         }
         private ObservableCollection<string> _presetNames = new ObservableCollection<string>();
         public ObservableCollection<string> PresetNames
         {
             get => _presetNames;
-            set { _presetNames = value; OnPropertyChanged(); }
+            set { _presetNames = new ObservableCollection<string>(value.OrderBy(name => name)); OnPropertyChanged(); }
         }
         private string newSoundFontFile = "";
         public string NewSoundFontFile
         {
             get { return newSoundFontFile; }
             // when the soundfont file changes, load it into the SF buffer and get the list of presets to populate the preset drop down
-            set {
+            set
+            {
                 newSoundFontFile = value;
                 SoundFont? sf = Utilities.SoundFontUtilities.GetSoundFont(newSoundFontFile);
                 if (sf != null)
@@ -88,7 +96,7 @@ namespace CMGWpf.View
                     {
                         newPresets.Add(Utilities.SoundFontUtilities.BankPresetToName(preset));
                     }
-                    PresetNames = newPresets;
+                    PresetNames = new ObservableCollection<string>(newPresets.OrderBy(name => name));
                 }
 
                 OnPropertyChanged();
@@ -98,13 +106,13 @@ namespace CMGWpf.View
         public ObservableCollection<Ensemble> EnsembleList
         {
             get => _ensembleList;
-            set { _ensembleList = value; OnPropertyChanged(); }
+            set { _ensembleList = new ObservableCollection<Ensemble>(value.OrderBy(ensemble => ensemble.Name)); OnPropertyChanged(); }
         }
         private ObservableCollection<Voice> _voiceList = new ObservableCollection<Voice>();
         public ObservableCollection<Voice> VoiceList
         {
             get => _voiceList;
-            set { _voiceList = value; OnPropertyChanged(); }
+            set { _voiceList = new ObservableCollection<Voice>(value.OrderBy(voice => voice.Name)); OnPropertyChanged(); }
         }
         public class SelectableVoiceType() : INotifyPropertyChanged
         {
@@ -136,14 +144,16 @@ namespace CMGWpf.View
         }
         private ObservableCollection<VoiceEnsemblesListType> _voiceEnsemblesList = [];
         public ObservableCollection<VoiceEnsemblesListType> VoiceEnsemblesList
-        { get => _voiceEnsemblesList;
-            set { _voiceEnsemblesList = value; OnPropertyChanged(); } }
+        {
+            get => _voiceEnsemblesList;
+            set { _voiceEnsemblesList = new ObservableCollection<VoiceEnsemblesListType>(value.OrderBy(item => item.Name)); OnPropertyChanged(); }
+        }
 
         private ObservableCollection<SelectableVoiceType> _selectableVoiceList = new ObservableCollection<SelectableVoiceType>();
         public ObservableCollection<SelectableVoiceType> SelectableVoiceList
         {
             get => _selectableVoiceList;
-            set { _selectableVoiceList = value; OnPropertyChanged(); }
+            set { _selectableVoiceList = new ObservableCollection<SelectableVoiceType>(value.OrderBy(item => item.Voice?.Name)); OnPropertyChanged(); }
         }
 
         public string EnsembleEditorTitle
@@ -179,7 +189,7 @@ namespace CMGWpf.View
         }
         private ObservableCollection<Message> _errors = new ObservableCollection<Message>();
         public ObservableCollection<Message> Errors { get { return _errors; } set { _errors = value; OnPropertyChanged(); } }
-        
+
         private UserControl? _editorPanel;
         public UserControl? EditorPanel
         {

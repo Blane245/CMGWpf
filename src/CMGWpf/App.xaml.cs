@@ -1,5 +1,6 @@
-﻿using CMGWpf.Services;
-using CMGWpf.MVVM;
+﻿using CMGWpf.MVVM;
+using CMGWpf.Services;
+using CMGWpf.Utilities;
 using CMGWpf.View;
 using FFMpegCore;
 using System.IO;
@@ -8,7 +9,7 @@ using System.Windows;
 namespace CMGWpf
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// The entry point for the CMG application. Much of the logic here is to handle unhandled exceptions gracefully, ensuring that the file lock is released and the user is informed of any critical errors before the application crashes. It also configures FFmpeg and initializes the Jump List for recent files.
     /// </summary>
     public partial class App : Application
     {
@@ -32,7 +33,7 @@ namespace CMGWpf
             try
             {
                 // Log the exception
-                System.Diagnostics.Debug.WriteLine($"Unhandled UI Thread Exception: {e.Exception}");
+                DebugLog.Write($"Unhandled UI Thread Exception: {e.Exception}");
 
                 // Release file lock before crashing
                 FileLockService.Instance.ReleaseLock();
@@ -46,7 +47,7 @@ namespace CMGWpf
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in exception handler: {ex}");
+                DebugLog.Write($"Error in exception handler: {ex}");
             }
 
             // Let the application crash - don't mark as handled
@@ -58,7 +59,7 @@ namespace CMGWpf
             try
             {
                 // Log the exception
-                System.Diagnostics.Debug.WriteLine($"Unhandled Non-UI Thread Exception: {e.ExceptionObject}");
+                DebugLog.Write($"Unhandled Non-UI Thread Exception: {e.ExceptionObject}");
 
                 // Release file lock before crashing
                 FileLockService.Instance.ReleaseLock();
@@ -74,7 +75,7 @@ namespace CMGWpf
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in exception handler: {ex}");
+                DebugLog.Write($"Error in exception handler: {ex}");
             }
         }
 
@@ -83,7 +84,7 @@ namespace CMGWpf
             try
             {
                 // Log the exception
-                System.Diagnostics.Debug.WriteLine($"Unhandled Task Exception: {e.Exception}");
+                DebugLog.Write($"Unhandled Task Exception: {e.Exception}");
 
                 // Release file lock
                 FileLockService.Instance.ReleaseLock();
@@ -93,7 +94,7 @@ namespace CMGWpf
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in exception handler: {ex}");
+                DebugLog.Write($"Error in exception handler: {ex}");
             }
         }
 
@@ -106,7 +107,7 @@ namespace CMGWpf
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error releasing lock on exit: {ex}");
+                DebugLog.Write($"Error releasing lock on exit: {ex}");
             }
         }
 
@@ -185,7 +186,7 @@ namespace CMGWpf
                             if (Directory.Exists(ffmpegPath) && File.Exists(Path.Combine(ffmpegPath, "ffmpeg.exe")))
                             {
                                 GlobalFFOptions.Configure(new FFOptions { BinaryFolder = ffmpegPath });
-                                System.Diagnostics.Debug.WriteLine($"FFmpeg found at: {ffmpegPath}");
+                                DebugLog.Write($"FFmpeg found at: {ffmpegPath}");
                                 return;
                             }
                         }
@@ -194,13 +195,13 @@ namespace CMGWpf
                 else if (Directory.Exists(path) && File.Exists(Path.Combine(path, "ffmpeg.exe")))
                 {
                     GlobalFFOptions.Configure(new FFOptions { BinaryFolder = path });
-                    System.Diagnostics.Debug.WriteLine($"FFmpeg found at: {path}");
+                    DebugLog.Write($"FFmpeg found at: {path}");
                     return;
                 }
             }
 
             // If not found in common locations, assume it's in PATH
-            System.Diagnostics.Debug.WriteLine("FFmpeg not found in common locations, assuming it's in system PATH");
+            DebugLog.Write("FFmpeg not found in common locations, assuming it's in system PATH");
         }
     }
 

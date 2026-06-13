@@ -1,8 +1,8 @@
 ﻿using CMGWpf.Model;
 using CMGWpf.Model.Generators;
 using CMGWpf.PlayFunctions.Utilities;
-using CMGWpf.Services;
 using CMGWpf.Types;
+using CMGWpf.Utilities;
 using CMGWpf.View;
 using static CMGWpf.Types.DBTypes;
 using static CMGWpf.Types.PlayTypes;
@@ -11,6 +11,10 @@ namespace CMGWpf.PlayFunctions.DSP
 {
     public class SourcesFromAlgorithmic
     {
+        /// <summary>
+        /// This function generates the audio sources for an algorithmic generator by looping through the time range of the generator and getting the current values from the note, attack, speed, duration, pan, and volume algorithms at each point in time. Looping is done differently when the note algorithm is sequencer It then generates the instrument samples for each note using the preset and sound font information, applies pan and reverb, and merges the samples into the final audio buffer. It also creates InstrumentSource objects for each note and adds them to the collection for visualization. The function is designed to run on a separate thread for each generator to allow for parallel processing of multiple generators.
+        /// </summary>
+        /// <param name="algorithmic">The generator to be processed</param>
         public static void Get(Algorithmic algorithmic)
         {
             // gather the DSP, etc., information from this generator on a separate thread so that multiple generators can be processed in parallel. 
@@ -109,23 +113,23 @@ namespace CMGWpf.PlayFunctions.DSP
                             bool lockTaken = false;
                             try
                             {
-                                Monitor.Enter(GlobalService.Instance.PlayResultsLock, ref lockTaken);
+                                Monitor.Enter(PlayViewModel.Instance.PlayResultsLock, ref lockTaken);
                                 PlayViewModel.Instance.FinalSignal.Add(panSamples, instrumentStartIndex);
                             }
                             finally
                             {
                                 if (lockTaken)
                                 {
-                                    Monitor.Exit(GlobalService.Instance.PlayResultsLock);
+                                    Monitor.Exit(PlayViewModel.Instance.PlayResultsLock);
                                 }
                             }
 
                             // These use ConcurrentBag - no lock needed!
-                            PlayViewModel.Instance.TimeMidiPresets.Add(new TimeMidiPreset   
+                            PlayViewModel.Instance.TimeMidiVoices.Add(new TimeMidiVoice
                             {
                                 Line = new TimeMidiLine { Start = new TimeMidiPoint { Time = time, Midi = note }, End = new TimeMidiPoint { Time = instrumentEndTime, Midi = note } },
-                                SoundFontName = soundFontName,
-                                PresetName = preset.Name
+                                GeneratorName = algorithmic.Name,
+                                VoiceName = ""
                             });
                             PlayViewModel.Instance.InstrumentSources.Add(source);
                         }
@@ -142,7 +146,7 @@ namespace CMGWpf.PlayFunctions.DSP
                 int beats = 0;
                 foreach (SequenceItem item in sequencer.Items)
                 {
-                    double beat = item.beats;
+                    double beat = item.Beats;
                     CurrentValues currentValues = algorithmic.GetCurrentValues(time - startTime, beats);
                     double note = currentValues.Note;
                     var hitBeat = currentValues.Beat;
@@ -153,17 +157,12 @@ namespace CMGWpf.PlayFunctions.DSP
                     double duration = (interval * durationPercent) / 100;
                     var volumedB = Math.Clamp(parent.Volume + currentValues.Volume, -10, 10);
                     var pan = currentValues.Pan;
-                    if (item.value >= 0 && hitBeat) // not a rest or a skipped note
+                    if (item.Value >= 0 && hitBeat) // not a rest or a skipped note
                     {
+                        DebugLog.Write($"Hit beat at time {time}. Playing note {note} with velocity {velocity}, speed {speed}, interval {interval}, duration {duration}, volume {volumedB}, pan {pan}");
                         List<FinalVoice> voices = PresetUtilities.BuildVoicesForPresetAtKeyVel(preset, (int)note, (int)velocity);
                         foreach (var voice in voices)
                         {
-                            DebugLog.Write($"Building sample {voice!.SampleHeader!.Name}, start {voice.SampleHeader.Start}, end {voice.SampleHeader.End}, length {voice.SampleHeader.End - voice.SampleHeader.Start}, loop start {voice.SampleHeader.StartLoop}, loop end {voice.SampleHeader.EndLoop}, sample rate {voice.SampleHeader.SampleRate}, original pitch {voice.SampleHeader.OriginalPitch}, pitch correction {voice.SampleHeader.PitchCorrection} for Instrument {voice.InstrumentName} with generators:");
-                            DebugLog.Write($"");
-                            //foreach (var SFgen in voice.Generators)
-                            //{
-                            //    DebugLog($"  {SFgen.Key}: {SFgen.Value}");
-                            //}                        // not a rest
                             (double[] instrumentSample, InstrumentSource source) = InstrumentSample.Get(new InstrumentSampleParameters
                             {
                                 Duration = duration,
@@ -212,27 +211,27 @@ namespace CMGWpf.PlayFunctions.DSP
                             bool lockTaken = false;
                             try
                             {
-                                Monitor.Enter(GlobalService.Instance.PlayResultsLock, ref lockTaken);
+                                Monitor.Enter(PlayViewModel.Instance.PlayResultsLock, ref lockTaken);
                                 PlayViewModel.Instance.FinalSignal.Add(panInstrumentSample, instrumentStartIndex);
                             }
                             finally
                             {
                                 if (lockTaken)
                                 {
-                                    Monitor.Exit(GlobalService.Instance.PlayResultsLock);
+                                    Monitor.Exit(PlayViewModel.Instance.PlayResultsLock);
                                 }
                             }
 
                             // Use concurrent collections - no lock needed
-                            PlayViewModel.Instance.TimeMidiPresets.Add(new TimeMidiPreset
+                            PlayViewModel.Instance.TimeMidiVoices.Add(new TimeMidiVoice
                             {
                                 Line = new TimeMidiLine
                                 {
                                     Start = new TimeMidiPoint { Time = time, Midi = note },
                                     End = new TimeMidiPoint { Time = instrumentEndTime, Midi = note }
                                 },
-                                SoundFontName = soundFontName,
-                                PresetName = preset.Name
+                                GeneratorName = algorithmic.Name,
+                                VoiceName = ""
                             });
                             PlayViewModel.Instance.InstrumentSources.Add(source);
                         }
@@ -242,14 +241,14 @@ namespace CMGWpf.PlayFunctions.DSP
                 }
             }
 
-            // add the preset to the collection of presets that have been played so that it can be displayed in the UI with its assigned color
+            // add the generator name to the list of generator voices for scroll roll display
             // ConcurrentBag is thread-safe, no lock needed
-            SF_Preset currentPreset = new()
+            GeneratorVoice currentGV = new()
             {
-                SoundFontName = soundFontName,
-                PresetName = preset.Name
+                GeneratorName = algorithmic.Name,
+                VoiceName = ""
             };
-            PlayViewModel.Instance.SF_Presets.Add(currentPreset);
+            PlayViewModel.Instance.GeneratorVoices.Add(currentGV);
         }
     }
 }

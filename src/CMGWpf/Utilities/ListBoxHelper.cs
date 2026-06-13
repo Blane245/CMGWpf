@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Windows.Controls;
 
 namespace CMGWpf.Utilities
@@ -10,8 +9,7 @@ namespace CMGWpf.Utilities
     public static class ListBoxHelper
     {
         /// <summary>
-        /// Sets up two-way synchronization between a ListBox's SelectedItems and an ObservableCollection.
-        /// Call this in the dialog's constructor or Loaded event.
+        /// Sets up two-way synchronization between a ListBox's SelectedItems and an ObservableCollection. Call this in the dialog's constructor or Loaded event.
         /// </summary>
         /// <param name="listBox">The ListBox control with SelectionMode="Multiple"</param>
         /// <param name="boundCollection">The ObservableCollection to sync with</param>

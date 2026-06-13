@@ -2,9 +2,9 @@
 using CMGWpf.PlayFunctions.DSP;
 using CMGWpf.PlayFunctions.Utilities;
 using CMGWpf.Types;
+using CMGWpf.Utilities;
 using CMGWpf.View;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Forms;
@@ -13,12 +13,17 @@ using static CMGWpf.Types.PlayTypes;
 
 namespace CMGWpf.PlayFunctions
 {
-
+    /// <summary>
+    /// The driver for playing the composition or generating a report. This class handles the main workflow for processing the generators in the composition, including checking for active generator dialogs, preparing the data for playback or reporting, and managing the multi-threading of DSP processing for the generators. It also includes functions for normalizing the audio buffer and managing timers for updating the UI during playback. The PlayEngine class is designed to be responsive to user interactions, allowing for cancellation of processing and providing feedback on progress through the UI. Overall, it serves as the central hub for coordinating the various components involved in playing or reporting on the composition.
+    /// </summary>
     public static class PlayEngine
     {
+        /// <summary>
+        /// check if any generator dialogs are currently open and return true if so. Play and Report are prevented from executing if generators are being added or edited.
+        /// </summary>
+        /// <returns>true if any generator dialogs are open, otherwise false.</returns>
         public static bool CheckActiveGenerators()
         {
-            // check if any generator dialogs are currently open and return true if so. Play and Report are prevented from executing if generators are being added or edited.
             ObservableCollection<TrackViewModel>? trackViewModels = TracksViewModel.Instance.CachedTracks;
             if (trackViewModels == null) return false;
             foreach (var trackVm in trackViewModels)
@@ -32,9 +37,15 @@ namespace CMGWpf.PlayFunctions
             }
             return false;
         }
+        /// <summary>
+        /// The main entry point for starting the play or report process. This function checks for active generator dialogs, prepares the data for playback or reporting, and initializes the multi-threading process for DSP processing of the generators. It also handles user interactions such as cancellation and provides feedback on progress through the UI. The function first checks if any generator dialogs are open and prompts the user to continue if so. Then it uses the ReadyPlay utility to check if the composition is ready for play or report, and if there are any errors it displays them in the UI. If everything is ready, it initializes the necessary data structures and calls the Go function to start the processing.
+        /// </summary>
+        /// <param name="generator">The generator to be processed, if any.</param>
+        /// <param name="isPlay">Indicates whether the process is for playback (true) or report generation (false).</param>
+        /// <param name="isBeingEdited">Indicates whether the generator is currently being edited.</param>
         public static void StartUp(Generator? generator, bool isPlay, bool isBeingEdited)
         {
-            Debug.WriteLine($"{(isPlay ? "Play" : "Report")} command being executed.");
+            DebugLog.Write($"{(isPlay ? "Play" : "Report")} command being executed.");
 
             // check if any generators or being edited and give the user the option to continue or not. Special handling is needed when play is invoked from the generator edit dialog
             if (!isBeingEdited && CheckActiveGenerators())
@@ -51,19 +62,24 @@ namespace CMGWpf.PlayFunctions
                 return;
             }
 
-            // this function is used by both Play and Report. In Play it will generate the audio buffer and the sources for the report writer, and then show the PlayDialog with the sound roll visualization. In Report it will just generate the audio buffer and the sources for the report writer, show an file save dialog, and the build the htm that describes all of the active generators and their sources. The PlayDialog and ReportWriter are separate windows that can be shown independently, but they both use the same PlayViewModel to share data between them. The PlayViewModel is a singleton that holds the state of the play session, including the generators being played, the audio buffer, the current play position, and other relevant information. This allows for a clean separation of concerns between the data processing in the PlayEngine and the UI presentation in the dialogs.
             // initialize the play/record processing inputs and outputs and launch the generator conversion multi threading process.
             PlayViewModel.Instance.PlayGenerators = ready.Generators;
             PlayViewModel.Instance.PlayDuration = ready.Duration;
             PlayViewModel.Instance.FinalSignal = new AudioBufferWrapper(new double[(int)Math.Ceiling(ready.Duration) * SampleRate]);
-            PlayViewModel.Instance.TimeMidiPresets = [];
-            PlayViewModel.Instance.SF_Presets = [];
+            PlayViewModel.Instance.TimeMidiVoices = [];
+            PlayViewModel.Instance.GeneratorVoices = [];
             PlayViewModel.Instance.InstrumentSources = [];
+            PlayViewModel.Instance.CompletedGenerators = 0;
             Go(isPlay);
         }
+
+        // 
+        /// <summary>
+        /// This function sets up for either playing the composition or generating a report of the composition. It uses multi-threading to handle DSP for the generators in the composition, allowing for a responsive UI and efficient processing. The function initializes the necessary dialogs and timers for monitoring progress and updating the UI, and it handles cancellation by the user. Once all processing is complete, it either starts playback or generates the report based on the user's choice.
+        /// </summary>
+        /// <param name="isPlay"></param>
         public static void Go(bool isPlay)
         {
-            // this function is used by both Play and Report. In Play it will generate the audio buffer and the sources for the report writer, and then show the PlayDialog with the sound roll visualization. In Report it will just generate the audio buffer and the sources for the report writer, show an file save dialog, and the build the htm that describes all of the active generators and their sources. The PlayDialog and ReportWriter are separate windows that can be shown independently, but they both use the same PlayViewModel to share data between them. The PlayViewModel is a singleton that holds the state of the play session, including the generators being played, the audio buffer, the current play position, and other relevant information. This allows for a clean separation of concerns between the data processing in the PlayEngine and the UI presentation in the dialogs.
             PlayDialog? playDialog = null;
             SaveFileDialog? saveFileDialog = null;
             if (isPlay)
@@ -88,12 +104,10 @@ namespace CMGWpf.PlayFunctions
                     OverwritePrompt = true,
                     FileName = $"{fileNameRoot}.htm"
                 };
-                saveFileDialog.ShowDialog();
-                if (string.IsNullOrEmpty(saveFileDialog.FileName)) return; // user cancelled
+                DialogResult openResult = saveFileDialog.ShowDialog();
+                if (openResult == DialogResult.Cancel) return; // user cancelled
             }
 
-
-            // kick off the tasks for each generator and have them update the global state as they go. The generators will be responsible for updating the audio buffer, the sources collection, the presets collection, and the sound roll instruments as they are being processed. The tasks will be monitored for completion and the progress will be reported to the UI. Once all of the tasks are completed, the audio buffer will be normalized and assigned to the PlayViewModel for playback or report generation. The use of multiple threads allows for a responsive UI and efficient processing of the generators, especially when there are multiple generators that can be processed in parallel.
             List<Task> tasks = new List<Task>();
             CancellationTokenSource tokenSource = new CancellationTokenSource();
             CancellationToken cancellationToken = tokenSource.Token;
@@ -116,9 +130,10 @@ namespace CMGWpf.PlayFunctions
                      try
                      {
                          if (cancellationToken.IsCancellationRequested) cancellationToken.ThrowIfCancellationRequested();
-                     } catch (OperationCanceledException)
+                     }
+                     catch (OperationCanceledException)
                      {
-                         Debug.WriteLine($"Operation Canceled Exception Thrown");
+                         DebugLog.Write($"Operation Canceled Exception Thrown");
                      }
                  }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
                     tasks.Add(aTask);
@@ -143,21 +158,21 @@ namespace CMGWpf.PlayFunctions
                 PlayViewModel.Instance.ProgressMessage = $"Dispatching tasks to process {PlayViewModel.Instance.TotalGenerators} generators...";
                 progressDialog.Show();
 
-                progressTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+                progressTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000) };
                 progressTimer.Tick += (s, e) => PollProgress();
                 progressTimer.Start();
-                // At this point we relinquish control to the progress timer to monitor the completion of the tasks and to update the UI accordingly. The user can cancel the operation at any time, which will signal the tasks to stop and will update the status messages in the UI to indicate that the operation was cancelled.
             }
-            // setup a timer to monitor the progress of the tasks and update the UI accordingly. This will allow the user to see the progress of the processing and to cancel it if they wish. The timer will check the status of the tasks at regular intervals and update the progress in the PlayViewModel, which will be reflected in the UI. The user can cancel the operation at any time, which will signal the tasks to stop and will update the status messages in the UI to indicate that the operation was cancelled.
+
+            // Monitor the progress of the tasks to be completed or cancelled every second, and update the progress message in the UI. If the user cancels, stop the tasks and close the progress dialog. If all tasks are completed, close the progress dialog and proceed to play or report generation.
             void PollProgress()
             {
-                Debug.WriteLine($"Polling progress at {DateTime.Now}, {PlayViewModel.Instance.CompletedGenerators} of {PlayViewModel.Instance.TotalGenerators} generators completed.");
+                DebugLog.Write($"Polling progress at {DateTime.Now}, {PlayViewModel.Instance.CompletedGenerators} of {PlayViewModel.Instance.TotalGenerators} generators completed.");
                 if (PlayViewModel.Instance.UserCancelled)
                 {
                     tokenSource.Cancel();
                     tokenSource.Dispose();
                     progressTimer.Stop();
-                    FileViewModel.Instance.StatusMessages = new ObservableCollection<Types.Message>() { new Types.Message() { Text = $"{(isPlay ? "Play" : "Record")} processing cancelled by user." } };
+                    FileViewModel.Instance.StatusMessages = new ObservableCollection<Types.Message>() { new Types.Message() { Text = $"{(isPlay ? "Play" : "Report")} processing cancelled by user." } };
                     return;
                 }
                 int completedTasks = tasks.Count(t => t.IsCompleted);
@@ -184,8 +199,8 @@ namespace CMGWpf.PlayFunctions
                     // convert the final signal from the generators from double to float and normalize
                     PlayViewModel.Instance.AudioBuffer = NormalizeBuffer(PlayViewModel.Instance.FinalSignal.Buffer);
                     // prepare the palette for the sound roll
-                    SoundRollBuilder.TimeMidiPresets = PlayViewModel.Instance.TimeMidiPresets;
-                    PlayViewModel.Instance.PresetColors = SoundRollBuilder.DefineVoicePalette(PlayViewModel.Instance.SF_Presets);
+                    SoundRollBuilder.TimeMidiVoices = PlayViewModel.Instance.TimeMidiVoices;
+                    PlayViewModel.Instance.VoiceColors = SoundRollBuilder.DefineVoicePalette(PlayViewModel.Instance.GeneratorVoices);
                     // Initialize NAudio if we have audio data
                     if (PlayViewModel.Instance.AudioBuffer!.Length > 0)
                     {
@@ -216,12 +231,13 @@ namespace CMGWpf.PlayFunctions
                     PlayViewModel.Instance.AudioOutput?.Stop();
                     PlayViewModel.Instance.AudioOutput?.Dispose();
                     PlayViewModel.Instance.AudioOutput = null;
+                    FileViewModel.Instance.StatusMessages = [new() { Text = $"Play complete for {FileViewModel.Instance.FileName}." }];
                 }
                 else
                 {
                     // Generate the report using the active generators and sources
                     ReportWriter.WriteReport(saveFileDialog!.FileName);
-                    FileViewModel.Instance.StatusMessages = new ObservableCollection<Types.Message>() { new Types.Message() { Text = $"HTML report written to {saveFileDialog.FileName}." } };
+                    FileViewModel.Instance.StatusMessages = [new() { Text = $"HTML report written to {saveFileDialog.FileName}." }];
                 }
 
                 return;
@@ -284,7 +300,7 @@ namespace CMGWpf.PlayFunctions
                 }
             };
             positionTimer.Start();
-            Debug.WriteLine($"Position timer started at {DateTime.Now}");
+            DebugLog.Write($"Position timer started at {DateTime.Now}");
         }
         private static DispatcherTimer? signalTimer;
         public static void InitializeSignalLevelTimer()
@@ -305,14 +321,14 @@ namespace CMGWpf.PlayFunctions
                 }
             };
             signalTimer.Start();
-            Debug.WriteLine($"Signal Timer started at {DateTime.Now}");
+            DebugLog.Write($"Signal Timer started at {DateTime.Now}");
         }
 
         public static void StopTimers()
         {
             positionTimer?.Stop();
             signalTimer?.Stop();
-            Debug.WriteLine($"Timers stopped at {DateTime.Now}");
+            DebugLog.Write($"Timers stopped at {DateTime.Now}");
         }
         #endregion
 

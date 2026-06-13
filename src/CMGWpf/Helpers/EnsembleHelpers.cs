@@ -1,5 +1,6 @@
 ﻿using CMGWpf.Data;
 using CMGWpf.Model.Database;
+using CMGWpf.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 
@@ -11,7 +12,6 @@ namespace CMGWpf.Helpers
         {
             using var context = new CmgDbContext();
             var ensembles = await context.Ensembles
-                //.Include(e => e.Voices)
                 .ToListAsync();
             return new ObservableCollection<Ensemble>(ensembles);
         }
@@ -60,7 +60,7 @@ namespace CMGWpf.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error adding ensemble: {ex.Message}");
+                DebugLog.Write($"Error adding ensemble: {ex.Message}");
                 return false;
             }
         }
@@ -83,7 +83,7 @@ namespace CMGWpf.Helpers
                         await context.SaveChangesAsync();
                     } catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Error removing ensemble: {ex.Message}");
+                        DebugLog.Write($"Error removing ensemble: {ex.Message}");
                         return false;
 
                     }
@@ -116,7 +116,7 @@ namespace CMGWpf.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error modifying ensemble: {ex.Message}");
+                DebugLog.Write($"Error modifying ensemble: {ex.Message}");
                 return false;
             }
         }

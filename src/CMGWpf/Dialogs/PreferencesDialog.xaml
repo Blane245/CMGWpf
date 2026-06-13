@@ -13,6 +13,7 @@
         WindowStyle="None"
         ResizeMode="CanResize"
         MinHeight="210" MinWidth="300"
+        Icon="/Assets/CMG-Logo.ico"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
         >
     <shell:WindowChrome.WindowChrome>
@@ -35,7 +36,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Soundfont Directory: "/>
-                    <TextBox Text="{Binding SoundFontFileLocation, Mode=TwoWay}" ToolTip="Enter the local computer file syste path to the folder that contains soundfont files."/>
+                    <TextBox Text="{Binding SoundFontFileLocation, Mode=TwoWay}" ToolTip="Enter the local computer file system path to the folder that contains soundfont files."/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Record Format: "/>

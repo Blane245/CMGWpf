@@ -16,8 +16,7 @@ namespace CMGWpf.PlayFunctions.Utilities
         private static ConcurrentBag<InstrumentSource> InstrumentSources => PlayViewModel.Instance.InstrumentSources;
         /// <summary>
         /// This will use the information gathered during the play process to write a report to a file in HTML format. 
-        /// The report will include details about the instruments used, their parameters, and any relevant information 
-        /// that can help with debugging or analysis.
+        /// The report will include details about the instruments used, their parameters, the instrument source data from DSP, and any relevant information that can help with debugging or analysis or a composition.
         /// </summary>
         /// <param name="filePath">Path to the output HTML file</param>
         public static void WriteReport(string filePath)
@@ -529,7 +528,7 @@ namespace CMGWpf.PlayFunctions.Utilities
         {
             if (items.Count == 0)
                 return "No items in sequence.";
-            return string.Join(", ", items.Select(i => i.value.ToString("F2")+":"+i.beats.ToString("F2")));
+            return string.Join(", ", items.Select(i => i.Value.ToString("F2") + ":" + i.Beats.ToString("F2")));
         }
         private static string RenderStochasticDetails(Stochastic stoch)
         {

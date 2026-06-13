@@ -4,7 +4,6 @@ using CMGWpf.Panels;
 using CMGWpf.Panels.Database;
 using CMGWpf.Types;
 using CMGWpf.View;
-using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Windows;
 

@@ -1,14 +1,15 @@
 ﻿using CMGWpf.PlayFunctions;
 using CMGWpf.Services;
 using CMGWpf.Types;
+using CMGWpf.Utilities;
 using CMGWpf.View;
 using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Win32;
 using NAudio.Lame;
 using NAudio.Wave;
-using System.Diagnostics;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -21,8 +22,6 @@ namespace CMGWpf.MVVM
         #region Play Dialog Commands
         public void Rewind()
         {
-            Debug.WriteLine("Rewind command being executed.");
-
             if (vm.AudioOutput != null && vm.AudioProvider is AudioBufferProvider provider)
             {
                 vm.AudioOutput.Pause();
@@ -32,8 +31,6 @@ namespace CMGWpf.MVVM
         }
         public void PlayPause()
         {
-            Debug.WriteLine("Play/Pause command being executed.");
-
             if (vm.AudioOutput == null) return;
 
             if (vm.IsPlaying)
@@ -47,6 +44,7 @@ namespace CMGWpf.MVVM
                 vm.IsPlaying = true;
             }
         }
+        [SupportedOSPlatform("windows6.1")]
         public void ShowVoicesToggle(PlayDialog dialog)
         {
             vm.ShowVoices = !vm.ShowVoices;
@@ -75,8 +73,6 @@ namespace CMGWpf.MVVM
 
         public void RecordAudio(Window owner)
         {
-            Debug.WriteLine("Record Audio command being executed.");
-
             if (vm.AudioBuffer == null || vm.AudioBuffer.Length == 0)
             {
                 MessageBox.Show("No audio to record. Please play a composition first.", "No Audio", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -109,19 +105,6 @@ namespace CMGWpf.MVVM
 
             string filePath = saveDialog.FileName;
 
-            // Check if file exists and ask for confirmation
-            //if (File.Exists(filePath))
-            //{
-            //    var result = MessageBox.Show(
-            //        $"The file '{Path.GetFileName(filePath)}' already exists. Do you want to overwrite it?",
-            //        "Confirm Overwrite",
-            //        MessageBoxButton.YesNo,
-            //        MessageBoxImage.Warning);
-
-            //    if (result != MessageBoxResult.Yes)
-            //        return;
-            //}
-
             try
             {
                 // Save the audio based on format
@@ -143,21 +126,18 @@ namespace CMGWpf.MVVM
             catch (Exception ex)
             {
                 vm.Messages = [new Message() { Text = $"Error saving audio:\n{ex.Message}", Error = true }];
-                Debug.WriteLine($"Error saving audio: {ex}");
+                DebugLog.Write($"Error saving audio: {ex}");
             }
         }
 
         public async void RecordVideo(Window owner)
         {
-            Debug.WriteLine("Record Video command being executed.");
-
             if (vm.AudioBuffer == null || vm.AudioBuffer.Length == 0)
             {
-                MessageBox.Show("No video to record. Please play a composition first.", "No Video", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("No video to record.", "No Video", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Check if owner is PlayDialog to access Sound Roll
             if (owner is not PlayDialog playDialog)
             {
                 MessageBox.Show("Video recording can only be initiated from the Play dialog.", "Invalid Context", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -215,7 +195,7 @@ namespace CMGWpf.MVVM
             catch (Exception ex)
             {
                 vm.Messages = [new Message() { Text = $"Error saving video:\n{ex.Message}", Error = true }];
-                Debug.WriteLine($"Error saving video: {ex}");
+                DebugLog.Write($"Error saving video: {ex}");
             }
             finally
             {
@@ -412,11 +392,10 @@ namespace CMGWpf.MVVM
                     try
                     {
                         File.Delete(outputPath);
-                        Debug.WriteLine($"Deleted output file after cancellation: {outputPath}");
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Failed to delete output file: {ex.Message}");
+                        DebugLog.Write($"Failed to delete output file: {ex.Message}");
                     }
                 }
 
@@ -430,7 +409,7 @@ namespace CMGWpf.MVVM
             }
         }
 
-        private async Task CleanupTempDirectoryAsync(string tempDir)
+        private static async Task CleanupTempDirectoryAsync(string tempDir)
         {
             if (!Directory.Exists(tempDir))
                 return;
@@ -446,7 +425,7 @@ namespace CMGWpf.MVVM
                     try
                     {
                         Directory.Delete(tempDir, true);
-                        Debug.WriteLine($"Temp directory cleaned up: {tempDir}");
+                        DebugLog.Write($"Temp directory cleaned up: {tempDir}");
                         return;
                     }
                     catch (IOException) when (attempt < 2)
@@ -457,7 +436,7 @@ namespace CMGWpf.MVVM
                 }
 
                 // If directory deletion failed, try deleting individual files
-                Debug.WriteLine($"Attempting to delete individual files in: {tempDir}");
+                DebugLog.Write($"Attempting to delete individual files in: {tempDir}");
                 foreach (var file in Directory.GetFiles(tempDir, "*", SearchOption.AllDirectories))
                 {
                     try
@@ -466,7 +445,7 @@ namespace CMGWpf.MVVM
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Failed to delete file {file}: {ex.Message}");
+                        DebugLog.Write($"Failed to delete file {file}: {ex.Message}");
                     }
                 }
 
@@ -476,67 +455,11 @@ namespace CMGWpf.MVVM
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Failed to delete temp directory {tempDir}: {ex.Message}");
-                Debug.WriteLine("Temp files may need manual cleanup.");
+                DebugLog.Write($"Failed to delete temp directory {tempDir}: {ex.Message}");
+                DebugLog.Write("Temp files may need manual cleanup.");
             }
         }
-
-        private byte[] RenderFrameToPngBytes(System.Windows.Controls.ScrollViewer scrollViewer)
-        {
-            // Get the viewport dimensions (visible area only)
-            int width = (int)scrollViewer.ViewportWidth;
-            int height = (int)scrollViewer.ViewportHeight;
-
-            if (width <= 0 || height <= 0)
-                return Array.Empty<byte>();
-
-            // Get the canvas inside the scroll viewer
-            if (scrollViewer.Content is not System.Windows.Controls.Canvas canvas)
-                return Array.Empty<byte>();
-
-            // Create a visual brush that shows only the visible portion
-            VisualBrush visualBrush = new VisualBrush(canvas)
-            {
-                // Calculate which portion of the canvas is currently visible
-                Viewbox = new Rect(
-                    scrollViewer.HorizontalOffset,  // X offset in canvas coordinates
-                    scrollViewer.VerticalOffset,    // Y offset in canvas coordinates
-                    width,                          // Width of visible area
-                    height                          // Height of visible area
-                ),
-                ViewboxUnits = BrushMappingMode.Absolute,
-                Stretch = Stretch.None,
-                AlignmentX = AlignmentX.Left,
-                AlignmentY = AlignmentY.Top
-            };
-
-            // Create a drawing visual with the viewport dimensions
-            DrawingVisual drawingVisual = new DrawingVisual();
-            using (DrawingContext drawingContext = drawingVisual.RenderOpen())
-            {
-                // Draw only the visible portion at the actual size
-                drawingContext.DrawRectangle(visualBrush, null, new Rect(0, 0, width, height));
-            }
-
-            // Render to bitmap at viewport size
-            RenderTargetBitmap renderBitmap = new RenderTargetBitmap(
-                width,
-                height,
-                96, // DPI
-                96,
-                PixelFormats.Pbgra32);
-
-            renderBitmap.Render(drawingVisual);
-
-            PngBitmapEncoder encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
-
-            using var memoryStream = new MemoryStream();
-            encoder.Save(memoryStream);
-            return memoryStream.ToArray();
-        }
-
-        private byte[] ExtractFrameFromBitmap(RenderTargetBitmap sourceBitmap, int x, int y, int width, int height)
+        private static byte[] ExtractFrameFromBitmap(RenderTargetBitmap sourceBitmap, int x, int y, int width, int height)
         {
             // Clamp to source bitmap bounds
             int sourceWidth = sourceBitmap.PixelWidth;
@@ -548,7 +471,7 @@ namespace CMGWpf.MVVM
             height = Math.Min(height, sourceHeight - y);
 
             if (width <= 0 || height <= 0)
-                return Array.Empty<byte>();
+                return [];
 
             // Create a cropped bitmap from the source
             CroppedBitmap croppedBitmap = new CroppedBitmap(sourceBitmap, new Int32Rect(x, y, width, height));
