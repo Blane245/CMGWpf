@@ -42,7 +42,7 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                 </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label Content="Reload and Build" HorizontalAlignment="Left" FontSize="16" FontWeight="Bold" />
-                <Button Content="Ensembles" Command="{Binding ReloadEnsembles}" CommandParameter="{Binding StochasticGenerator}" Margin="5" Background="Green" Foreground="White" ToolTip="Reload the list of ensembles after a modification to the database"/>
+                <Button Content="Ensembles" Command="{Binding ReloadEnsembles}" Margin="5" Background="Green" Foreground="White" ToolTip="Reload the list of ensembles after a modification to the database"/>
                     <Button Content="Voices" Command="{Binding ReloadVoices}" CommandParameter="{Binding StochasticGenerator}" Margin="5" Background="Green" Foreground="White" ToolTip="Reload voices of an ensemble after they have been modified"/>
                     <Button Content="Build Composition" Command="{Binding BuildComposition}" CommandParameter="{Binding StochasticGenerator}" Margin="5" Background="green" Foreground="White" ToolTip="Build the composition from using the composition parameters "/>
             </StackPanel>
@@ -54,8 +54,6 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
             <StackPanel Orientation="Vertical">
                 <Label Content="Dynamics Parameters" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="Sounds/sec:" VerticalAlignment="Center"/>
-                    <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.01" Value="{Binding StochasticGenerator.Delta}" ToolTip="How many sounds each instrument section can play in a second" VerticalAlignment="Center"/>
                     <Label Content="Microtones?"/>
                     <CheckBox Content="" IsChecked="{Binding StochasticGenerator.Microtones}" ToolTip="Whether to allow microtonal sounds" VerticalAlignment="center"/>
                     <Label Content="Dynamics Seed:"/>
@@ -146,18 +144,25 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                             <DataGridTemplateColumn Header="Volume" ToolTipService.ToolTip="The volume of the voice [-10,+10] dB">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Slider  Minimum="-100" Maximum="100" Interval="1" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding Volume, Mode=TwoWay}" Width="100"/>
+                                    <Slider  Minimum="-20" Maximum="20" Interval="1" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding Volume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged }" Width="100"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Velocity">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Slider Minimum="0" Maximum="127"  Value="{Binding Velocity, Mode=TwoWay}" Width="100"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
+                        <DataGridTemplateColumn Header="Velocity">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Slider Minimum="0" Maximum="127" Value="{Binding Velocity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged }" Width="100"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Events/sec">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <xctk:DoubleUpDown Minimum="0" Maximum="100" Increment=".01" Value="{Binding Delta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="The number of events per second in each cloud"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Description" Binding="{Binding Description}" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Timbre" Binding="{Binding Timbre}" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Register Lo" Binding="{Binding RegisterLo}" IsReadOnly="True"/>

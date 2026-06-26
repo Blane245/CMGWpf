@@ -40,13 +40,13 @@ namespace CMGWpf.View
         public ObservableCollection<NoteSequence> NoteSequenceList
         {
             get { return _noteSequenceList; }
-            set { _noteSequenceList = value; OnPropertyChanged(); }
+            set { _noteSequenceList = [..value.OrderBy(sequence=>sequence.Name)]; OnPropertyChanged(); }
         }
         private ObservableCollection<Tag> _tagList = [];
         public ObservableCollection<Tag> TagList
         {
             get { return _tagList; }
-            set { _tagList = value; OnPropertyChanged(); }
+            set { _tagList = [..value.OrderBy(tag => tag.Name)]; OnPropertyChanged(); }
         }
         private Tag? _UITag;
         public Tag? UITag

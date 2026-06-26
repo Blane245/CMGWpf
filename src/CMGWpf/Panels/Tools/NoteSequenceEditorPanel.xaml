@@ -43,7 +43,7 @@
                           CanUserSortColumns="False"
                           CanUserReorderColumns="False"
                               Width="Auto"
-                              MaxHeight="400"
+                              MaxHeight="500"
                           >
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Note" Binding="{Binding Path=Note, Mode=TwoWay}" MinWidth="100"/>

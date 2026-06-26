@@ -199,7 +199,6 @@ namespace CMGWpf.Model.Generators
             set { if (value.Count != voices.Count) { Composition = []; voices = value; } else voices = [.. value]; }
         } // the voices in the ensemble. The voices are read from the database and augmented with generator specific data. The voices are used to determine the sound of the events in the composition. user can change the settings for each voice, such as whether it is muted or not, and the volume and velocity. If the number of voices changes, clear the composition.
         // Signal Processing parameters
-        public double Delta { get; set; } = 0; // The average number of sounds/second for each voice. 
         public bool Microtones { get; set; } = false; // whether microtones are allowed in the composition. 
         public string DynamicsSeed { get; set; } = String.Empty; // the seed for the random number generator used to determine the dynamics of events in the composition. 
         public FastRandom DynamicsRn = MathUtilities.StartFastRandom(null); // the random number generator used to determine the dynamics of events in the composition. 
@@ -242,7 +241,6 @@ namespace CMGWpf.Model.Generators
                     Lambda == g.Lambda &&
                     CompositionSeed == g.CompositionSeed &&
                     Voices == g.Voices &&
-                    Delta == g.Delta &&
                     Microtones == g.Microtones &&
                     DynamicsSeed == g.DynamicsSeed &&
                     IntensityOption == g.IntensityOption &&
@@ -289,7 +287,8 @@ namespace CMGWpf.Model.Generators
                     Duration = voice.Duration,
                     Muted = voice.Muted,
                     Volume = voice.Volume,
-                    Velocity = voice.Velocity
+                    Velocity = voice.Velocity,
+                    Delta = voice.Delta
                 };
                 clone.Voices.Add(voiceCopy);
             }
@@ -359,12 +358,12 @@ namespace CMGWpf.Model.Generators
                 voiceElem.SetAttribute("muted", voice.Muted.ToString());
                 voiceElem.SetAttribute("volume", voice.Volume.ToString());
                 voiceElem.SetAttribute("velocity", voice.Velocity.ToString());
+                voiceElem.SetAttribute("delta", voice.Delta.ToString());
             }
             elem.SetAttribute("Tc", CompositionDuration.ToString());
             elem.SetAttribute("Nt", NumberOfTimeCells.ToString());
             elem.SetAttribute("lambda", Lambda.ToString());
             elem.SetAttribute("compositionSeed", CompositionSeed);
-            elem.SetAttribute("delta", Delta.ToString());
             elem.SetAttribute("microtones", Microtones.ToString());
             elem.SetAttribute("dynamicsSeed", DynamicsSeed);
             XmlElement intensityElem = doc.CreateElement("intensity");
@@ -382,21 +381,17 @@ namespace CMGWpf.Model.Generators
             reverbElem.SetAttribute("delay", ReverbParameters.Delay.ToString());
             reverbElem.SetAttribute("decay", ReverbParameters.Decay.ToString());
             // add the composition as a string in row/column order
-            string compositiostring = String.Empty;
+            string compositionString = String.Empty;
             for (int i = 0; i < Composition.Length; i++)
             {
                 for (int j = 0; j < Composition[i].Length; j++)
                 {
-                    compositiostring += Composition[i][j].ToString() + ",";
+                    compositionString += Composition[i][j].ToString() + ",";
                 }
-                compositiostring += ";";
+                compositionString += ";";
             }
-            elem.SetAttribute("composition", compositiostring);
+            elem.SetAttribute("composition", compositionString);
         }
-        //private async void GetDBEnsemble(string name)
-        //{
-        //    (Ensemble, Voices) = await EnsembleUtilities.GetEnsembleAsync(name);
-        //}
         public override Task LoadXML(XmlElement generatorElem, Track parent)
         {
             Name = XMLFunctions.GetAttributeString(generatorElem, "name", "");
@@ -416,6 +411,7 @@ namespace CMGWpf.Model.Generators
                     Description = XMLFunctions.GetAttributeString(ensembleElem, "description", ""),
                     Voices = XMLFunctions.GetAttributeString(ensembleElem, "voices", "")
                 };
+                var delta = XMLFunctions.GetAttributeDouble(generatorElem, "delta", 0); // get as default based on old format
                 XmlElement? voicesElem = generatorElem.GetElementsByTagName("voices").Cast<XmlElement?>().FirstOrDefault();
                 if (voicesElem != null)
                 {
@@ -434,7 +430,8 @@ namespace CMGWpf.Model.Generators
                             Duration = XMLFunctions.GetAttributeDouble(voiceElem, "duration", 1),
                             Muted = XMLFunctions.GetAttributeBool(voiceElem, "muted", false),
                             Volume = XMLFunctions.GetAttributeDouble(voiceElem, "volume", 0),
-                            Velocity = XMLFunctions.GetAttributeDouble(voiceElem, "velocity", 64)
+                            Velocity = XMLFunctions.GetAttributeDouble(voiceElem, "velocity", 64),
+                            Delta = XMLFunctions.GetAttributeDouble(voiceElem, "delta", delta), // use old format default is missing
                         };
                         // Read the soundfont from the identified file, and find the preset in the soundfont. If the soundfont or preset cannot be found, then these fields should be cleared. This is because the soundfont and preset are used to generate the sound for the voice, and if they cannot be found, then the voice cannot be generated, so these fields should be cleared to reflect that.
                         voice.SoundFont = SoundFontUtilities.GetSoundFont(voice.SoundFontFileName);
@@ -468,7 +465,6 @@ namespace CMGWpf.Model.Generators
                 CompositionRn = MathUtilities.StartFastRandom(CompositionSeed);
 
                 // Load signal processing parameters
-                Delta = XMLFunctions.GetAttributeDouble(generatorElem, "delta", 0);
                 Microtones = XMLFunctions.GetAttributeBool(generatorElem, "microtones", false);
                 DynamicsSeed = XMLFunctions.GetAttributeString(generatorElem, "dynamicsSeed", "");
                 DynamicsRn = MathUtilities.StartFastRandom(DynamicsSeed);
@@ -585,8 +581,6 @@ namespace CMGWpf.Model.Generators
                 errors.Add(new Message() { Text = "Number of time cells must be positive.", Error = true });
             if (Lambda <= 0)
                 errors.Add(new Message() { Text = "Events/Row must be positive.", Error = true });
-            if (Delta <= 0)
-                errors.Add(new Message() { Text = "Sounds/sec must be positive.", Error = true });
             if (Voices.Count == 0)
                 errors.Add(new Message() { Text = "At least one voice is required.", Error = true });
             if (PanOption != PANOPTION.none && PanAlgorithm != PANALGORITHM.none && PanParameters.CycleTime <= 0)
@@ -595,6 +589,11 @@ namespace CMGWpf.Model.Generators
                 errors.Add(new Message() { Text = "Intensity cycle time must be positive.", Error = true });
             if (Composition.Length == 0)
                 errors.Add(new Message() { Text = "Composition must be generated.", Error = true });
+            foreach (var voice in Voices)
+            {
+                if (voice.Delta <= 0)
+                    errors.Add(new Message() { Text = $"Voice '{voice.Name}': Delta must be positive.", Error = true });
+            }
             return errors;
         }
         public override string ToString() => "Stochastic";

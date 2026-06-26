@@ -54,8 +54,8 @@ namespace CMGWpf.PlayFunctions.DSP
         public static (double[], InstrumentSource) Get(InstrumentSampleParameters parameters)
         {
             // Deconstruct parameters into local variables for easier access
-            var duration = parameters.Duration;
             var interval = parameters.Interval;
+            var duration = parameters.Duration;
             var startPitch = parameters.StartPitch;
             var endPitch = parameters.EndPitch;
             var volumeDb = parameters.VolumeDb;
@@ -172,10 +172,12 @@ namespace CMGWpf.PlayFunctions.DSP
             double holdEnd = attackEnd + holdSeconds;
             double decayEnd = holdEnd + decaySeconds;
             // these last two numbers may be less than the others depending on the duration of the note. These special cases are handled below.
-            double noteEnd = duration;
+            double noteInterval = Math.Min(duration, interval);
+            if (!loop) noteInterval = Math.Min(noteInterval, (double)instrumentSample.Length / inputSampleRate);
+            double noteEnd = noteInterval;
             // if the note is staccato, drop the release phase and end the note noteEnd seconds.
             // also, if the release is very short, cut it off
-            double releaseEnd = (duration == interval && releaseSeconds > 0.11) ? noteEnd + releaseSeconds : noteEnd;
+            double releaseEnd = (duration == interval) ? noteEnd + releaseSeconds : noteEnd;
 
             double volumeGain = Sf2Units.VolumeDbToGain(volumeDb);
             static double Attenuate(double gain, double dB)
@@ -231,9 +233,11 @@ namespace CMGWpf.PlayFunctions.DSP
                     if (noteEnd != releaseEnd) envelope = [.. envelope, new GainEnvelope { Gain = 0, Time = releaseEnd }];
                 }
                 else
-                { // decay completes before the end of the note, so stop at decayEnd as gain has dropped to zero
+                { // decay completes before the end of the note, so stop at decayEnd as gain has dropped to sustain gain
                     envelope = [.. envelope, new GainEnvelope { Gain = noteEndGain, Time = holdEnd }];
-                    envelope = [.. envelope, new GainEnvelope { Gain = 0, Time = decayEnd }];
+                    envelope = [.. envelope, new GainEnvelope { Gain = sustainGain, Time = decayEnd }];
+                    envelope = [.. envelope, new GainEnvelope { Gain = sustainGain, Time = noteEnd }];
+                    if (noteEnd != releaseEnd) envelope = [.. envelope, new GainEnvelope { Gain = 0, Time = releaseEnd }];
                 }
             }
 

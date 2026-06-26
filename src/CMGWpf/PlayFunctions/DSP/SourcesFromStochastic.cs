@@ -149,7 +149,7 @@ namespace CMGWpf.PlayFunctions.DSP
         /// <returns>(double[], CloudState) The generated cloud samples (stereo) and the updated cloud state.</returns>
         private static (double[], CloudState) BuildCloud(Stochastic generator, double cloudDuration, Voice voice, CloudState cloudState, double cellTime)
         {
-            double delta = generator.Delta;
+            double delta = voice.Delta;
             bool microTones = generator.Microtones;
             PANOPTION panOption = generator.PanOption;
             PANALGORITHM panAlgorithm = generator.PanAlgorithm;
@@ -213,6 +213,7 @@ namespace CMGWpf.PlayFunctions.DSP
             {
                 t2 = t1 + interval;
 
+                double duration = voice.Duration == 0 ? interval : voice.Duration + 0.0001;
                 // get a glissando using a Gaussian random speed and the current interval, or get a sustained pitch
                 if (timbre == TIMBRE.glissando)
                 {
@@ -227,7 +228,6 @@ namespace CMGWpf.PlayFunctions.DSP
                 foreach (var instrument in instruments)
                 {
                     // get the single channel sample and the source data from the preset instrument
-                    double duration = voice.Duration == 0 ? interval : voice.Duration;
                     (double[] instrumentSample, InstrumentSource source) = InstrumentSample.Get(new InstrumentSampleParameters()
                     {
                         Duration = duration,

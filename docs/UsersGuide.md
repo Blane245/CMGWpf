@@ -125,7 +125,7 @@ Computer Music Generator (CMG) User's Guide, Version 4.0
 - [Appendix E: On Beats and Notes in Octave](#appendix-e-on-beats-and-notes-in-octave)
 - [Appendix F: Glossary](#appendix-f-glossary)
 - [Acknowledgements](#acknowledgements)
-<!-- TOC-->
+<!-- TOC -->
 ---
 
 # Introduction
@@ -427,7 +427,6 @@ Once a composition is defined it can be built with the `Build Composition` butto
 
 These affect the production of sound from the defined composition. Changes to these parameters do not affect a built composition.
 
-- **Sounds/Second**: Average number of sound events in a cloud
 - **Microtones?**: Enables the use of microtones between semi-tones
 - **Intensity Transition**: Variation of the volume over time
     - **Scope Option**: Where intensity transition are applied. Either Cloud, Voice, or Composition level
@@ -456,6 +455,7 @@ The following parameters may be set for each voice:
 - **Volume**: Relative volume (+-100dB) of the voice
 - **Velocity**: Velocity, or attack, value of the voice [0-127]
 - **Mute**: Disable the voice in the final composition. 
+- **Events/Second**: Average number of sound events in a cloud
 
 Ensembles and voices may be changed within the CMG Database independent of their use within CMG. Each time a CMG file is loaded, the ensemble and voices are reread from the database. If changes are made while a file is opened, this changes will only take effect by pressing the **Reload** buttons `Ensemble` or `Voices`. 
 

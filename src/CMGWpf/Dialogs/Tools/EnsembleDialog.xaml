@@ -28,81 +28,82 @@
                            CornerRadius="0"
                            UseAeroCaptionButtons="False" />
     </shell:WindowChrome.WindowChrome>
-
-    <Grid Margin="0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="80"/>
-        </Grid.RowDefinitions>
-        <panels:CustomWindowChrome Grid.Row="0"
+    <Border BorderBrush="Black" BorderThickness="1" Margin="0">
+        <Grid Margin="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="80"/>
+            </Grid.RowDefinitions>
+            <panels:CustomWindowChrome Grid.Row="0"
                                    ChromeBackground="HotPink"
                                      WindowTitle="CMG Ensemble and Voice Editor"
                                    />
-        <Grid Grid.Row="1" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="auto"/>
-            </Grid.ColumnDefinitions>
-            <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
-                <StackPanel Margin="5">
-                    <Label FontWeight="Bold" FontSize="14" Content="Ensembles" HorizontalAlignment="Center"/>
-                    <Button Command="{Binding AddEnsembleCommand}" Margin="0" Padding="0" Width="100">Add Ensemble</Button>
-                    <DataGrid ItemsSource="{Binding EnsembleList}" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="600">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="True" CanUserResize="True" CanUserSort="True"/>
-                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" CanUserReorder="True" CanUserResize="True" CanUserSort="True"/>
-                        </DataGrid.Columns>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Edit" 
+            <Grid Grid.Row="1" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
+                    <StackPanel Margin="5">
+                        <Label FontWeight="Bold" FontSize="14" Content="Ensembles" HorizontalAlignment="Center"/>
+                        <Button Command="{Binding AddEnsembleCommand}" Margin="0" Padding="0" Width="100">Add Ensemble</Button>
+                        <DataGrid ItemsSource="{Binding EnsembleList}" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="600">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserReorder="True" CanUserResize="True" CanUserSort="True"/>
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" CanUserReorder="True" CanUserResize="True" CanUserSort="True"/>
+                            </DataGrid.Columns>
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Edit" 
                                           Command="{Binding DataContext.EditEnsembleCommand, 
                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                           CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                <MenuItem Header="Delete" 
+                                    <MenuItem Header="Delete" 
                                           Command="{Binding DataContext.DeleteEnsembleCommand, 
                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                           CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                    </DataGrid>
-                </StackPanel>
-            </Border>
-            <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="0" >
-                <StackPanel Margin="5">
-                    <Label FontWeight="Bold" FontSize="14" Content="Voices" HorizontalAlignment="Center"/>
-                    <Button Command="{Binding AddVoiceCommand}" Margin="0" Padding="0" Width="100">Add Voice</Button>
-                    <DataGrid ItemsSource="{Binding VoiceList}" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="600">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserResize="True" CanUserReorder="True" CanUserSort="True"/>
-                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" CanUserResize="True" CanUserReorder="True" CanUserSort="True"/>
-                        </DataGrid.Columns>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Edit"                                           Command="{Binding DataContext.EditVoiceCommand, 
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="0" >
+                    <StackPanel Margin="5">
+                        <Label FontWeight="Bold" FontSize="14" Content="Voices" HorizontalAlignment="Center"/>
+                        <Button Command="{Binding AddVoiceCommand}" Margin="0" Padding="0" Width="100">Add Voice</Button>
+                        <DataGrid ItemsSource="{Binding VoiceList}" AutoGenerateColumns="False" IsReadOnly="True" MaxHeight="600">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" CanUserResize="True" CanUserReorder="True" CanUserSort="True"/>
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" CanUserResize="True" CanUserReorder="True" CanUserSort="True"/>
+                            </DataGrid.Columns>
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Edit"                                           Command="{Binding DataContext.EditVoiceCommand, 
                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                           CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                <MenuItem Header="List Ensembles"                                           Command="{Binding DataContext.ListVoiceEnsemblesCommand, 
+                                    <MenuItem Header="List Ensembles"                                           Command="{Binding DataContext.ListVoiceEnsemblesCommand, 
                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                           CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                <MenuItem Header="Delete"                                           Command="{Binding DataContext.DeleteVoiceCommand, 
+                                    <MenuItem Header="Delete"                                           Command="{Binding DataContext.DeleteVoiceCommand, 
                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                           CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                    </DataGrid>
-                </StackPanel>
-            </Border>
-            <ContentControl Grid.Column="2" Content="{Binding EditorPanel}"/>
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+                <ContentControl Grid.Column="2" Content="{Binding EditorPanel}"/>
+            </Grid>
+            <Grid Grid.Row="2">
+                <panels:MessagePanel Source="{Binding DataContext.Errors, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="0" MinHeight="150"/>
+            </Grid>
         </Grid>
-        <Grid Grid.Row="2">
-            <panels:MessagePanel Source="{Binding DataContext.Errors, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="0" MinHeight="150"/>
-        </Grid>
-    </Grid>
+    </Border>
 </Window>

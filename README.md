@@ -71,6 +71,7 @@ CMGWpf is a sophisticated computer music generation tool that enables composers 
    ```
 
 ### Quick Start
+1. Place one or more soundfont files in C:\SoundFonts
 1. Launch CMGWpf
 2. Create a new composition or open an existing .cmg file
 3. Add tracks to organize your composition
@@ -122,15 +123,18 @@ CMGWpf/
 - **Material.Icons.WPF**: Material Design icons
 - **Microsoft.Xaml.Behaviors.Wpf**: MVVM support
 
-## 🧪 Testing
-
-Run unit tests:
-```bash
-dotnet test tests/CMGWpf.UnitTests
-```
 ## 🐛 Known Issues
 
 See [notes.md](src/CMGWpf/notes.md) for current bug tracking and implementation status.
+
+## Release Notes
+### Release 4.0.1
+* Changed duration of last note in an algorithmic generator to full length rather than truncating at the stop time. 
+* Fixed handling of voice volume and velocity in stochastic generator
+* Corrected DSP when decay time is short
+* Adjusted final audio to have no more than 1 second of silence at the end
+* Repaired error in shift track
+
 
 ## 📝 License
 

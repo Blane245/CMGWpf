@@ -100,5 +100,13 @@ namespace CMGWpf.Utilities
                 }
             }
         }
+
+        public static Preset? GetPreset(string SFFileName, string presetName)
+        {
+            SoundFont? soundFont = GetSoundFont(SFFileName);
+            if (soundFont == null) return null;
+            Preset? preset = soundFont.Presets.FirstOrDefault(p => SoundFontUtilities.BankPresetToName(p) == presetName);
+            return preset;
+        }
     }
 }

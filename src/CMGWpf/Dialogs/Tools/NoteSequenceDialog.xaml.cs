@@ -5,7 +5,7 @@ using System.Windows;
 namespace CMGWpf.Dialogs.Tools
 {
     /// <summary>
-    /// Interaction logic for NoteSeqeunceDialog.xaml
+    /// Interaction logic for NoteSequenceDialog.xaml
     /// </summary>
     public partial class NoteSequenceDialog : Window
     {
@@ -24,15 +24,15 @@ namespace CMGWpf.Dialogs.Tools
             isLoaded = true;
             if (DataContext is not NoteSequencesView vm) return;
 
-            var notesequences = await Helpers.NoteSequenceHelpers.List();
+            var noteSequences = await Helpers.NoteSequenceHelpers.List();
             var tags = await Helpers.TagHelpers.List();
             vm.EditorPanel = new BlankPanel(); // Initialize with a blank panel
 
             // Ensure UI updates happen on the UI thread
             await Dispatcher.InvokeAsync(() =>
             {
-                vm.NoteSequenceList = notesequences;
-                vm.TagList = tags;
+                vm.NoteSequenceList = [..noteSequences.OrderBy(sequence => sequence.Name)];
+                vm.TagList = [..tags.OrderBy(tag => tag.Name)];
             });
 
         }

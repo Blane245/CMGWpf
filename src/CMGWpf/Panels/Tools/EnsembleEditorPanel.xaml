@@ -29,7 +29,7 @@
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <Label Content="Voices: " VerticalAlignment="Top"/>
-                <ScrollViewer MaxHeight="200">
+                <ScrollViewer MaxHeight="500">
                     <ListView ItemsSource="{Binding SelectableVoiceList}">
                         <ListView.View>
                             <GridView ColumnHeaderToolTip="Select the voices that are to be included in the ensemble.">

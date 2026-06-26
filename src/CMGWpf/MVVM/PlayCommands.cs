@@ -297,7 +297,7 @@ namespace CMGWpf.MVVM
                     return false;
 
                 // Now extract frames from the pre-rendered bitmap (FAST - no WPF layout!)
-                progressDialog.SetStatus("Generating frames...");
+                progressDialog.SetStatus("Generating video frames...");
                 List<byte[]> frameData = new List<byte[]>(totalFrames);
 
                 await Task.Run(() =>

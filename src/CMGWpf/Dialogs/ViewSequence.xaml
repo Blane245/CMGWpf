@@ -39,8 +39,8 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
-                                <TextBlock Text="{Binding value}" Width="100"/>
-                                <TextBlock Text="{Binding beats}" Width="100"/>
+                                <TextBlock Text="{Binding Value}" Width="100"/>
+                                <TextBlock Text="{Binding Beats}" Width="100"/>
                             </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

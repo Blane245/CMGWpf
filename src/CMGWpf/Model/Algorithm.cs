@@ -1,4 +1,5 @@
 ﻿using CMGWpf.Helpers;
+using CMGWpf.Model.Database;
 using CMGWpf.Model.Generators;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
@@ -6,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Xml;
 using static CMGWpf.Types.DBTypes;
 
@@ -739,22 +741,17 @@ namespace CMGWpf.Model
         }
         public void UnPackItems(string itemsString)
         {
-            var items = itemsString.Split(';', StringSplitOptions.RemoveEmptyEntries)
-                .Select(itemString =>
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var noteItems = JsonSerializer.Deserialize<ObservableCollection<NoteItem>>(itemsString, options);
+            Items = new ObservableCollection<SequenceItem>();
+            if (noteItems != null)
+                foreach (var noteItem in noteItems)
                 {
-                    var parts = itemString.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 3 &&
-                        double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out double value) &&
-                        double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out double beats))
-                    {
-                        return new SequenceItem { Value = value, Beats = beats};
-                    }
-                    else
-                    {
-                        throw new FormatException($"Invalid item format: {itemString}");
-                    }
-                }).ToList();
-            Items = new ObservableCollection<SequenceItem>(items);
+                    Items.Add(new SequenceItem { Value = noteItem.Value, Beats = noteItem.Beats });
+                }
         } 
         public override void LoadXML(XmlElement elem)
         {

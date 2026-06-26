@@ -2,12 +2,17 @@
 // Define the application and user level settings
 //      Application level settings
 //          Version - the version of the CMG application
-//          CMGSoundFontLocation - the location of the SoundFont files
-//          DbServer - the url of the CMG database server
-//          DbPort - the port number of the CMG database server
+//          
 //      User level settings
+//          CMGSoundFontLocation - the location of the SoundFont files
 //          CMGRecentFiles - the recent file list joined with |
-//          AudioFormat - the format of Audio files
+//          CMGRecordFormat - the format of Audio files
+//          CMGIsSnap - whether interval snapping is enabled
+//          CMGSnapIncrement - the increment for interval snapping
+//          WindowLeft - the left position of the main window   
+//          WindowTop - the top position of the main window
+//          WindowWidth - the width of the main window
+//          WindowHeight - the height of the main window
 //          
 //------------------------------------------------------------------------------
 
@@ -28,33 +33,13 @@ namespace CMGWpf.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("4.0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("4.1.0")]
         public string Version {
             get {
                 return ((string)(this["Version"]));
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://blane-latitude-7290")]
-        public string DbServer
-        {
-            get
-            {
-                return ((string)(this["DbServer"]));
-            }
-        }
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("8081")]
-        public string DbPort
-        {
-            get
-            {
-                return ((string)(this["DbPort"]));
-            }
-        }
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("C:\\SoundFonts")]
@@ -82,48 +67,6 @@ namespace CMGWpf.Properties {
             set
             {
                 this["CMGRecordFormat"] = value;
-            }
-        }
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Time")]
-        public string CMGTimeLineMode
-        {
-            get
-            {
-                return ((string)(this["CMGTimeLineMode"]));
-            }
-            set
-            {
-                this["CMGTimeLineMode"] = value;
-            }
-        }
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
-        public string CMGMeasureLength
-        {
-            get
-            {
-                return ((string)(this["CMGMeasureLength"]));
-            }
-            set
-            {
-                this["CMGMeasureLength"] = value;
-            }
-        }
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("4")]
-        public string CMGBeatsPerMeasure
-        {
-            get
-            {
-                return ((string)(this["CMGBeatsPerMeasure"]));
-            }
-            set
-            {
-                this["CMGBeatsPerMeasure"] = value;
             }
         }
         [global::System.Configuration.UserScopedSettingAttribute()]
@@ -169,21 +112,6 @@ namespace CMGWpf.Properties {
                 this["CMGRecentFiles"] = value;
             }
         }
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("mp3")]
-        public string AudioFormat
-        {
-            get
-            {
-                return ((string)(this["AudioFormat"]));
-            }
-            set
-            {
-                this["AudioFormat"] = value;
-            }
-        }
-
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]

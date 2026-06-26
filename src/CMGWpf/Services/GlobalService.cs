@@ -29,8 +29,8 @@ namespace CMGWpf.Services
                 return _instance;
             }
         }
-        private ObservableCollection<Message> statusMessges = [];
-        public ObservableCollection<Message> StatusMessages { get => statusMessges; set { statusMessges = value; OnPropertyChanged(); } }
+        private ObservableCollection<Message> statusMessages = new ObservableCollection<Message>();
+        public ObservableCollection<Message> StatusMessages { get => statusMessages; set { statusMessages = value; OnPropertyChanged(); } }
         #region Preferences
         private string soundFontFileLocation = Settings.Default.CMGSoundFontLocation;
         public string SoundFontFileLocation
@@ -67,55 +67,7 @@ namespace CMGWpf.Services
                 }
             }
         }
-        public ObservableCollection<string> TimeLineModes { get; } = ["Time", "Measure"];
-        private string timeLineMode = Settings.Default.CMGTimeLineMode;
-        public string TimeLineMode
-        {
-            get => timeLineMode;
-            set
-            {
-                if (TimeLineModes.Contains(value))
-                {
-                    timeLineMode = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        private double measureLength = Double.Parse(Settings.Default.CMGMeasureLength);
-        public double MeasureLength
-        {
-            get => measureLength;
-            set
-            {
-                if (value <= 0)
-                {
-                    _ = MessageBox.Show("Measure Length Must Be Positive", "Measure Length Error", MessageBoxButton.OK);
-                }
-                else
-                {
-                    measureLength = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        private int beatsPerMeasure = int.Parse(Settings.Default.CMGBeatsPerMeasure);
-        public int BeatsPerMeasure
-        {
-            get => beatsPerMeasure;
-            set
-            {
-                if (value <= 0)
-                {
-                    _ = MessageBox.Show("Beats Per Measure Must Be Positive", "Beats Per Message Error", MessageBoxButton.OK);
-                }
-                else
-                {
-                    beatsPerMeasure = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        private bool isSnap = Settings.Default.CMGBeatsPerMeasure == "true";
+        private bool isSnap = Settings.Default.CMGIsSnap == "true";
         public bool IsSnap
         {
             get => isSnap;
@@ -125,8 +77,8 @@ namespace CMGWpf.Services
                 OnPropertyChanged();
             }
         }
-        private int snapIncrement = int.Parse(Settings.Default.CMGSnapIncrement);
-        public int SnapIncrement
+        private double snapIncrement = double.Parse(Settings.Default.CMGSnapIncrement);
+        public double SnapIncrement
         {
             get => snapIncrement;
             set
@@ -142,7 +94,6 @@ namespace CMGWpf.Services
                 }
             }
         }
-        public readonly string SnapIncrementUnits = Settings.Default.CMGTimeLineMode == "time" ? "(sec)" : "(beats)";
         private RelayCommand<object>? _editPreferencesCommand;
         public RelayCommand<object> EditPreferencesCommand =>
             _editPreferencesCommand ??= new RelayCommand<object>(execute =>
@@ -166,18 +117,15 @@ namespace CMGWpf.Services
             {
                 DebugLog.Write("EditPreferencesOK command being executed.");
                 // move all of the preferences properties to the settings
-                Settings.Default.CMGBeatsPerMeasure = BeatsPerMeasure.ToString();
                 Settings.Default.CMGIsSnap = IsSnap ? "true" : "false";
-                Settings.Default.CMGMeasureLength = MeasureLength.ToString();
                 Settings.Default.CMGRecordFormat = RecordFormat;
                 Settings.Default.CMGSnapIncrement = SnapIncrement.ToString();
                 Settings.Default.CMGSoundFontLocation = SoundFontFileLocation;
-                Settings.Default.CMGTimeLineMode = TimeLineMode;
                 StatusMessages = [new Message() { Text = "Preferences Updated", Error = false }];
                 window.Close();
             });
         #endregion
-        private async void LoadEnsembleNamesAsync()
+        public async void LoadEnsembleNamesAsync()
         {
             try
             {
@@ -195,7 +143,8 @@ namespace CMGWpf.Services
         {
             try
             {
-                var NoteSequenceNames = await NoteSequenceHelpers.List();
+                var sequenceNames = await NoteSequenceHelpers.List();
+                NoteSequenceNames = new ObservableCollection<string>(sequenceNames.Select(x => x.Name).OrderBy(name => name));
                 StatusMessages.Add(new Message { Text = $"{NoteSequenceNames.Count} Note Sequences loaded.", Error = NoteSequenceNames.Count == 0 });
             }
             catch (Exception ex)
@@ -255,6 +204,8 @@ namespace CMGWpf.Services
             set { ensembleNames = value; OnPropertyChanged(); }
         }
         private ObservableCollection<string> noteSequenceNames = [];
-        public ObservableCollection<string> NoteSequenceNames { get => noteSequenceNames; set { noteSequenceNames = value; OnPropertyChanged(); } }
+        public ObservableCollection<string> NoteSequenceNames { 
+            get => noteSequenceNames; 
+            set { noteSequenceNames = value; OnPropertyChanged(); } }
     }
 }

@@ -7,6 +7,7 @@ using CMGWpf.Services;
 using CMGWpf.SoundFont_2;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -371,6 +372,16 @@ namespace CMGWpf.View
             border.MouseLeave += GeneratorBorder_MouseLeave;
         }
 
+        // the left mouse event handlers work differently depending on where the mouse is when the user clicks. If the mouse is anywhere with the border except near the left and right end, the user can drag the generator up and down to change its vertical position. If the mouse is near the left end of the border, the user can drag the left end to change the start time, which also changes the stop time. If the mouse is near the right end of the border, the user can drag the right end to change the stop time. The left and right ends are defined as 10% of the width of the border. The middle area is defined as 80% of the width of the border. When the mouse is down within the middle of the border, the cursor is changed to SizeNS and the user can drag the generator up and down. When the mouse is down near the left end of the border, the cursor is changed to SizeWE and the user can drag the left end to change the start time. When the mouse is down near the right or left end of the border, the cursor is changed to SizeWE and the user can drag the stop or start time, respectively. 
+        private enum DragMode
+        {
+            None,
+            Move,
+            ResizeStart,
+            ResizeEnd
+        }
+        private bool isSnap = false;
+        private DragMode dragMode = DragMode.None;
         private void GeneratorBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (_generatorBorder == null) return;
@@ -378,9 +389,31 @@ namespace CMGWpf.View
             DebugLog.Write($"[{Generator.Name}] Mouse down - starting drag");
             IsDragging = true;
 
+            // set the drag and snap modes
+            double width = _generatorBorder.ActualWidth;
+            Point position = e.GetPosition(_generatorBorder);
+            double relativeX = position.X / width;
+
+            if (relativeX < 0.1)
+            {
+                dragMode = DragMode.ResizeStart;
+                _generatorBorder.Cursor = Cursors.SizeWE;
+            }
+            else if (relativeX > 0.9)
+            {
+                dragMode = DragMode.ResizeEnd;
+                _generatorBorder.Cursor = Cursors.SizeWE;
+            }
+            else
+            {
+                dragMode = DragMode.Move;
+                _generatorBorder.Cursor = Cursors.SizeNS;
+            }
+
+            isSnap = GlobalService.Instance.IsSnap;
+
             // Capture mouse (same as TimeLineViewModel)
             _generatorBorder.CaptureMouse();
-            _generatorBorder.Cursor = Cursors.SizeNS;
 
             e.Handled = true;
         }
@@ -391,14 +424,68 @@ namespace CMGWpf.View
 
             DebugLog.Write($"[{Generator.Name}] Mouse move with capture");
 
+            switch (dragMode)
+            {
+                case DragMode.Move:
+                    HandleMoveDrag(e);
+                    break;
+                case DragMode.ResizeStart:
+                    HandleResizeStartDrag(e);
+                    break;
+                case DragMode.ResizeEnd:
+                    HandleResizeEndDrag(e);
+                    break;
+                default: return;
+            }
+            e.Handled = true;
+        }
+        private void HandleMoveDrag(MouseEventArgs e) { 
             // Get the Canvas parent to calculate position relative to track
-            if (FindParentCanvas(_generatorBorder) is Canvas canvas)
+            if (_generatorBorder != null && FindParentCanvas(_generatorBorder) is Canvas canvas)
             {
                 Point position = e.GetPosition(canvas);
                 DragGenerator(position.Y);
             }
+        }
+        private static double CanvasLocationToTime(double location)
+        {
+            double timePerPixel = TimeLineTypes.TimeLineScales[TimeLine.CurrentZoomLevel].Extent / SizeService.Instance.DisplayWidth;
+            return TimeLine.StartTime + location * timePerPixel;
+        }
 
-            e.Handled = true;
+        private void HandleResizeStartDrag(MouseEventArgs e)
+        {
+            if (_generatorBorder != null && FindParentCanvas(_generatorBorder) is Canvas canvas)
+            {
+                Point position = e.GetPosition(canvas);
+                if (position.X < 0) position.X = 0; // Prevent negative end time
+                if (position.X > SizeService.Instance.DisplayWidth) position.X = SizeService.Instance.DisplayWidth; // Prevent end time beyond display width
+                double newStartTime = CanvasLocationToTime(position.X);
+                if (isSnap)
+                {
+                    newStartTime = Math.Round(newStartTime / GlobalService.Instance.SnapIncrement) * GlobalService.Instance.SnapIncrement;
+                }
+                NewStartTime = newStartTime;
+                double delta = Generator.StopTime - Generator.StartTime;
+                Generator.StartTime = newStartTime;
+                Generator.StopTime = newStartTime + delta; // maintain duration
+            }
+        }
+
+        private void HandleResizeEndDrag(MouseEventArgs e)
+        {
+            if (_generatorBorder != null && FindParentCanvas(_generatorBorder) is Canvas canvas)
+            {
+                Point position = e.GetPosition(canvas);
+                if (position.X < 0) position.X = 0; // Prevent negative end time
+                if (position.X > SizeService.Instance.DisplayWidth) position.X = SizeService.Instance.DisplayWidth; // Prevent end time beyond display width
+                double newEndTime = CanvasLocationToTime(position.X);
+                if (isSnap)
+                {
+                    newEndTime = Math.Round(newEndTime / GlobalService.Instance.SnapIncrement) * GlobalService.Instance.SnapIncrement;
+                }
+                Generator.StopTime = newEndTime;
+            }
         }
 
         private void GeneratorBorder_MouseLeave(object sender, MouseEventArgs e)
@@ -410,8 +497,20 @@ namespace CMGWpf.View
             {
                 if (FindParentCanvas(_generatorBorder) is Canvas canvas)
                 {
-                    Point position = e.GetPosition(canvas);
-                    DragGenerator(position.Y);
+                    switch (dragMode)
+                    {
+                        case DragMode.Move:
+                            HandleMoveDrag(e); 
+                            break;
+                        case DragMode.ResizeStart:
+                            HandleResizeStartDrag(e);
+                            break; 
+                        case DragMode.ResizeEnd:
+                            HandleResizeEndDrag(e);
+                            break;
+                        default:
+                            return;
+                    }
                 }
             }
             // If not captured, don't change cursor - let XAML default (Hand) remain
@@ -654,32 +753,14 @@ namespace CMGWpf.View
                     Messages.Clear(); Messages.Add(new Message { Text = "New Autoregressive seed assigned.", Error = false });
                 }
             });
-        // reload the list of all ensembles from the database and update the dropdown in the stochastic generator dialog. This is to ensure that if the user adds or removes ensembles from the database while the stochastic generator dialog is open, the dropdown for selecting ensembles is updated in real time to reflect those changes.
-        private RelayCommand<Stochastic>? _reloadEnsembles;
-        public RelayCommand<Stochastic> ReloadEnsembles =>
-            _reloadEnsembles ??= new RelayCommand<Stochastic>(generator =>
-            {
-                if (generator is Stochastic g)
-                {
-                    _ = ReloadEnsemblesAsync();
-                }
-            });
-
+        // reload the list of all ensembles from the database and update the drop down in the stochastic generator dialog. This is to ensure that if the user adds or removes ensembles from the database while the stochastic generator dialog is open, the drop down for selecting ensembles is updated in real time to reflect those changes.
+        private RelayCommand<object>? _reloadEnsembles;
+        public RelayCommand<object> ReloadEnsembles =>
+            _reloadEnsembles ??= new RelayCommand<object>(_ => _ = ReloadEnsemblesAsync());
         private async Task ReloadEnsemblesAsync()
         {
-            try
-            {
-                var ensembles = await EnsembleHelpers.List();
-                //ObservableCollection<Ensemble> ensembles = await EnsembleUtilities.GetEnsembleListAsync();
-                ObservableCollection<string> names = [.. ensembles.Select(ensemble => ensemble.Name)];
-                GlobalService.Instance.EnsembleNames = names;
-            }
-            catch (Exception ex)
-            {
-                Messages.Clear(); Messages.Add(new Message { Text = $"Error reloading ensembles: {ex.Message}", Error = true });
-            }
+            GlobalService.Instance.LoadEnsembleNamesAsync(); // Start the async loading of ensemble names in the background
         }
-
 
         public static ObservableCollection<MODULATORTYPE> ModulatorTypes => new(Enum.GetValues<MODULATORTYPE>());
         public static ObservableCollection<ALGORITHMTYPE> AlgorithmTypes => new(Enum.GetValues<ALGORITHMTYPE>());
@@ -765,11 +846,11 @@ namespace CMGWpf.View
                         Synonym = "(tempo)",
                         ValueUnits = (value) => "BPM",
                         AmplitudeUnits = (value) => "BPM",
-                        ValueFormat = "F0",
-                        AmplitudeFormat = "F0",
+                        ValueFormat = "F1",
+                        AmplitudeFormat = "F1",
                         Minimum = 1,
                         Maximum = 10000,
-                        Increment = 1,
+                        Increment = 0.1,
                         Algorithm = AlgorithmicGenerator.SpeedAlgorithm,
                     };
                     _speedAttribute.PropertyChanged += (s, e) =>
@@ -969,7 +1050,8 @@ namespace CMGWpf.View
                             RegisterLo = dbVoice.RegisterLo,
                             RegisterHi = dbVoice.RegisterHi,
                             Duration = dbVoice.Duration,
-                            SoundFont = SoundFontUtilities.GetSoundFont(dbVoice.SoundFontFile)
+                            SoundFont = SoundFontUtilities.GetSoundFont(dbVoice.SoundFontFile),
+                            Preset = SoundFontUtilities.GetPreset(dbVoice.SoundFontFile, dbVoice.PresetName)
                         }));
                     StochasticGenerator.Composition = [];
 
@@ -1159,7 +1241,7 @@ namespace CMGWpf.View
                 foreach (var dbVoice in dBVoices)
                 {
                     var soundFont = SoundFontUtilities.GetSoundFont(dbVoice.SoundFontFile);
-                    var preset = soundFont?.Presets.FirstOrDefault(p => SoundFontUtilities.BankPresetToName(p) == dbVoice.PresetName);
+                    var preset = SoundFontUtilities.GetPreset(dbVoice.SoundFontFile, dbVoice.PresetName);
                     Voice voice = new Voice
                     {
                         Name = dbVoice.Name,

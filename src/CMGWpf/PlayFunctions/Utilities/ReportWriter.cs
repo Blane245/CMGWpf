@@ -558,7 +558,6 @@ namespace CMGWpf.PlayFunctions.Utilities
                 <strong>Dynamic Parameters</strong>
                 <table>
                     <thead>
-                            <th>Delta (events/sec)</th>
                             <th>Intensity Option</th>
                             <th>Intensity Transition Option</th>
                             <th>Intensity Cycle Time (sec)</th>
@@ -570,7 +569,6 @@ namespace CMGWpf.PlayFunctions.Utilities
                                         </thead>
                         <tbody>
                             <tr>
-                                <td>{{stoch.Delta}}</td>
                                 <td>{{stoch.IntensityOption}}</td>
                                                 <td>{{stoch.IntensityTransitionOption}}</td>
                                 <td>{{stoch.IntensityParameters.CycleTime:F2}}</td>
@@ -592,6 +590,7 @@ namespace CMGWpf.PlayFunctions.Utilities
                             <th>Muted?</th>
                             <th>Volume</th>
                             <th>Velocity</th>
+                            <th>Delta</th>
                             <th>Timbre</th>
                             <th>Register</th>
                             <th>Duration</th>
@@ -605,6 +604,7 @@ namespace CMGWpf.PlayFunctions.Utilities
                             $"<td>{(v.Muted ? "True" : "False")}</td>" +
                             $"<td>{v.Volume:F0}</td>" +
                             $"<td>{v.Velocity:F0}</td>" +
+                            $"<td>{v.Delta:F2}</td>" +
                             $"<td>{v.Timbre}</td>" +
                             $"<td>{v.RegisterLo:F2} → {v.RegisterHi:F2}</td>" +
                             $"<td>{v.Duration:F1}</td>" +
@@ -753,18 +753,20 @@ namespace CMGWpf.PlayFunctions.Utilities
                 {
                     path += LineTo(e.Time, e.Gain);
                 }
-                path += $"L {source.Envelope[^1].Time * xScale} {ENVELOPEHEIGHT}";
+                path += $"L {envelope[^1].Time * xScale} {ENVELOPEHEIGHT}";
                 return path;
             }
             string EnvelopeGraph(GainEnvelope[] envelope)
             {
+                if (envelope.Length == 0)
+                    return "<p>No envelope data.</p>";
                 return $$"""
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         height={{ENVELOPEHEIGHT.ToString() + "px"}}
                         width={{ENVELOPEWIDTH.ToString() + "px"}}
                     >
-                        <path d="{{Path(source.Envelope)}}" fill="Black" />
+                        <path d="{{Path(envelope)}}" fill="Black" />
                     </svg>
                     <p style="text-align:right;">{{maxTime:F3}} (sec)</p>
                     """;

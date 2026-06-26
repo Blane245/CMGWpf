@@ -12,7 +12,7 @@
         mc:Ignorable="d"
         WindowStyle="None"
         ResizeMode="CanResize"
-        MinHeight="210" MinWidth="300"
+        Height="210" Width="400"
         Icon="/Assets/CMG-Logo.ico"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
         >
@@ -40,28 +40,15 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Record Format: "/>
-                    <ComboBox ItemsSource="{Binding RecordFormats}" SelectedItem="{Binding RecordFormat, Mode=TwoWay}" ToolTip="Select the desired audio recoring format."/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Time Line Mode: "/>
-                    <ComboBox ItemsSource="{Binding TimeLineModes}" SelectedItem="{Binding TimeLineMode, Mode=TwoWay}" ToolTip="Currently not implemented."/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Measure Length (sec): "/>
-                    <xctk:DoubleUpDown Value="{Binding MeasureLength, Mode=TwoWay}" Minimum="0" Maximum="1000" Increment="1" ToolTip="Currently not implemented."/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Beats per Measure: "/>
-                    <xctk:IntegerUpDown Value="{Binding BeatsPerMeasure, Mode=TwoWay}" Minimum="1" Maximum="100" Increment="1" ToolTip="Currently not implemented"/>
+                    <ComboBox ItemsSource="{Binding RecordFormats}" SelectedItem="{Binding RecordFormat, Mode=TwoWay}" ToolTip="Select the desired audio recording format."/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Snap Mode: "/>
-                    <CheckBox IsChecked="{Binding IsSnap, Mode=TwoWay}" ToolTip="Currently not implemented"/>
+                    <CheckBox IsChecked="{Binding IsSnap, Mode=TwoWay}" ToolTip="Snap when moving start or end time of generator"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="Snap Increment: "/>
-                    <Label Content="{Binding SnapIncrementUnits}"/>
-                    <xctk:IntegerUpDown Value="{Binding SnapIncrement, Mode=TwoWay}" Minimum="1" Maximum="1000" ToolTip="Currently not implemented"/>
+                    <Label Content="Snap Increment (sec): "/>
+                    <xctk:DoubleUpDown Value="{Binding SnapIncrement, Mode=TwoWay}" Minimum="0.1" Maximum="1000" Increment="0.1" ToolTip="The number of seconds between snap points"/>
                 </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                 <Button x:Name="OK" Width="50" Content="OK" Command="{Binding EditPreferencesOkCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="0"/>

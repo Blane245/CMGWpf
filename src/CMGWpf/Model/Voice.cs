@@ -21,7 +21,8 @@ namespace CMGWpf.Model
         public TIMBRE Timbre { get; set; }
         public double RegisterLo { get; set; }
         public double RegisterHi { get; set; }
-        public double Duration { get; set; }
+        private double _duration = 0;
+        public double Duration { get => Math.Round(_duration, 3); set { _duration = value; } }
         // a change to the mute property will cause a change in the UI for the composition
         private bool muted;
         public bool Muted
@@ -29,6 +30,7 @@ namespace CMGWpf.Model
             set { if (muted != value) { muted = value; OnPropertyChanged(); } } }
         public double Volume { get; set; }
         public double Velocity { get; set; }
+        public double Delta { get; set; }
         public Voice Clone()
         {
             return (Voice)MemberwiseClone();

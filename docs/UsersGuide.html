@@ -212,7 +212,7 @@ margin-right: auto;
 <li><a href="#appendix-f-glossary">Appendix F: Glossary</a></li>
 <li><a href="#acknowledgements">Acknowledgements</a></li>
 </ul>
-<!-- TOC-->
+<!-- TOC -->
 <hr />
 <h1 id="introduction">Introduction</h1>
 <p>CMG (Computer Music Generator) is a desktop application developed using the Windows Platform Framework (WPF) for creating music through algorithmic and stochastic (chance-based) composition techniques. Whether you're an experimental composer, sound designer, or music educator, CMG provides powerful tools for generating, editing, and rendering complex musical structures.</p>
@@ -545,7 +545,6 @@ Each of the attributes has a algorithm assigned to it. More details may be found
 <p><strong>Dynamics Parameters</strong>:</p>
 <p>These affect the production of sound from the defined composition. Changes to these parameters do not affect a built composition.</p>
 <ul>
-<li><strong>Sounds/Second</strong>: Average number of sound events in a cloud</li>
 <li><strong>Microtones?</strong>: Enables the use of microtones between semi-tones</li>
 <li><strong>Intensity Transition</strong>: Variation of the volume over time
 <ul>
@@ -584,6 +583,7 @@ Each of the attributes has a algorithm assigned to it. More details may be found
 <li><strong>Volume</strong>: Relative volume (+-100dB) of the voice</li>
 <li><strong>Velocity</strong>: Velocity, or attack, value of the voice [0-127]</li>
 <li><strong>Mute</strong>: Disable the voice in the final composition.</li>
+<li><strong>Events/Second</strong>: Average number of sound events in a cloud</li>
 </ul>
 <p>Ensembles and voices may be changed within the CMG Database independent of their use within CMG. Each time a CMG file is loaded, the ensemble and voices are reread from the database. If changes are made while a file is opened, this changes will only take effect by pressing the <strong>Reload</strong> buttons <code>Ensemble</code> or <code>Voices</code>.</p>
 <h2 id="generator-operations">Generator Operations</h2>

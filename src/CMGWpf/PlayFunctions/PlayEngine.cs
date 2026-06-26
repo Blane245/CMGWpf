@@ -64,7 +64,6 @@ namespace CMGWpf.PlayFunctions
 
             // initialize the play/record processing inputs and outputs and launch the generator conversion multi threading process.
             PlayViewModel.Instance.PlayGenerators = ready.Generators;
-            PlayViewModel.Instance.PlayDuration = ready.Duration;
             PlayViewModel.Instance.FinalSignal = new AudioBufferWrapper(new double[(int)Math.Ceiling(ready.Duration) * SampleRate]);
             PlayViewModel.Instance.TimeMidiVoices = [];
             PlayViewModel.Instance.GeneratorVoices = [];
@@ -184,8 +183,6 @@ namespace CMGWpf.PlayFunctions
                 {
                     progressTimer.Stop();
                     progressDialog.Close();
-                    // adjust the composition duration based on the length of the float buffer. divide by 2 for stereo.
-                    PlayViewModel.Instance.PlayDuration = (PlayViewModel.Instance.FinalSignal != null) ? (PlayViewModel.Instance.FinalSignal.Buffer.Length / (float)(SampleRate * 2)) : 0;
                     PerformPlayReport();
                 }
 
@@ -194,10 +191,11 @@ namespace CMGWpf.PlayFunctions
             // once all data is available perform play or report
             void PerformPlayReport()
             {
+                PlayViewModel.Instance.AudioBuffer = NormalizeBuffer(PlayViewModel.Instance.FinalSignal.Buffer);
+                PlayViewModel.Instance.PlayDuration = PlayViewModel.Instance.AudioBuffer.Length / (SampleRate * 2);
                 if (isPlay)
                 {
                     // convert the final signal from the generators from double to float and normalize
-                    PlayViewModel.Instance.AudioBuffer = NormalizeBuffer(PlayViewModel.Instance.FinalSignal.Buffer);
                     // prepare the palette for the sound roll
                     SoundRollBuilder.TimeMidiVoices = PlayViewModel.Instance.TimeMidiVoices;
                     PlayViewModel.Instance.VoiceColors = SoundRollBuilder.DefineVoicePalette(PlayViewModel.Instance.GeneratorVoices);
@@ -246,7 +244,7 @@ namespace CMGWpf.PlayFunctions
         }
 
         /// <summary>
-        /// Normalize the output so that the rms value of the nonzero samples becomes 0.5, but clip anything outside of -1 and +1 to prevent distortion. This is a simple normalization approach that can be improved in the future with more advanced techniques like dynamic range compression or limiting. For now it just ensures that the output is not too quiet or too loud on average, while allowing for some variation in the sample values. The buffer is converted to single precision to be compatible with the audio output system, which typically uses 32-bit float samples. 
+        /// Normalize the output so that the rms value of the nonzero samples becomes 0.5, but clip anything outside of -1 and +1 to prevent distortion. This is a simple normalization approach that can be improved in the future with more advanced techniques like dynamic range compression or limiting. For now it just ensures that the output is not too quiet or too loud on average, while allowing for some variation in the sample values. The buffer is converted to single precision to be compatible with the audio output system, which typically uses 32-bit float samples. Also, all but a maximum of one second of silence is allowed at the end
         /// </summary>
         /// <param name="buffer"></param>
         /// <returns>A single precision array that has been normalized</returns>
@@ -257,6 +255,17 @@ namespace CMGWpf.PlayFunctions
             double rms = 0;
             double sum = 0;
             int count = 0;
+            // find the last nonzero sample to allow for up to one second of silence at the end of the buffer, but not more. This prevents long tails of silence from being included in the output that can cause issues with some audio players and also ensures that the duration of the composition is accurate based on the actual audio content.
+            int maxSilenceSamples = SampleRate; // allow for up to one second of silence at the end
+            int lastNonZero = buffer.Length;
+            for (int i = buffer.Length - 1; i >= 0; i--)
+            {
+                if (buffer[i] != 0) break;
+                lastNonZero--;
+            }
+            int allowedSilenceSamples = Math.Min(lastNonZero + maxSilenceSamples, buffer.Length);
+            if (allowedSilenceSamples < buffer.Length) buffer = buffer.Take(allowedSilenceSamples).ToArray();
+
             for (int i = 0; i < buffer.Length; i++)
             {
                 // ignore zeroes so they overload the numbers

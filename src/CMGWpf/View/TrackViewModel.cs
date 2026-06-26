@@ -96,6 +96,11 @@ namespace CMGWpf.View
         public void NotifyTrackChanged(Track newTrack)
         {
             Track = newTrack;
+            // replace the track in the tracks collection
+            for(var i = 0; i < FileViewModel.Instance.File.Tracks.Count; i++)
+            {
+                if (FileViewModel.Instance.File.Tracks[i].Name == newTrack.Name) FileViewModel.Instance.File.Tracks[i] = newTrack;
+            }
             // Clear the cached generators so they get recreated with the updated track
             CachedGenerators = null;
             OnPropertyChanged(nameof(Generators));

@@ -53,14 +53,14 @@ namespace CMGWpf.PlayFunctions.DSP
                     DebugLog.Write($"At time {time}: Note={currentValues.Note}, Attack={currentValues.Attack}, Speed={currentValues.Speed}, Duration={currentValues.Duration}, Pan={currentValues.Pan}, Volume={currentValues.Volume}");
                     var hitBeat = currentValues.Beat;
                     var note = currentValues.Note;
-                    if (!microtones) note = Math.Round(note);
+                    if (!algorithmic.Microtones) note = Math.Round(note);
                     var velocity = currentValues.Attack;
                     var speed = currentValues.Speed;
                     var durationPercent = currentValues.Duration;
                     var volumedB = currentValues.Volume;
                     var pan = currentValues.Pan;
                     volumedB += Math.Clamp(parent.Volume, -10, 10);
-                    double interval = Math.Min(60 / speed, stopTime - time);
+                    double interval = 60 / speed;
                     double noteDuration = (interval * durationPercent) / 100;
                     if (hitBeat)
                     {
@@ -90,7 +90,7 @@ namespace CMGWpf.PlayFunctions.DSP
                             // complete the source definition and add to the sources collection
                             source.Generator = algorithmic;
                             source.StartTime = time;
-                            source.StopTime = time + noteDuration;
+                            source.StopTime = time + (double)instrumentSample.Length / SampleRate;
                             source.SoundFontName = soundFontName;
                             source.PresetName = preset.Name;
                             source.Name = voice.InstrumentName;
@@ -108,7 +108,7 @@ namespace CMGWpf.PlayFunctions.DSP
                             Reverb.Apply(panSamples, algorithmic.ReverbDelay, algorithmic.ReverbDecay, PlayTypes.SampleRate);
 
                             // Update global data - only lock for buffer modification, use concurrent collections for the rest
-                            double instrumentEndTime = time + (double)instrumentSample.Length / PlayTypes.SampleRate;
+                            double instrumentEndTime = source.StopTime;
 
                             // Lock only for the audio buffer (needs synchronization for resize)
                             bool lockTaken = false;
@@ -187,7 +187,7 @@ namespace CMGWpf.PlayFunctions.DSP
                             // complete the source definition and add to the sources collection
                             source.Generator = algorithmic;
                             source.StartTime = time;
-                            source.StopTime = time + duration;
+                            source.StopTime = time + (double)instrumentSample.Length / SampleRate;
                             source.SoundFontName = soundFontName;
                             source.PresetName = preset.Name;
                             source.Name = voice.InstrumentName;
@@ -206,7 +206,7 @@ namespace CMGWpf.PlayFunctions.DSP
 
                             // Update global data - only lock for buffer modification
                             int instrumentStartIndex = (int)(time * PlayTypes.SampleRate) * 2;
-                            double instrumentEndTime = time + (double)instrumentSample.Length / PlayTypes.SampleRate;
+                            double instrumentEndTime = source.StopTime;
 
                             // Lock only for audio buffer
                             bool lockTaken = false;

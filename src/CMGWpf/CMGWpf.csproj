@@ -44,6 +44,7 @@
     <PackageReference Include="NAudio" Version="2.3.0" />
     <PackageReference Include="NAudio.Lame" Version="2.1.0" />
     <PackageReference Include="pythonnet" Version="3.1.0" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,6 +56,7 @@
 	  <None Remove="..\..\docs\HowToOpenDatabaseMigration.md" />
 	  <None Remove="..\..\docs\Phase9-Cleanup-Complete.md" />
 	  <None Remove="..\..\docs\SQLiteMigration.md" />
+	  <None Remove="..\..\docs\UsersGuide.html" />
 	  <None Include="..\..\README.md" Link="README.md">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
@@ -95,9 +97,6 @@
 
   <ItemGroup>
     <None Update="..\..\docs\.editorconfig" Link=".editorconfig" />
-    <None Update="..\..\docs\UsersGuide.html">
-      <DependentUpon>UsersGuide.md</DependentUpon>
-    </None>
   </ItemGroup>
 
 </Project>
