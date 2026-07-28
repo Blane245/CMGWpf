@@ -100,6 +100,14 @@ namespace CMGWpf.Utilities
                 }
             }
         }
+        public static SoundFont? ReloadSoundFont (string SFFileName)
+        {
+            if (SFPool.ContainsKey(SFFileName))
+            {
+                SFPool.Remove(SFFileName);
+            }
+            return GetSoundFont(SFFileName);
+        }
 
         public static Preset? GetPreset(string SFFileName, string presetName)
         {

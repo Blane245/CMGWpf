@@ -411,7 +411,7 @@ namespace CMGWpf.Model.Generators
                     Description = XMLFunctions.GetAttributeString(ensembleElem, "description", ""),
                     Voices = XMLFunctions.GetAttributeString(ensembleElem, "voices", "")
                 };
-                var delta = XMLFunctions.GetAttributeDouble(generatorElem, "delta", 0); // get as default based on old format
+                var delta = XMLFunctions.GetAttributeDouble(generatorElem, "delta", 2); // get as default based on old format
                 XmlElement? voicesElem = generatorElem.GetElementsByTagName("voices").Cast<XmlElement?>().FirstOrDefault();
                 if (voicesElem != null)
                 {

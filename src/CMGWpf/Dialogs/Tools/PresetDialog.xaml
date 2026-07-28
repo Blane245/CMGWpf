@@ -1,0 +1,102 @@
+﻿<Window x:Class="CMGWpf.Dialogs.PresetDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CMGWpf.Dialogs"
+        xmlns:panels="clr-namespace:CMGWpf.Panels"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        mc:Ignorable="d"
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        SizeToContent="WidthAndHeight"
+        Icon="/Assets/CMG-Logo.ico"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+>
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40"
+                           ResizeBorderThickness="5"
+                           GlassFrameThickness="0"
+                           CornerRadius="0"
+                           UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <!-- window header -->
+            <RowDefinition Height="Auto"/>
+            <!-- parameters -->
+            <RowDefinition Height="*"/>
+            <!-- content -->
+            <RowDefinition Height="*"/>
+            <!-- signal -->
+        </Grid.RowDefinitions>
+        <panels:CustomWindowChrome Grid.Row="0"
+                                     WindowTitle="Explore Preset"
+                                     ChromeBackground="BlueViolet">
+        </panels:CustomWindowChrome>
+        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" >
+                    <Label Content="SoundFont:"/>
+                    <ComboBox ItemsSource="{Binding SoundFontFileNames}" SelectedValue="{Binding SoundFontFileName, Mode=TwoWay}" ToolTip="Select a SoundFont file." />
+                    <Button x:Name="ReloadSoundFont" Width="100" Content="Reload SoundFont" Click="ReloadSoundFont_Click" Margin="5,0,0,0"/>
+                    <Button x:Name="ViewPresets" Width="80" Content="View Presets" Click="ViewPresets_Click" Margin="5,0,0,0"/>
+                    <Label Content="Preset Name: "/>
+                    <ComboBox ItemsSource="{Binding PresetNames}" SelectedItem="{Binding PresetName, Mode=TwoWay}" ToolTip="Select a preset from the chosen SoundFont." />
+                    <Label Content="Start Pitch (0-127): "/>
+                    <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="0" Maximum="127" Increment="0.01" Value="{Binding StartPitch, Mode=TwoWay}" ToolTip="Set the start pitch for the preset."/>
+                    <Label Content="End Pitch (0-127): "/>
+                    <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="0" Maximum="127" Increment="0.01" Value="{Binding EndPitch, Mode=TwoWay}" ToolTip="Set the end pitch for the preset."/>
+                    <Label Content="Velocity (0-127): "/>
+                    <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="0" Maximum="127" Increment="1" Value="{Binding Velocity, Mode=TwoWay}" ToolTip="Set the velocity for the preset."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" >
+                    <Label Content="Interval (sec): "/>
+                    <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="0" Maximum="100" Increment="0.01" Value="{Binding Interval, Mode=TwoWay}" ToolTip="Set the interval for the preset."/>
+                    <Label Content="Duration (sec): "/>
+                    <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="0" Maximum="127" Increment="0.01" Value="{Binding Duration, Mode=TwoWay}" ToolTip="Set the duration for the preset."/>
+                    <Label Content="Loop: "/>
+                    <CheckBox Content="" IsChecked="{Binding IsLooping}" ToolTip="Enable or disable looping for the preset." />
+                    <Label Content="Attack: "/>
+                    <CheckBox Content="" IsChecked="{Binding IsAttack}" ToolTip="Enable or disable the attack portion of the sound." />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Reverb Delay (sec): "/>
+                    <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="0" Maximum="127" Increment="0.01" Value="{Binding ReverbDelay, Mode=TwoWay}" ToolTip="Set the reverb delay for the preset."/>
+                    <Label Content="Reverb Decay (0-10dB): "/>
+                    <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="1" Value="{Binding ReverbDecay, Mode=TwoWay}" ToolTip="Set the reverb decay for the preset."/>
+                    <Label Content="Noise Frequency (Hz): "/>
+                    <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="0" Maximum="20000" Increment="1" Value="{Binding NoiseFrequency, Mode=TwoWay}" ToolTip="Set the noise frequency for the preset."/>
+                    <Label Content="Noise Amplitude (+-10dB): "/>
+                    <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="-10" Maximum="10" Increment="0.01" Value="{Binding NoiseAmplitude, Mode=TwoWay}" ToolTip="Set the noise amplitude for the preset."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Tremolo Speed (mHz): "/>
+                    <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding TremoloSpeed}" ToolTip="Set the speed for the tremolo effect."/>
+                    <Label Content="Tremolo Depth (0-10dB): "/>
+                    <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.1" Value="{Binding TremoloDepth}" ToolTip="Set the depth for the tremolo effect."/>
+                    <Label Content="Tremolo Modulator: "/>
+                    <ComboBox ItemsSource="{Binding ModulatorTypes}" SelectedItem="{Binding TremoloWaveform, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="Select the modulator waveform for the tremolo effect."/>
+                    <Label Content="Vibrato Speed (mHz): "/>
+                    <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding VibratoSpeed}" ToolTip="Set the speed for the vibrato effect."/>
+                    <Label Content="Vibrato Depth (cents): "/>
+                    <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="1000" Increment="10" Value="{Binding VibratoDepth}" ToolTip="Set the depth for the vibrato effect."/>
+                    <Label Content="Vibrato Modulator:"/>
+                    <ComboBox ItemsSource="{Binding ModulatorTypes}" SelectedItem="{Binding VibratoWaveform, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Select the modulator waveform for the vibrato effect."/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="Play" Width="50" Content="Play" Click="Play_Click" Margin="5,0,0,0"/>
+                    <Button x:Name="Cancel" Width="50" Content="Cancel" Click="Cancel_Click" Margin="5,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <Border Grid.Row="2" BorderBrush="Black" BorderThickness="1" Padding="5" Name="PresetTable">
+        </Border>
+        <Border Grid.Row="3" BorderBrush="Black" BorderThickness="1" Padding="5" Name="PresetSignal">
+        </Border>
+    </Grid>
+</Window>

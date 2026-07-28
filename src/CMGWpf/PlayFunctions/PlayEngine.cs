@@ -249,7 +249,7 @@ namespace CMGWpf.PlayFunctions
         /// <param name="buffer"></param>
         /// <returns>A single precision array that has been normalized</returns>
         /// <exception cref="Exception"></exception>
-        private static float[] NormalizeBuffer(double[] buffer)
+        public static float[] NormalizeBuffer(double[] buffer)
         {
             double max = 0;
             double rms = 0;
@@ -268,7 +268,7 @@ namespace CMGWpf.PlayFunctions
 
             for (int i = 0; i < buffer.Length; i++)
             {
-                // ignore zeroes so they overload the numbers
+                // ignore zeroes so they don't overload the numbers
                 if (buffer[i] != 0)
                 {
                     if (double.IsNaN(buffer[i])) throw new Exception($"buffer is undefined at position i={i}");
@@ -289,7 +289,7 @@ namespace CMGWpf.PlayFunctions
             // normalize using rms * 2 so that the samples at the rms value become 0.5, but clip anything outside of -1 and +1
             for (int i = 0; i < buffer.Length; i++)
             {
-                floatBuffer[i] = (float)buffer[i] / (float)(rms * 2.0F);
+                floatBuffer[i] = (float)buffer[i] / (float)(rms * 5.0F);
                 floatBuffer[i] = Math.Clamp(floatBuffer[i], -1.0F, 1.0F);
             }
             DebugLog.Write($"Final audio buffer normalized, average={average}, max={max}, rms={rms}");

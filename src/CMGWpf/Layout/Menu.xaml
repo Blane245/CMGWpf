@@ -51,9 +51,13 @@
                               ToolTip="Display the Note Sequence Editor."
                         InputGestureText="Ctrl+D"                              
                               />
-                <MenuItem Header="_Generator and Calculator Tools..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=GeneratorandCalculatorToolsCommand}"
+                <MenuItem Header="_Generator and Calculator Tools..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=GeneratorAndCalculatorToolsCommand}"
                               ToolTip="Activate Generator and Calculator Tools Window"
                               InputGestureText="Ctrl+G"
+                              />
+                <MenuItem Header="_Preset Review..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=PresetReviewCommand}"
+                              ToolTip="Activate Preset Review Window"
+                              InputGestureText="Ctrl+Alt+P"
                               />
             </MenuItem>
             <MenuItem Header="_Play">

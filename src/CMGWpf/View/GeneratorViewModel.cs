@@ -846,11 +846,11 @@ namespace CMGWpf.View
                         Synonym = "(tempo)",
                         ValueUnits = (value) => "BPM",
                         AmplitudeUnits = (value) => "BPM",
-                        ValueFormat = "F1",
-                        AmplitudeFormat = "F1",
-                        Minimum = 1,
+                        ValueFormat = "F2",
+                        AmplitudeFormat = "F2",
+                        Minimum = .01,
                         Maximum = 10000,
-                        Increment = 0.1,
+                        Increment = 0.01,
                         Algorithm = AlgorithmicGenerator.SpeedAlgorithm,
                     };
                     _speedAttribute.PropertyChanged += (s, e) =>
@@ -1257,6 +1257,7 @@ namespace CMGWpf.View
                         Muted = false,
                         Volume = 0,
                         Velocity = 63,
+                        Delta = 2,
                     };
                     StochasticGenerator.Voices.Add(voice);
                 }

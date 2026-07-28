@@ -1,5 +1,4 @@
 # Version 4.1.0
-## bugs
 	Changed duration of last note in an algorithmic generator to full length rather than truncating at the stop time. 
 	Fixed handling of voice volume and velocity in stochastic generator
 	Corrected DSP when decay time is short and when note interval is less than a specified duration
@@ -9,3 +8,6 @@
 	Implemented time snapping for generators
 	Removed dead signal from audio signal leaving up to 1 second of silence at the end of a composition
 	Cleaned up the user settings file to remove unused parameters
+# Version 4.2.0
+	Implemented preset review dialog for the user to review the presets with DSP parameter settings.
+	Tuned up the DSP.

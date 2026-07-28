@@ -1,4 +1,5 @@
-﻿using CMGWpf.Dialogs.Tools;
+﻿using CMGWpf.Dialogs;
+using CMGWpf.Dialogs.Tools;
 using CMGWpf.MVVM;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
@@ -23,17 +24,30 @@ namespace CMGWpf.View
         // dialog close action will permit new dialog to be created.
         private Window? _toolDialog = null;
         public Window? ToolDialog { get => _toolDialog; set { _toolDialog = value; OnPropertyChanged(); } }
+        private Window? _presetDialog = null;
+        public Window? PresetDialog { get => _presetDialog; set { _presetDialog = value; OnPropertyChanged(); } }
 
-
-        private RelayCommand<object?>? _generatorandCalculatorToolsCommand;
-        public RelayCommand<object?> GeneratorandCalculatorToolsCommand =>
-            _generatorandCalculatorToolsCommand ??= new RelayCommand<Object?>(execute =>
+        private RelayCommand<object?>? _generatorAndCalculatorToolsCommand;
+        public RelayCommand<object?> GeneratorAndCalculatorToolsCommand =>
+            _generatorAndCalculatorToolsCommand ??= new RelayCommand<Object?>(execute =>
             {
                 if (ToolDialog == null)
                 {
                     ToolDialog = new GeneratorAndCalculatorTools();
                     ToolDialog.BringIntoView();
                     ToolDialog.Show();
+                }
+            });
+
+        private RelayCommand<object?>? _presetReviewCommand;
+        public RelayCommand<object?> PresetReviewCommand =>
+            _presetReviewCommand ??= new RelayCommand<Object?>(execute =>
+            {
+                if (PresetDialog == null)
+                {
+                    PresetDialog = new PresetDialog();
+                    PresetDialog.BringIntoView();
+                    PresetDialog.Show();
                 }
             });
 

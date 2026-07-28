@@ -1,4 +1,6 @@
-﻿namespace CMGWpf.Services
+﻿using System.Windows;
+
+namespace CMGWpf.Services
 {
     /// <summary>
     /// A singleton service that manages the current window size and calculates available space for different UI components based on predefined dimensions for controls, chrome, timeline, etc. It provides properties for the main window dimensions and calculated dimensions for display area, body area, play area, and dialog content. The service raises property change notifications when dimensions are updated to allow the UI to react accordingly.
@@ -27,9 +29,11 @@
             {
                 windowHeight = value; OnPropertyChanged();
                 bodyHeight = WindowHeight - ChromeHeight - TimeLineHeight - FooterHeight;
-                playHeight = windowHeight - ChromeHeight - PlayHeaderHeight;
+                // Use the work area height so UI doesn't overlap the taskbar when windows are maximized
+                playHeight = WindowHeight - ChromeHeight - PlayHeaderHeight;
                 OnPropertyChanged(nameof(BodyHeight));
                 OnPropertyChanged(nameof(DialogHeight));
+                OnPropertyChanged(nameof(PlayHeight));
             }
         }
 
@@ -41,7 +45,8 @@
             // Initialize calculated values
             displayWidth = windowWidth - ControlWidth;
             bodyHeight = windowHeight - ChromeHeight - TimeLineHeight - FooterHeight;
-            playHeight = windowHeight - ChromeHeight - PlayHeaderHeight;
+            // Use work area height so play area doesn't extend under the taskbar
+            playHeight = SystemParameters.WorkArea.Height - ChromeHeight - PlayHeaderHeight;
         }
         public double ControlWidth { get; } = 200;
         public double ChromeHeight { get; } = 40; // Custom window chrome height
@@ -55,6 +60,12 @@
         private double bodyHeight = 0;
         public double BodyHeight { get => bodyHeight; }
         private double playHeight = 0;
+
+        /// <summary>
+        /// Gets the available height for the play area (work area minus chrome and header).
+        /// Uses SystemParameters.WorkArea to avoid overlapping the taskbar when maximized.
+        /// </summary>
+        public double PlayHeight { get => playHeight; }
 
         /// <summary>
         /// Gets the available height for dialog content (WindowHeight - ChromeHeight)

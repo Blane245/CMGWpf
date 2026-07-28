@@ -32,7 +32,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=PlayHeaderHeight}"/>
-            <RowDefinition Height="*"/>
+            <!-- Bind the play content row height to SizeService.PlayHeight so it respects the taskbar (work area) -->
+            <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=PlayHeight}"/>
         </Grid.RowDefinitions>
         <panels:CustomWindowChrome Grid.Row="0"
                                      WindowTitle="{Binding PlayTitle}"

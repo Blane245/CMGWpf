@@ -159,7 +159,7 @@ namespace CMGWpf.PlayFunctions.DSP
             {
                 loopStart = sampleStartLoop + startAddrsCoarseOffset * 32768 + startAddrOffset - sampleStart;
                 loopEnd = Math.Clamp(sampleEndLoop + endAddrsCoarseOffset * 32768 + endAddrOffset - sampleStart, loopStart, instrumentSample.Length);
-                loop = loopEnabled;
+                loop = (loopStart != loopEnd)? loopEnabled: false;
                 loopLength = loopEnd - loopStart;
             }
             else loop = false;
@@ -321,7 +321,7 @@ namespace CMGWpf.PlayFunctions.DSP
                 {
                     iEnvelope++;
                 }
-                double envelopeGain = (iEnvelope < maxEnvelope) ? Interpolation.Linear(t, envelope[iEnvelope - 1].Time, envelope[iEnvelope].Time, envelope[iEnvelope - 1].Gain, envelope[iEnvelope].Gain) : volumeGain * initialAttenuationGain;
+                double envelopeGain = (iEnvelope <= maxEnvelope) ? Interpolation.Linear(t, envelope[iEnvelope - 1].Time, envelope[iEnvelope].Time, envelope[iEnvelope - 1].Gain, envelope[iEnvelope].Gain) : volumeGain * initialAttenuationGain;
                 double tremoloGain = Sf2Units.VolumeDbToGain(tremolo.GetCurrentValue(t));
                 finalSamples[i] = sample * envelopeGain * tremoloGain;
             }
