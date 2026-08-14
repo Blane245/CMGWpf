@@ -8,9 +8,10 @@ namespace CMGWpf.Model.Generators
 {
     public enum GENERATORTYPE
     {
-        NoGenertor,
+        NoGenerator,
         Algorithmic,
         Stochastic,
+        ChordSequencer,
     }
     public class CurrentValues
     {
@@ -21,6 +22,13 @@ namespace CMGWpf.Model.Generators
         public double Duration { get; set; } = 60;
         public double Volume { get; set; } = 0;
         public double Pan { get; set; } = 0;
+    }
+    public class ChordSequencerValues
+    {
+        public double Speed { get; set; } = 60;
+        public double Volume { get; set; } = 0;
+        public double Pan { get; set; } = 0;
+
     }
 
     /// <summary>
@@ -44,6 +52,7 @@ namespace CMGWpf.Model.Generators
                 {
                     GENERATORTYPE.Algorithmic => new Algorithmic(uid, parent),
                     GENERATORTYPE.Stochastic => new Stochastic(uid, parent),
+                    GENERATORTYPE.ChordSequencer => new ChordSequencer(uid, parent),
                     _ => throw new ArgumentException("Unknown generator type", nameof(type)),
                 };
             }

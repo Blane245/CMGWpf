@@ -1,6 +1,9 @@
 using CMGWpf.Model.Database;
+using CMGWpf.Types;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
+using System.Text.Json;
+using System.Collections.ObjectModel;
 
 namespace CMGWpf.Data
 {
@@ -20,6 +23,7 @@ namespace CMGWpf.Data
         public DbSet<Voice> Voices { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<NoteSequence> NoteSequences { get; set; }
+        public DbSet<ChordSequence> ChordSequences { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -200,6 +204,37 @@ namespace CMGWpf.Data
                             j.ToTable("notesequence_tag");
                         }
                     );
+            });
+
+            // Configure ChordSequence entity
+            modelBuilder.Entity<ChordSequence>(entity =>
+            {
+            entity.ToTable("chordsequence");
+
+            // Primary key
+            entity.HasKey(e => new { e.Name });
+
+            // Properties
+            entity.Property(e => e.Name)
+                .HasMaxLength(45)
+                .IsRequired();
+
+            entity.Property(e => e.Items);
+            //entity.Property(e => e.SoundFontFileName)
+            //    .HasMaxLength(500);
+
+            //entity.Property(e => e.PresetName)
+            //    .HasMaxLength(255);
+            //entity.Property(e => e.BPM);
+            //entity.Property(e => e.RootNote)
+            //    .HasMaxLength(1);
+            //entity.Property(e => e.RootOctave);
+            entity.Property(e => e.IsMajor);
+            entity.Property(e => e.Items)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v),
+                    v => JsonSerializer.Deserialize<ObservableCollection<ChordItem>>(v) ?? new ObservableCollection<ChordItem>()
+                );
             });
         }
     }

@@ -34,6 +34,7 @@
                 <!-- Cancel Button -->
             </Grid.RowDefinitions>
             <panels:CustomWindowChrome Grid.Row="0"
+                                       IconSource="/Assets/CMG-Logo.ico"
                                      WindowTitle="{Binding WindowTitle}"
                                      ChromeBackground="Chocolate">
             </panels:CustomWindowChrome>

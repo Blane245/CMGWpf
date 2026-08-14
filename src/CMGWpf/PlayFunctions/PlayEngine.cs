@@ -112,7 +112,7 @@ namespace CMGWpf.PlayFunctions
             CancellationToken cancellationToken = tokenSource.Token;
             foreach (var gen in PlayViewModel.Instance.PlayGenerators)
             {
-                if (gen is Algorithmic || gen is Stochastic)
+                if (gen is Algorithmic || gen is Stochastic || gen is ChordSequencer)
                 {
                     // Use LongRunning hint to avoid thread pool starvation for CPU-intensive DSP work
                     Task aTask = Task.Factory.StartNew(() =>
@@ -124,6 +124,9 @@ namespace CMGWpf.PlayFunctions
                              break;
                          case Stochastic:
                              SourcesFromStochastic.Get((gen as Stochastic)!);
+                             break;
+                         case ChordSequencer:
+                             SourcesFromChordSequencer.Get((gen as ChordSequencer)!);
                              break;
                      }
                      try
@@ -192,7 +195,7 @@ namespace CMGWpf.PlayFunctions
             void PerformPlayReport()
             {
                 PlayViewModel.Instance.AudioBuffer = NormalizeBuffer(PlayViewModel.Instance.FinalSignal.Buffer);
-                PlayViewModel.Instance.PlayDuration = PlayViewModel.Instance.AudioBuffer.Length / (SampleRate * 2);
+                //PlayViewModel.Instance.PlayDuration = PlayViewModel.Instance.AudioBuffer.Length / (SampleRate * 2);
                 if (isPlay)
                 {
                     // convert the final signal from the generators from double to float and normalize
@@ -222,6 +225,8 @@ namespace CMGWpf.PlayFunctions
                             });
                         };
                     }
+                    //PlayViewModel.Instance.CurrentPlayPosition = 0;
+
                     playDialog!.ShowDialog();
 
                     // Clean up when dialog closes

@@ -1,6 +1,6 @@
 ﻿using CMGWpf.Model.Database;
 using CMGWpf.MVVM;
-using CMGWpf.Panels.Database;
+using CMGWpf.Panels.Tools;
 using CMGWpf.SoundFont_2;
 using CMGWpf.Types;
 using System.Collections.ObjectModel;

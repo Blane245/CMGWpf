@@ -81,6 +81,21 @@ namespace CMGWpf.View
                 }
             });
 
+        private Window? _chordSequenceDialog = null;
+        public Window? ChordSequenceDialog { get => _chordSequenceDialog; set { _chordSequenceDialog = value; OnPropertyChanged(); } }
+
+
+        private RelayCommand<object?>? _chordSequenceEditorCommand;
+        public RelayCommand<object?> ChordSequenceEditorCommand =>
+            _chordSequenceEditorCommand ??= new RelayCommand<Object?>(execute =>
+            {
+                if (ChordSequenceDialog == null)
+                {
+                    ChordSequenceDialog = new ChordSequenceDialog();
+                    ChordSequenceDialog.Show();
+                }
+            });
+
         private double _midi1 = 0;
         public double Midi1
         {

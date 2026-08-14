@@ -1,13 +1,13 @@
 using CMGWpf.Dialogs;
 using CMGWpf.Helpers;
 using CMGWpf.Model;
+using CMGWpf.Model.Database;
 using CMGWpf.Model.Generators;
 using CMGWpf.MVVM;
 using CMGWpf.Services;
 using CMGWpf.SoundFont_2;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -101,6 +101,16 @@ namespace CMGWpf.View
                     SubscribeToVoices();
                     OnPropertyChanged(nameof(StochasticGenerator));
                     OnPropertyChanged(nameof(StochasticComposition));
+                }
+                if (value.GetType() == typeof(ChordSequencer))
+                {
+                    _speedAttribute = null;
+                    _volumeAttribute = null;
+                    _panAttribute = null;
+                    OnPropertyChanged(nameof(SpeedAttribute));
+                    OnPropertyChanged(nameof(PanAttribute));
+                    OnPropertyChanged(nameof(ChordSequencerGenerator));
+                    OnPropertyChanged(nameof(ChordSequencerGenerator));
                 }
             }
         }
@@ -239,6 +249,7 @@ namespace CMGWpf.View
             {
                 "Algorithmic" => selected ? Brushes.Cyan : Brushes.LightCyan,
                 "Stochastic" => selected ? Brushes.Coral : Brushes.LightCoral,
+                "ChordSequencer" => selected ? Brushes.Pink : Brushes.LightPink,
                 _ => Brushes.White
             };
             _backgroundColor = brush;
@@ -439,7 +450,8 @@ namespace CMGWpf.View
             }
             e.Handled = true;
         }
-        private void HandleMoveDrag(MouseEventArgs e) { 
+        private void HandleMoveDrag(MouseEventArgs e)
+        {
             // Get the Canvas parent to calculate position relative to track
             if (_generatorBorder != null && FindParentCanvas(_generatorBorder) is Canvas canvas)
             {
@@ -500,11 +512,11 @@ namespace CMGWpf.View
                     switch (dragMode)
                     {
                         case DragMode.Move:
-                            HandleMoveDrag(e); 
+                            HandleMoveDrag(e);
                             break;
                         case DragMode.ResizeStart:
                             HandleResizeStartDrag(e);
-                            break; 
+                            break;
                         case DragMode.ResizeEnd:
                             HandleResizeEndDrag(e);
                             break;
@@ -1095,7 +1107,7 @@ namespace CMGWpf.View
         private void Voice_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             // When a voice's Muted property changes, refresh the composition display
-            if (e.PropertyName == nameof(Voice.Muted))
+            if (e.PropertyName == nameof(Model.Voice.Muted))
             {
                 OnPropertyChanged(nameof(StochasticComposition));
             }
@@ -1242,7 +1254,7 @@ namespace CMGWpf.View
                 {
                     var soundFont = SoundFontUtilities.GetSoundFont(dbVoice.SoundFontFile);
                     var preset = SoundFontUtilities.GetPreset(dbVoice.SoundFontFile, dbVoice.PresetName);
-                    Voice voice = new Voice
+                    Model.Voice voice = new Model.Voice
                     {
                         Name = dbVoice.Name,
                         Description = dbVoice.Description,
@@ -1336,6 +1348,265 @@ namespace CMGWpf.View
                 }
             });
         #endregion
+        #region ChordSequencer specific properties and commands
+        public ChordSequencer? ChordSequencerGenerator => UIgenerator as ChordSequencer;
+        public ObservableCollection<string> ChordSequenceNames
+        {
+            get
+            {
+                var sequences = ChordSequenceHelpers.List().Result;
+                return new ObservableCollection<string>(sequences.Select(sequence => sequence.Name).OrderBy(name => name));
+            }
+        }
+        public string ChordSequenceName
+        {
+            get => ChordSequencerGenerator?.ChordSequenceName ?? "";
+            set
+            {
+                var chordSequence = ChordSequenceHelpers.Get(value).Result;
+                ChordSequencerGenerator?.ChordSequence = chordSequence?.Clone() ?? new ChordSequence();
+                ChordSequencerGenerator?.ChordSequenceName = value ?? "";
+                OnPropertyChanged();
+
+            }
+        }
+        private string chordSequencerSoundFontFileName = "";
+        public string ChordSequencerSoundFontFileName
+        {
+            get
+            {
+                if (ChordSequencerGenerator != null && ChordSequencerGenerator.SoundFontFileName != string.Empty)
+                {
+                    chordSequencerSoundFontFileName = ChordSequencerGenerator.SoundFontFileName;
+                    if (ChordSequencerGenerator.SoundFont != null)
+                    {
+                        ChordSequencerPresetNames = new ObservableCollection<string>(ChordSequencerGenerator.SoundFont.PresetArray.Select(preset => SoundFontUtilities.BankPresetToName(preset)).OrderBy(name => name));
+                        ChordSequencerPresets = new ObservableCollection<Preset>(ChordSequencerGenerator.SoundFont.Presets);
+                    }
+                }
+                return chordSequencerSoundFontFileName;
+            }
+            set
+            {
+                SoundFont? SoundFont = SoundFontUtilities.GetSoundFont(value);
+                if (SoundFont == null)
+                {
+                    Messages.Clear(); Messages.Add(new Message { Text = $"Error loading SoundFont: {value}", Error = true });
+                    return;
+                }
+                chordSequencerSoundFontFileName = value;
+                OnPropertyChanged();
+                // update the chord sequencer generator with the new soundFont
+                if (ChordSequencerGenerator == null)
+                {
+                    Messages.Clear(); Messages.Add(new Message { Text = $"Error: Chord Sequencer Generator is null.", Error = true });
+                    return;
+                }
+                ChordSequencerGenerator.SoundFont = SoundFont;
+                ChordSequencerGenerator.SoundFontFileName = value;
+                OnPropertyChanged(nameof(ChordSequencerGenerator));
+
+                // get the presets for this soundFont and sort them in name order for the preset dropdown
+                ChordSequencerPresets = new ObservableCollection<Preset>(SoundFont.Presets);
+                ChordSequencerPresetNames = new ObservableCollection<string>(ChordSequencerPresets.Select(preset => SoundFontUtilities.BankPresetToName(preset)).OrderBy(name => name));
+                OnPropertyChanged(nameof(ChordSequencerPresets));
+                OnPropertyChanged(nameof(ChordSequencerPresetNames));
+
+
+
+            }
+        }
+        private ObservableCollection<Preset> chordSequencerPresets = [];
+        public ObservableCollection<Preset> ChordSequencerPresets
+        {
+            get { return chordSequencerPresets; }
+            set { chordSequencerPresets = value; OnPropertyChanged(); }
+        }
+        private ObservableCollection<string> chordSequencerPresetNames = [];
+        public ObservableCollection<string> ChordSequencerPresetNames
+        {
+            // This get checks to see if the chord sequencer generator has a SoundFont and if it does, it updates the preset names list for the drop down. This is to ensure that if the user changes the SoundFont file name in the algorithmic generator dialog, the changes are reflected in real time in the preset drop down.
+            // this may never happen since the SoundFont file name get/set should update the preset list, but this is just to be safe and ensure that the preset list is always up to date with the SoundFont file name.
+            get
+            {
+                if (ChordSequencerGenerator != null && ChordSequencerGenerator.SoundFont != null)
+                {
+                    chordSequencerPresetNames = new ObservableCollection<string>(ChordSequencerGenerator.SoundFont.Presets.Select(preset => SoundFontUtilities.BankPresetToName(preset)).OrderBy(name => name));
+                }
+                return chordSequencerPresetNames;
+            }
+            set { chordSequencerPresetNames = value; OnPropertyChanged(); }
+        }
+        private string chordSequencerPresetName = string.Empty;
+        public string ChordSequencerPresetName
+        {
+            // this get checks to see if the chord sequencer generator has a preset and if it does, it updates the local variable for the preset name. This is to ensure that if the user changes the preset in the algorithmic generator dialog, the changes are reflected in real time in the preset name variable which is used to set the drop down selection.
+            get
+            {
+                if (ChordSequencerGenerator != null && ChordSequencerGenerator.Preset != null)
+                {
+                    chordSequencerPresetName = SoundFontUtilities.BankPresetToName(ChordSequencerGenerator.Preset);
+                }
+                return chordSequencerPresetName;
+            }
+            set
+            {
+                chordSequencerPresetName = value;
+                OnPropertyChanged();
+                // update the algorithmic generator with the new preset
+                Preset? preset = ChordSequencerPresets.FirstOrDefault(p => SoundFontUtilities.BankPresetToName(p) == value);
+                if (preset != null && ChordSequencerGenerator != null)
+                {
+                    ChordSequencerGenerator.Preset = preset;
+                    ChordSequencerGenerator.PresetName = value;
+                    OnPropertyChanged(nameof(ChordSequencerGenerator));
+                }
+            }
+        }
+        public ObservableCollection<string> NoteNames { get; } = new ObservableCollection<string>(Music.Notes.Keys.ToArray());
+        private AttributeDescriptor? _chordSequencerSpeedAttribute;
+        public AttributeDescriptor? ChordSequencerSpeedAttribute
+        {
+            get
+            {
+                if (_chordSequencerSpeedAttribute == null && ChordSequencerGenerator != null)
+                {
+                    _chordSequencerSpeedAttribute = new AttributeDescriptor
+                    {
+                        Name = "Speed",
+                        Synonym = "(tempo)",
+                        ValueUnits = (value) => "BPM",
+                        AmplitudeUnits = (value) => "BPM",
+                        ValueFormat = "F2",
+                        AmplitudeFormat = "F2",
+                        Minimum = .01,
+                        Maximum = 10000,
+                        Increment = 0.01,
+                        Algorithm = ChordSequencerGenerator.SpeedAlgorithm,
+                    };
+                    _chordSequencerSpeedAttribute.PropertyChanged += (s, e) =>
+                    {
+                        if (e.PropertyName == nameof(AttributeDescriptor.Algorithm) && ChordSequencerGenerator != null)
+                        {
+                            ChordSequencerGenerator.SpeedAlgorithm = _chordSequencerSpeedAttribute.Algorithm;
+                            OnPropertyChanged(nameof(AlgorithmicGenerator));
+                        }
+                    };
+                }
+                return _chordSequencerSpeedAttribute;
+            }
+        }
+
+
+        private AttributeDescriptor? _chordSequencerVolumeAttribute;
+        public AttributeDescriptor? ChordSequencerVolumeAttribute
+        {
+            get
+            {
+                if (_chordSequencerVolumeAttribute == null && ChordSequencerGenerator != null)
+                {
+                    _chordSequencerVolumeAttribute = new AttributeDescriptor
+                    {
+                        Synonym = "(intensity)",
+                        Name = "Volume",
+                        ValueUnits = (value) => "dB",
+                        AmplitudeUnits = (value) => "dB",
+                        ValueFormat = "F0",
+                        AmplitudeFormat = "F0",
+                        Minimum = -100,
+                        Maximum = 100,
+                        Increment = 1,
+                        Algorithm = ChordSequencerGenerator.VolumeAlgorithm,
+                    };
+                    _chordSequencerVolumeAttribute.PropertyChanged += (s, e) =>
+                    {
+                        if (e.PropertyName == nameof(AttributeDescriptor.Algorithm) && ChordSequencerGenerator != null)
+                        {
+                            ChordSequencerGenerator.VolumeAlgorithm = _chordSequencerVolumeAttribute.Algorithm;
+                            OnPropertyChanged(nameof(ChordSequencerGenerator));
+                        }
+                    };
+                }
+                return _chordSequencerVolumeAttribute;
+            }
+        }
+
+        private AttributeDescriptor? _chordSequencerPanAttribute;
+        public AttributeDescriptor? ChordSequencerPanAttribute
+        {
+            get
+            {
+                if (_chordSequencerPanAttribute == null && ChordSequencerGenerator != null)
+                {
+                    _chordSequencerPanAttribute = new AttributeDescriptor
+                    {
+                        Name = "Pan",
+                        Synonym = "(channel)",
+                        ValueUnits = (value) => "[-1,+1]",
+                        AmplitudeUnits = (value) => "[-1,+1]",
+                        ValueFormat = "F1",
+                        AmplitudeFormat = "F1",
+                        Minimum = -1,
+                        Maximum = 1,
+                        Increment = 0.1,
+                        Algorithm = ChordSequencerGenerator.PanAlgorithm,
+                    };
+                    _chordSequencerPanAttribute.PropertyChanged += (s, e) =>
+                    {
+                        if (e.PropertyName == nameof(AttributeDescriptor.Algorithm) && ChordSequencerGenerator != null)
+                        {
+                            ChordSequencerGenerator.PanAlgorithm = _chordSequencerPanAttribute.Algorithm;
+                            OnPropertyChanged(nameof(ChordSequencerGenerator));
+                        }
+                    };
+                }
+                return _chordSequencerPanAttribute;
+            }
+        }
+
+        private RelayCommand<ChordSequencer>? _chordSequencerNoiseSeedCommand;
+        public RelayCommand<ChordSequencer> ChordSequencerNoiseSeedCommand =>
+            _chordSequencerNoiseSeedCommand ??= new RelayCommand<ChordSequencer>(generator =>
+            {
+                if (generator is ChordSequencer g)
+                {
+                    string newSeed = StringUtils.GenerateRandomString(10);
+                    g.NoiseSeed = newSeed;
+                    // Notify that the algorithm changed so UI updates
+                    OnPropertyChanged(nameof(ChordSequencerGenerator));
+                    Messages.Clear(); Messages.Add(new Message { Text = "New Noise seed assigned.", Error = false });
+                }
+            });
+
+
+        private RelayCommand<object>? _reloadChordSequencesCommand;
+        public RelayCommand<object> ReloadChordSequencesCommand =>
+            _reloadChordSequencesCommand ??= new RelayCommand<object>(execute =>
+            {
+                OnPropertyChanged(nameof(ChordSequenceNames));
+            });
+        private RelayCommand<object>? _showChordSequenceCommand;
+        public RelayCommand<object> ShowChordSequenceCommand =>
+            _showChordSequenceCommand ??= new RelayCommand<object>(execute =>
+            {
+                // Current values in ChordSequencerGenerator are used to build the list of ChordItems to display in the dialog. The dialog is read-only and does not allow editing of the chord sequence.
+                var key = ChordSequencerGenerator?.Key ?? "C";
+                var octave = ChordSequencerGenerator?.Octave ?? 4;
+                var chordSequence = ChordSequencerGenerator?.ChordSequence ?? new ChordSequence();
+                var noteNames = new List<string>();
+                foreach (var item in chordSequence.Items)
+                {
+                    var noteName = Music.TranslateChordValueToChordName[item.ChordValue][key];
+                    noteName = noteName.Replace("__", (octave + 1).ToString()).Replace("_", octave.ToString()); // imbed the octave number into the chord name for display purposes
+                    // add inversion number
+                    noteName += $" Beats: {item.Duration} Inversion: {item.Inversion} Weight: {item.Effort.Weight} Articulation: {item.Effort.Articulation} Binding: {item.Effort.ChordBinding} Space: {item.Effort.Space} ";
+                    noteNames.Add(noteName);
+                }
+                _ = MessageBox.Show(string.Join(Environment.NewLine, noteNames), $"Chord Sequence for {chordSequence.Name} in the key of {key} in octave {octave}", MessageBoxButton.OK, MessageBoxImage.Information);
+            });
+
+        #endregion
+
         #region Nested Classes
         /// <summary>
         /// Descriptor that wraps an Algorithm with its metadata (name, units) for data binding

@@ -1,5 +1,5 @@
 ﻿using System.Windows.Controls;
-namespace CMGWpf.Panels.Database
+namespace CMGWpf.Panels.Tools
 {
     /// <summary>
     /// Interaction logic for BlankPanel.xaml

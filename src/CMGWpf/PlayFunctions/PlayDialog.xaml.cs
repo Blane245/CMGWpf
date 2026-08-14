@@ -1,4 +1,5 @@
 ﻿using CMGWpf.Services;
+using CMGWpf.Types;
 using CMGWpf.View;
 using System.Windows;
 
@@ -35,6 +36,8 @@ namespace CMGWpf.PlayFunctions
             {
                 double height = SoundRollGrid.ActualHeight;
                 double width = SizeService.Instance.DisplayWidth;
+                vm.PlayDuration = PlayViewModel.Instance.AudioBuffer.Length / (PlayTypes.SampleRate * 2);
+                vm.CurrentPlayPosition = 0;
                 DrawSoundRoll(vm, width, height);
                 vm.IsPlaying = false;
             }

@@ -2,7 +2,7 @@
 using CMGWpf.Helpers;
 using CMGWpf.Model.Database;
 using CMGWpf.Panels;
-using CMGWpf.Panels.Database;
+using CMGWpf.Panels.Tools;
 using CMGWpf.Types;
 using CMGWpf.View;
 using System.Collections.ObjectModel;

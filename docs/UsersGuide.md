@@ -39,6 +39,7 @@ Computer Music Generator (CMG) User's Guide, Version 4.0
     - [Deleting a Track](#deleting-a-track)
     - [Move Track Up and Down](#move-track-up-and-down)
     - [Track Solo and Mute](#track-solo-and-mute)
+    - [Add Generator](#add-generator)
     - [Track-Level Tools (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M18 16H16V15H8V16H6V15H2V20H22V15H18V16M20 8H17V6C17 4.9 16.1 4 15 4H9C7.9 4 7 4.9 7 6V8H4C2.9 8 2 8.9 2 10V14H6V12H8V14H16V12H18V14H22V10C22 8.9 21.1 8 20 8M15 8H9V6H15V8Z" /></svg>)](#track-level-tools-)
       - [Track Volume](#track-volume)
       - [Track Shift](#track-shift)
@@ -47,6 +48,7 @@ Computer Music Generator (CMG) User's Guide, Version 4.0
   - [Generator Types](#generator-types)
     - [Algorithmic Generators](#algorithmic-generators)
     - [Stochastic Generators](#stochastic-generators)
+    - [Chord Sequencer Generators](#chord-sequencer-generators)
   - [Generator Operations](#generator-operations)
     - [Adding a Generator](#adding-a-generator)
     - [Editing a Generator](#editing-a-generator)
@@ -82,9 +84,10 @@ Computer Music Generator (CMG) User's Guide, Version 4.0
 - [Generator Design](#generator-design)
   - [Algorithmic Generators](#algorithmic-generators-1)
   - [Stochastic Generators](#stochastic-generators-1)
+  - [Chord Sequencer Generators](#chord-sequencer-generators-1)
 - [Performance Optimization](#performance-optimization)
-- [Troubleshooting Tips](#troubleshooting-tips)
 - [Troubleshooting](#troubleshooting)
+  - [Tips](#tips)
   - [Common Issues](#common-issues)
     - ["File is already open in another instance"](#file-is-already-open-in-another-instance)
     - ["Error Messages When Play is Selected"](#error-messages-when-play-is-selected)
@@ -122,8 +125,13 @@ Computer Music Generator (CMG) User's Guide, Version 4.0
   - [Intensity Modulation](#intensity-modulation)
   - [Pan Modulation](#pan-modulation)
   - [Reverb Processing](#reverb-processing)
-- [Appendix E: On Beats and Notes in Octave](#appendix-e-on-beats-and-notes-in-octave)
-- [Appendix F: Glossary](#appendix-f-glossary)
+- [Appendix E: Chord Sequencer Generator Processing](#appendix-e-chord-sequencer-generator-processing)
+- [Appendix F: On Beats and Notes in Octave](#appendix-f-on-beats-and-notes-in-octave)
+- [Appendix G: CMG Database Maintenance](#appendix-g-cmg-database-maintenance)
+  - [Emsemble and Voice Editing](#emsemble-and-voice-editing)
+  - [Note Sequence Editing](#note-sequence-editing)
+  - [Chord Sequence Editing](#chord-sequence-editing)
+- [Appendix H: Glossary](#appendix-h-glossary)
 - [Acknowledgements](#acknowledgements)
 <!-- TOC -->
 ---
@@ -201,7 +209,7 @@ On first launch, CMG will:
 
 2. **Add a Generator**
            - Click the (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M14 3V13.56C13.41 13.21 12.73 13 12 13C9.79 13 8 14.79 8 17S9.79 21 12 21 16 19.21 16 17V3H14Z" /></svg>) icon on the track control menu
-   - Select either `Algorithmic` or `Stochastic` generator type. Try Algorithmic first as it is simpler and you CMG Database has no ensembles yet.
+   - Select either `Algorithmic` or `Stochastic` generator type. Try Algorithmic first as it is simpler and you CMG Database has no ensembles yet. The `Chord Sequencer` generator requires create of a chord sequence, which is described later.
 
 3. **Configure the Generator**
    - Set the start and stop times.
@@ -319,6 +327,9 @@ Tracks organize your composition into logical layers, similar to tracks in a DAW
 Tracks can be moved up and down in the vertical display of tracks. Use `Track->Move Up` (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z" /></svg>) and `Track->Move Down` (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M11,4H13V16L18.5,10.5L19.92,11.92L12,19.84L4.08,11.92L5.5,10.5L11,16V4Z" /></svg>) to performs these operations.
 ### Track Solo and Mute
 When playing a composition, tracks can be muted or soloed. None of the generators in a muted track will be heard. One or more tracks can be soloed, in which case all other tracks will not be heard. Use `Track->Mute` (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" /></svg>) and `Track->Solo` (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" /></svg>) for these operations. The buttons will change to (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" /></svg>) and (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M21.1,12.5L22.5,13.91L15.97,20.5L12.5,17L13.9,15.59L15.97,17.67L21.1,12.5M10,17L13,20H3V18C3,15.79 6.58,14 11,14L12.89,14.11L10,17M11,4A4,4 0 0,1 15,8A4,4 0 0,1 11,12A4,4 0 0,1 7,8A4,4 0 0,1 11,4Z" /></svg>), respectively. If a track is both soloed and muted, mute takes precedence and the track will not be heard.
+### Add Generator 
+A new generator can be added to a track by clicking `Track->Add Generator` (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 3V13.56C13.41 13.21 12.73 13 12 13C9.79 13 8 14.79 8 17S9.79 21 12 21 16 19.21 16 17V3H14Z" /></svg>). A menu is provided for adding one of the generator types. 
+
 ### Track-Level Tools (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M18 16H16V15H8V16H6V15H2V20H22V15H18V16M20 8H17V6C17 4.9 16.1 4 15 4H9C7.9 4 7 4.9 7 6V8H4C2.9 8 2 8.9 2 10V14H6V12H8V14H16V12H18V14H22V10C22 8.9 21.1 8 20 8M15 8H9V6H15V8Z" /></svg>)
 
 #### Track Volume
@@ -343,7 +354,7 @@ When playing a composition, tracks can be muted or soloed. None of the generator
 
 # Generators
 
-Generators are the core of CMG, defining the actual musical content. There are two types: **Algorithmic** and **Stochastic**. The details of the parameter setting and the algorithms employed by the generators can be found in the appendices.
+Generators are the core of CMG, defining the actual musical content. There are three types: **Algorithmic**, **Stochastic**, and **Chord Sequencer**. The details of the how the parameters are used by the generators can be found in the appendices.
 
 <p class="note">In what follows, a number of the algorithms include a random number generator, and an optional seed can be provided for each individually. If a seed is not specified, the date and time value when the composition is built is used to seed the random number generator. This causes different sequence of values to be created each time the composition is built. A seed can be manually entered or one can be generated. Seeds for each random generator may be different or the same as desired.</p>
 
@@ -459,6 +470,23 @@ The following parameters may be set for each voice:
 
 Ensembles and voices may be changed within the CMG Database independent of their use within CMG. Each time a CMG file is loaded, the ensemble and voices are reread from the database. If changes are made while a file is opened, this changes will only take effect by pressing the **Reload** buttons `Ensemble` or `Voices`. 
 
+### Chord Sequencer Generators
+
+Chord Sequencers generators are similar to Algorithmic generators. Their unique feature is that pitches are derived from a Chord Sequence. **Speed**, **Volume**, and **Pan** attributes have the same properties as Algorithmic generators and use the same algorithms. The **Duration** and **Attack** attributes are not present as they are defined in the chord sequences.
+
+Chord Sequencer generators also have the following parameters, which are applied to the entire chord sequence and are defined in the in the Algorithmic generators:
+- **SoundFont**
+- **Preset**
+- **Noise**
+- **Reverb**
+- **Tremolo**
+- **Vibrato**
+
+A Chord Sequence must be specified for the Chord Sequence attribute. The `Reload Sequences` button reloads all chord sequences and is used by any have been added, deleted, or edited. The `Show Chord Sequence` button display a pop up window that shows the chords and their attributes or the sequence. The parameters of a chord sequence are:
+- **Key**: The musical key of the chord sequence. This must be one of the valid note names (A, A#, Bb,...).
+- **Octave**: (-1 to 9)**: The musical octave of the key.
+- **Repeat Count (0-100)**: The number of times that the chord sequence should be repeated. If the value is zero (0) the sequence is repeated until the stop time of the generator. The repeat count cannot extend the generator's time past the stop time.
+
 ## Generator Operations
 
 ### Adding a Generator
@@ -501,11 +529,17 @@ Ensembles and voices may be changed within the CMG Database independent of their
 1. Click `Play...` button in generator editor or from the generator menu
 1. Plays the current generator
 1. Useful for reviewing changes before saving or playing with other generators
+1. 
 ### Reposition a Generator
 The generator box is 1/3 of the height of a track. This provides space so that generators that are simultaneous or overlapping in time on the same track can be de-conflicted. To move a generator up and down within the track boundaries:
-1. Left click the generator and a resize north-south cursor will be display
+1. Left click the generator anywhere away from the generator's start or stop times and a resize north-south cursor will be displayed.
 1. Drag the mouse either up or down and the generator box will follow within the bounds of the track. 
 1. Release the mouse button and the reposition is complete. 
+
+A generator may be moved in left or right in time. The movement will be 'snapped' to the specified snap interval if snap is enabled:
+1. Left click the generator near the start or stop time and a resize east-west cursor will be displayed.
+1. Drag the mouse either left or right.
+1. Release the mouse button an the reposition is complete.
 
 ## Generator Dialog Features
 
@@ -563,7 +597,7 @@ The Play dialog provides:
 - **Volume Control**: Manual control of the volume of the playback
 - **Progress Bar**: Visual playback position with manual control
 - **Time Display**: Current time and total duration
-- **Voice Legend**: Clicking (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M13 20.5C13 21.03 13.09 21.53 13.26 22H6C4.89 22 4 21.11 4 20V4C4 2.9 4.89 2 6 2H7V9L9.5 7.5L12 9V2H18C19.1 2 20 2.89 20 4V11H16.5V16.11C14.5 16.57 13 18.36 13 20.5M20 13H18.5V18.21C18.19 18.07 17.86 18 17.5 18C16.12 18 15 19.12 15 20.5S16.12 23 17.5 23 20 21.88 20 20.5V15H22V13H20Z" /></svg>) displays or hides the table of voices with their soundfont, preset, and color.
+- **Voice Legend**: Clicking (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M13 20.5C13 21.03 13.09 21.53 13.26 22H6C4.89 22 4 21.11 4 20V4C4 2.9 4.89 2 6 2H7V9L9.5 7.5L12 9V2H18C19.1 2 20 2.89 20 4V11H16.5V16.11C14.5 16.57 13 18.36 13 20.5M20 13H18.5V18.21C18.19 18.07 17.86 18 17.5 18C16.12 18 15 19.12 15 20.5S16.12 23 17.5 23 20 21.88 20 20.5V15H22V13H20Z" /></svg>) displays or hides the table of generators with their voices (if a stochastic generator) and color.
 - **Signal Levels**: Visual feedback of the average and maximum signal levels of the left and right channels
 - **Record Audio**: Clicking (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M17.3,11C17.3,14 14.76,16.1 12,16.1C9.24,16.1 6.7,14 6.7,11H5C5,14.41 7.72,17.23 11,17.72V21H13V17.72C16.28,17.23 19,14.41 19,11M10.8,4.9C10.8,4.24 11.34,3.7 12,3.7C12.66,3.7 13.2,4.24 13.2,4.9L13.19,11.1C13.19,11.76 12.66,12.3 12,12.3C11.34,12.3 10.8,11.76 10.8,11.1M12,14A3,3 0 0,0 15,11V5A3,3 0 0,0 12,2A3,3 0 0,0 9,5V11A3,3 0 0,0 12,14Z" /></svg>) will start audio recording. 
 - **Record Video**: Clicking (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="lime" width="1em" height="1em" style="vertical-align: middle;"><path d="M15,8V16H5V8H15M16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5V7A1,1 0 0,0 16,6Z" /></svg>) will start video recording. 
@@ -604,11 +638,12 @@ Creates detailed HTML report with:
 ---
 
 # Tools and Utilities
-CMG tools are accessible from the Tools menu. They include some convenient calculators, access to the CMG Database Editor, and generator timing manipulators.
+CMG tools are accessible from the Tools menu. They include some convenient calculators, access to the CMG Database Editor, and generator timing manipulators. See the appendices for a full description of the database editors.
 <p class="note">**Note**: As many calculator tools can be opened simutaneously as desired. Generator tools cannot be used if any generator is being edited.</p>
 
 - **Ensemble Voice Editor**: Provides maintenance of stochastic generator ensembles and voices
 - **Note Sequence Editor**: Provides maintenance of algorithmic note sequences
+- **Chord Sequence Editor**: Provides maintenance of chord sequences
 - **Generator and Calculator Tools**:
     - **Midi/Frequency Converter**: Used to convert a midi number to its audio frequency (Hz) and vice versa
     - **Measure Duration Calculator**: Takes the number of beats in a measure and a speed (BPM) and calculates the number of seconds in the measure
@@ -621,16 +656,10 @@ CMG tools are accessible from the Tools menu. They include some convenient calcu
 
 # Preferences
 `Edit → Preferences` `Ctrl+P` will display the preferences dialog, which sets preferences that are maintained between CMG sessions. Be mindful that changing preferences in one instance of CMG will affect the preferences of the other instances.
-- **Soundfont Directory**: The file system directory that contains the soundfont files. The default value is C:\Soundfonts
-- **Record Format**: Audio recording format, either .mp3 or .wav
-
-<p class="note">**Note**: The following preferences do not affect CMG as they are not currently implemented.</p>
-
-- **Time Line Mode**: Either Time or Measure
-- **Measure Length (sec)**: The duration of a measure
-- **Beats per Measure**: The number of beats in a measure
-- **Snap Mode**: Enable time line snap mode
-- **Snap Increment**: The number of seconds or beats where snapping occurs
+- **Soundfont Directory**: The file system directory that contains the soundfont files. The default value is C:\Soundfonts.
+- **Record Format**: Audio recording format, either .mp3 or .wav.
+- **Snap Mode**: Enable time line snap mode. When a generator is moved in time, its position will be snapped to the nearest number of seconds specified by the snap increment.
+- **Snap Increment**: The number of seconds where snapping occurs.
 
 # Comments
 `Edit → Comment` or `Ctrl+Shift+C` will provide a dialog that edits the comments of the CMG file. This is useful for project information, compositional intentions, and revision history among other things.
@@ -651,6 +680,7 @@ CMG tools are accessible from the Tools menu. They include some convenient calcu
 | Edit Preferences | `Ctrl+P` |
 | Ensemble Voice Editor | `Ctrl+E` |
 | Note Sequence Editor | `Ctrl+D` |
+| Chord Sequencer Editor | `Ctrl+Alt+C` |
 | Generator and Calculator Tools | `Ctrl+G` |
 | Play | `Ctrl+Shift+P` |
 | Report | `Ctrl+Shift+R` |
@@ -708,23 +738,28 @@ Both generator types have the ability to make the note duration less than the in
 - **Experiment with microtones**: Using microtones can have interesting sound effects but may cause sonic "clutter".
 - **Adjust the Time Rows and Voice Columns**: Move the time rows up and down to aggregate or disperse silent and intense period. Move the voice columns left and right to change event densities for voices. 
 
+## Chord Sequencer Generators
+- **Build a Chord Sequence**: Use the Chord Sequence Editor to create a chord sequence. You have to have one of these before a Chord Sequencer generator can be created.
+- **Create a Simple Generator**: Use the Chord Sequence you created and let it run at 60 BPM from its start to stop time. Adjust the repeat count, key, and octave to hear their effects.
+- **Layer Genertors**: Use the chord sequencer as a under pinning below a algorithmic or stochastic generator to provide some structure.
+
 # Performance Optimization
 
 - **Soundfont Size**: Smaller soundfonts load faster
 - **Generator Count**: Many generators increase CPU load. Rendering a composition is done using multi-threading to make the best use of computer SPU and memory resources. 
 - **Close Unused Dialogs**: Non-modal dialogs consume memory
 
-# Troubleshooting Tips
+---
+
+# Troubleshooting
+
+## Tips
 
 - **Generator Won't Play**: Check error messages on the main window or the generator dialog
 - **File Won't Open**: Another instance may have it open; check for .lock file. The file may not be in proper CMG format.
 - **No Sound**: Check system audio output device for proper functioning. Increase system volume. Increase playback volume. Increase track volume. Check generator volume.
 - **Distorted Audio**: Could be a bad preset in the soundfont. Use another soundfont application to determine its parameters and quality. Reduce volume to prevent clipping. Excessive reverberation and instruments with long release times can cause distortion.
 - **Slow Playback**: System is overloading memory or CPU usage. Check task manager for the use of these resources.
-
----
-
-# Troubleshooting
 
 ## Common Issues
 
@@ -806,6 +841,8 @@ CMG files are XML-based with the following structure:
                     </generator>
                     <generator type="Stochastic" name="..." ...parameters...>
                     </generator>
+                    <generator type="ChordSequencer" name="..." ...parameters...>
+                    </generator>
                 </generators>
             </track>
         </tracks>
@@ -881,7 +918,7 @@ Each instrument in a preset has a base pitch defined by the root key generator. 
 
 # Appendix C: Algorithmic Generator Processing
 
-Sound production from algorithmic generators involves cycling through the period of time from the start of the generator to it stop time. There are two options here depending on whether or not the note attribute is using a sequencer. In either case, all of the attribute algorithms that use random number generators are initialized with their seeds before starting and the note beat sequence is initialized.
+Sound production from algorithmic generators involves cycling through the period of time from the start time of the generator to its stop time. There are two options here depending on whether or not the note attribute is using a sequencer. In either case, all of the attribute algorithms that use random number generators are initialized with their seeds before starting and the note beat sequence is initialized.
 ## Beat and Note Processing
 A Euclidean Rhythm algorithm is used to determine a beat pattern and the notes selectable with in octave. 
     * The number of beats in the measure is specified along with the number of 'on beats'. An 'on beat' is one that will produce a sound from the current preset, while an 'off beat' is silent no matter what preset is currently active. If the measure length and on beat count are the same, all notes will be played.
@@ -1012,6 +1049,8 @@ This theory is applied and expanded upon to create composition of events applied
 
 A Stochastic generator consists of a composition, a set of composition parameters, and a set of dynamics parameters. 
 
+---
+
 ## Composition Processing
 A composition is defined as an ensemble of voices, a duration, a number of time cells, and an average event density per time. It is a matrix of event counts, where the rows are the time cells and the columns are the voices in the ensemble. The events determined by the Poisson equation are placed in random rows and columns until all cells have been occupied. Once the composition is completed, the user may shuffle the rows and columns as desired, as this has no effect on the distribution probabilities. This process is done as part of the stochastic generator definition. The final composition is used during the DSP phase along with the dynamics parameters. 
 
@@ -1077,7 +1116,59 @@ flowchart LR
 </p>
 
 ---
-# Appendix E: On Beats and Notes in Octave
+
+# Appendix E: Chord Sequencer Generator Processing
+
+Sound production from chord sequencer generators is much like note sequencer algorithmic generation. It involves cycling through the period of time from the start time of the generator to its stop time. All attributes that use random number generators are initialize with their seeds before starting. The following activities are performed depending on the repeat count of the chord sequence. If the repeat count is zero(0), the activities are repeated until the time is greater than the stop time; otherwise it is repeated until the number of repeats is equal to the repeat count. Below is pictured a Chord Sequence with values assigned:
+<p align="center">
+<img src="./images/Chord Sequence Attribute.png" width="100%"; height="auto"; alt="description">
+<br>
+<em> A Typical Chord Sequence Attribute</em>
+</p>
+
+
+1. For each chord in the chord sequence, the following activities are performed.
+    1. Quit if the time is greater than the stop time and the repeat count of zero.
+    1. Skip if the chord is a rest.
+    1. Get the current values for speed, volume, and pan for the chord sequencer at the current time. This involves evaluating the algorithms for those attributes.
+    1. Get the midi number of the key and octave combination. Determine the chord interval from the speed and chord duration. Adjust the chord duration based on the articulation. Staccato defines the duration as 10% of the interval.
+    1. Get the volume of the chord from the volume attribute and the chord's weight. Chord volume is defined as follows:
+    
+        | Weight | Volume (dB) |
+        |-----|-----|
+        | pppp | -25 |
+        | ppp | -20 |
+        | pp | -15|
+        | p | -10 |
+        | mp | -5 |
+        | mf | 0 |
+        | f | 5 |
+        | ff | 10 |
+        | fff | 15 |
+        | ffff | 20 |
+        |-----|-----|
+
+    1. Get the timing of the chord notes based on the value of the chord binding as follows:
+        - **Block**: all notes sound simultaneously
+        - **ArgeggioUp**: the notes sound individually equally spaced from the start of the chord through the interval
+        - **ArgeggioDown**: the notes sound individually going down equally spaced from the start of the chord through the interval
+        - **StrumUp**: the notes are spaced 50ms apart
+        - **StrumDown**: the notes are spaced 50ms apart and going down
+    1. The order of the notes in the chord are rearranged according to the inversion setting:
+        - **0**: no reordering
+        - **1**: the first note is moved to the last position
+        - **2**: the first note is moved to the second to last position and the second note is moved to the last position
+    1. The following is performed for each note in the chord
+        1. Get the instruments and their preset/instrument generators for the preset. For each of the instruments in the preset, perform the following:
+        1. Get the sample from the DSP based on the current pitch (algorithmic generator do not have a glissando feature), the other current attribute values (except pan).
+        1. Create a stereo version of this DSP signal applying the current pan value. 
+        1. Apply reverb according to the generator's parameters
+        1. Add the panned and reverberated signal to the final stereo signal at the start time of the note
+    1. Increment the time by the current interval, and proceed to the next item in the sequence.
+
+---
+
+# Appendix F: On Beats and Notes in Octave
 The use of on beats and notes in octave are methods for establish complex rhythms and scales. The techniques use the Euclidean Rhythm algorithm ([See Wikipedia: Euclidean rhythm](https://en.wikipedia.org/wiki/Euclidean_rhythm)) for details and examples.) For on beats, the user specifies the length of the measure, the number of on beats in the measure and the offset to the pattern. For example, a measure length of 4, with on beats of three and an offset of 0 will generate the pattern [xxx.]. By offsetting the pattern by 1 beat, the pattern will be [.xxx], by 2 will be [x.xx], and by 3 will be [xx.x]. This technique can be used to create poly-rhythms by using different on beat patterns for different generators. For example, one generator could have a pattern of 13 by 9 and another generator could have a pattern of 15 by 7.
 
 Notes in octave is similar to on beats, except the length of the series is 12. Using a number less than 12 will cause notes in the octave to be skipped. A similar offset to on beats is provided.
@@ -1088,10 +1179,93 @@ Notes in octave is similar to on beats, except the length of the series is 12. U
 </p>
 
 ---
-# Appendix F: Glossary
+# Appendix G: CMG Database Maintenance
+## Emsemble and Voice Editing
+The Ensemble and Voice Editor is selected from the Tools main menu or by pressing `Ctrl+E`. Ensembles and their voices are used by the Stochastic generator. The dialog presents the list of ensembles and voices currently defined and has buttons for adding ensembles and voices. 
+
+A voice consists of the following attributes:
+- **Name**: A required unique name for the voice
+- **Description**: An optional description
+- **Timbre**: A voice is either sustained or glissando
+- **Duration (sec)**: When the duration is zero (0) the voice will be heard for its entire duration; otherwise it will be heard for the number of seconds specified here. This is normally used to create a staccato note.
+- **Register Lo/Hi (0-127)**: these values determine the range of midi notes that the voice can play.
+- **SoundFont File**: The name of the SoundFont file from which the voice's Preset is selected.
+- **Preset**: The name of the preset for the voice
+
+An ensemble consists of the following attributes:
+- **Name**: A required unique name for the ensemble
+- **Description**: An optional description
+- **Voices**: A list of voices that may appear in the ensemble. 
+
+Ensembles and Voices are added by pressing the `Add Ensemble` and `Add Voice` buttons, respectively. Ensembles and Voices may be edited or deleted by right clicking on a name in tehe corresponding list and selecting either `Delete` or `Edit`.
+
+## Note Sequence Editing
+The Note Sequence and Tag Editor is selected from the Tools main menu or by pressing `Ctrl+D`. Note sequences are used by the Algorithmic generator as a Note (pitch) attribute. The dialog presents the list of notes sequences and associated tags, and has buttons for adding note sequences and tags.
+
+A Tag is a unique name and no other attributes. Tags are used to provide a filter list of associated note sequences.
+
+
+A note sequence has the following attributes:
+- **Name**: A required unique name for the note sequence
+- **Tags**: An optional list of associated tags, comma delimited
+- **Notes in Sequence**: A table of time order notes in the sequence. Each note has two attributes:
+    - **Note**: The name of the note in standard music notation, which is the name of the note, following by its octave, following by an optional accidental (# or b), followed by the number of cents below or above the standard note (+-nnn).
+    - **Beats**: The number of beats in the note.
+
+Note sequences and Tags are added by pressing the `Add Note Sequence` and `Add Tag` buttons, respectively. Note sequences and tags may be edited or deleted by right clicking on a name in the corresponding list and selecting either `Delete` or `Edit`. Additionally, tags have a option to `List Note Sequences`, which will list the names of the note sequences that associated with the tag.
+
+## Chord Sequence Editing
+The Chord Sequence Editor is selected from the Tools main menu or by pressing `Ctrl+Shift+C`. chord sequences are used by the Chord Sequencer generator as a Pitch attributes. The dialog presents the list of chord sequences, and has a button to add a new chord sequence.
+
+A Chord sequence has the following attributes:
+- **Name**: A required unique name for the chord sequence
+- **Is Major Chord Sequence?**: Chord sequence are either major or minor sequences. The two types following certain rules about which chord are allowed. The following gives the names of the chords and which chords may follow each one:
+    ```csharp
+        public static Dictionary<string, string[]> MajorProgressionStateTransitions = new Dictionary<string, string[]>()
+        {
+            {"I", new string[] { "I", "ii", "iii", "IV", "V", "vi", "vii°", "rest" } },
+            {"ii", new string[] { "I", "ii", "V", "vii°" , "rest" } },
+            {"iii", new string[] { "I", "ii", "iii","IV", "vi", "rest" } },
+            {"IV", new string[] { "I", "ii", "iii", "IV", "V", "vii°", "rest" } },
+            {"V", new string[] { "I", "V", "vi", "rest" } },
+            {"vi", new string[] { "I", "ii", "iii", "IV", "V", "vi", "rest" } },
+            {"vii°", new string[] { "I", "iii", "vii°", "rest" } },
+            {"rest", new string[] {"I", "ii", "iii", "IV", "V", "vi", "vii°", "rest" } }
+        };
+        public static Dictionary<string, string[]> MinorProgressionStateTransitions = new Dictionary<string, string[]>()
+        {
+            {"i", new string[] { "i", "ii", "ii°", "III", "III+", "iv", "IV", "V", "v", "VI", "#vi°", "vii°", "VII", "rest" } },
+            {"ii°", new string[] { "i", "ii°", "III", "V", "v", "vii°", "VII", "rest" } },
+            {"ii", new string[] { "i", "ii", "III", "V", "v", "vii°", "VII", "rest" } },
+            {"III", new string[] { "i", "III",  "iv","IV", "VI", "#vi°", "vii°", "VII", "rest" } },
+            {"III+", new string[] { "i", "III+", "iv", "IV", "VI", "#vi°", "vii°", "VII", "rest" } },
+            {"iv", new string[] { "i", "iv", "V", "v", "vii°", "VII", "rest" } },
+            {"IV", new string[] { "i", "IV", "V", "v", "vii°", "VII", "rest" } },
+            {"V", new string[] { "i", "V", "VI", "#vi°", "rest" } },
+            {"v", new string[] { "i", "v", "VI", "#vi°", "rest" } },
+            {"VI", new string[] { "i", "III", "III+", "iv", "IV", "V", "v", "VI", "vii°", "VII", "rest" } },
+            {"#vi°", new string[] { "i", "III", "III+", "iv", "IV", "V", "v", "#vi°", "vii°", "VII", "rest" } },
+            {"vii°", new string[] { "i", "vii°", "rest" } },
+            {"VII", new string[] { "i", "VII", "rest" } },
+            {"rest", new string[] {"i", "ii", "ii°", "III", "III+", "iv", "IV", "V", "v", "VI", "#vi°", "vii°", "VII", "rest" } }
+        };
+    ```
+- ** Default Duration (beats)**: The number of beats assigned by default when a new chord is added to the sequence
+- ** Default Inversion (0,1,2)**: The inversion assigned by default when a new chord is added to the sequence
+- ** Default Weight**: The weight (pppp through ffff) assigned by default when a new chord is added to the sequence
+- ** Default Articulation**: The articulation (legato, staccato, accent) assigned by default when a new chord is added to the sequence
+- ** Default Chord Binding**: The binding (Block, ArpeggioUp, ArpeggioDown, StrumUp, StrumDown) assigned by default when a new chord is added to the sequence
+- ** Default Space**: The space (Direct, Indirect) assigned by default when a new chord is added to the sequence
+
+An `Add Chord` button is provided to add a new chord to the end of the chord sequence. Each chord has a value (I, i, II, ii, etc.) that is selected from the valid chord list, and Duration, Inversion, Weight, Articulation, Chord Binding, and Space values. These values are defaulted based on the default setting but may be changed as desired on each chord. 
+
+Chord sequences are added by pressing the `Add Chord Sequence` button. They may be edited or deleted by right clicking on a name in the corresponding list and selecting either `Delete` or `Edit`.
+
+---
+
+# Appendix H: Glossary
 
 **Algorithm**: Mathematical formula producing parameter values  
-**Algorithmic Generator**: Deterministic musical sequence  
 **Attack**: Initial volume/velocity of note  
 **BPM**: Beats Per Minute (tempo)  
 **Cloud**: Probabilistic note distribution in stochastic generator  
@@ -1125,7 +1299,8 @@ Special thanks to various people and non-people
 - [sfumato](https://github.com/felixroos/sfumato) - who revealed to me the complexities of soundfont signal processing
 - The Google search engine and Visual Studio Copilot (aka Claude Sonnet) that helped me hack my way through this. Claude, you're great!
 - 'The Computer Music Tutorial', by Curtis Roads, 1996. This is an excellent book that gives the history and basic of signal processing as applied to sound. Since it was written, many algorithmic methods described there are realizable on computers in real time. 
-- Iannis Xenakis, 'Formalized Music: Thought and Mathematics in Composition', 1971. This is a classic book that describes the use of stochastic processes in music composition. It is a bit difficult to read but is full of interesting ideas and techniques for using probability in music composition. Iannis is much more of a philosopher than I am.
+- 'Formalized Music: Thought and Mathematics in Composition', Iannis Xenakis, 1971. This is a classic book that describes the use of stochastic processes in music composition. It is a bit difficult to read but is full of interesting ideas and techniques for using probability in music composition. Iannis is much more of a philosopher than I am.
+- 'Music Composition for Dummies", by Scott Jarrett and Holly Day, 2011. This is a good book for the beginner that wants to learn about music composition. It is not a technical book but it does give a good overview of the process of composing music.
 
-*CMG User's Guide - Version 4.0*  
+*CMG User's Guide - Version 5.0*  
 *Last Updated: 2026*

@@ -11,3 +11,5 @@
 # Version 4.2.0
 	Implemented preset review dialog for the user to review the presets with DSP parameter settings.
 	Tuned up the DSP.
+# Version 5.0 
+	Added Chord sequencer generator

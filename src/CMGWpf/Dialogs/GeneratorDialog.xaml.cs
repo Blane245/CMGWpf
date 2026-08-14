@@ -61,6 +61,11 @@ namespace CMGWpf.Dialogs
                                 vm.UIGenerator = (g as Stochastic)!.Clone(g.Parent);
                                 break;
                             }
+                        case "ChordSequencer":
+                            {
+                                vm.UIGenerator = (g as ChordSequencer)!.Clone(g.Parent);
+                                break;
+                            }
                         default:
                             break;
                     }

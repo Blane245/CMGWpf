@@ -91,6 +91,13 @@ namespace CMGWpf.Model
                                     Generators.Add(g);
                                     break;
                                 }
+                            case "ChordSequencer":
+                                {
+                                    ChordSequencer g = new(0, this);
+                                    await g.LoadXML(generatorElem, this).ConfigureAwait(false);
+                                    Generators.Add(g);
+                                    break;
+                                }
                             default: break;
                         }
                     }

@@ -36,8 +36,9 @@
                 <RowDefinition Height="80"/>
             </Grid.RowDefinitions>
             <panels:CustomWindowChrome Grid.Row="0"
+                                       IconSource="/Assets/CMG-Logo.ico"
                                    ChromeBackground="HotPink"
-                                     WindowTitle="CMG Ensemble and Voice Editor"
+                                     WindowTitle="CMG Note Sequence and Tag Editor"
                                    />
 
             <Grid Grid.Row="1">

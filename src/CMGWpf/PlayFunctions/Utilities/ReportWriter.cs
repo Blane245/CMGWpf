@@ -207,6 +207,7 @@ namespace CMGWpf.PlayFunctions.Utilities
             {
                 Algorithmic => "Algorithmic",
                 Stochastic => "Stochastic",
+                ChordSequencer => "ChordSequencer",
                 _ => "Unknown"
             };
 
@@ -214,6 +215,7 @@ namespace CMGWpf.PlayFunctions.Utilities
             {
                 Algorithmic => "type-algorithmic",
                 Stochastic => "type-stochastic",
+                ChordSequencer => "type-chordSequencer",
                 _ => ""
             };
 
@@ -234,6 +236,7 @@ namespace CMGWpf.PlayFunctions.Utilities
             {
                 Algorithmic algo => RenderAlgorithmicDetails(algo),
                 Stochastic stoch => RenderStochasticDetails(stoch),
+                ChordSequencer chordSeq => RenderChordSequencerDetails(chordSeq),
                 _ => ""
             };
         }
@@ -529,6 +532,76 @@ namespace CMGWpf.PlayFunctions.Utilities
             if (items.Count == 0)
                 return "No items in sequence.";
             return string.Join(", ", items.Select(i => i.Value.ToString("F2") + ":" + i.Beats.ToString("F2")));
+        }
+        private static string RenderChordSequencerDetails(ChordSequencer crds)
+        {
+            string details = string.Empty;
+            details += $$"""
+                <table>
+                    <thead>
+                        <th>Start Time (sec)</th>
+                        <th>Stop Time (sec)</th>
+                        <th>SoundFont</th>
+                        <th>Preset</th>
+                        <th>Attack Enabled</th>
+                        <th>Noise Seed</th>
+                        <th>Noise Frequency (Hz)</th>
+                        <th>Noise Amplitude (dB)</th>
+                        <th>Reverb Delay (sec)</th>
+                        <th>Reverb Decay (dB)</th>
+                        <th>Tremolo Frequency (Hz)</th>
+                        <th>Tremolo Depth (dB)</th>
+                        <th>Tremolo Modulator (dB)</th>
+                        <th>Vibrato Frequency (Hz)</th>
+                        <th>Vibrato Depth (dB)</th>
+                        <th>Vibrato Modulator (dB)</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{crds.StartTime:F2}}</td>
+                            <td>{{crds.StopTime:F2}}</td>
+                            <td>{{crds.SoundFontFileName}}</td>
+                            <td>{{crds.PresetName}}</td>
+                            <td>{{(crds.AttackEnabled ? "Yes" : "No")}}</td>
+                            <td>{{crds.NoiseSeed}}</td>
+                            <td>{{crds.NoiseFrequency:F2}}</td>
+                            <td>{{crds.NoiseAmplitude:F2}}</td>
+                            <td>{{crds.ReverbDelay:F2}}</td>
+                            <td>{{crds.ReverbDecay:F2}}</td>
+                            <td>{{crds.Tremolo.Speed:F2}}</td>
+                            <td>{{crds.Tremolo.Depth:F2}}</td>
+                            <td>{{crds.Tremolo.WaveForm}}</td>
+                            <td>{{crds.Vibrato.Speed:F2}}</td>
+                            <td>{{crds.Vibrato.Depth:F2}}</td>
+                            <td>{{crds.Vibrato.WaveForm}}</td>
+                        </tr>   
+                        </tbody>
+                </table>
+                """;
+
+            // render the note through pan algorithms
+            details += $$"""
+                    <div>
+                        <strong>Chord Sequence: </strong>
+                        <p>{{crds.Name}}</p>
+                    </div>
+                    <div>
+                        <strong>Speed Algorithm: </strong>
+                        <p>{{crds.SpeedAlgorithm}}</p>
+                        {{RenderAlgorithmicDetails(crds.SpeedAlgorithm)}}
+                    </div>
+                    <div>
+                        <strong>Volume Algorithm: </strong>
+                        <p>{{crds.VolumeAlgorithm}}</p>
+                        {{RenderAlgorithmicDetails(crds.VolumeAlgorithm)}}
+                    </div>
+                    <div>
+                        <strong>Pan Algorithm: </strong>
+                        <p>{{crds.PanAlgorithm}}</p>
+                        {{RenderAlgorithmicDetails(crds.PanAlgorithm)}}
+                    </div>
+                    """;
+            return details;
         }
         private static string RenderStochasticDetails(Stochastic stoch)
         {

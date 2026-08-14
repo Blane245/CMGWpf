@@ -49,7 +49,9 @@
 
         <!-- Tools Menu Shortcuts -->
         <KeyBinding Key="G" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=GeneratorAndCalculatorToolsCommand}"/>
-        <KeyBinding Key="P" Modifiers="Ctrl+Alt" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=PresetReviewCommand}"/>
+        <KeyBinding Key="E" Modifiers="Ctrl" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=EnsembleVoiceEditorCommand}"/>
+        <KeyBinding Key="P" Modifiers="Ctrl+Alt" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=NoteSequenceEditorCommand}"/>
+        <KeyBinding Key="C" Modifiers="Ctrl+Alt" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=ChordSequenceEditorCommand}"/>
         <!-- Play Menu Shortcuts -->
         <KeyBinding Key="P" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=PlayCommand}"/>
         <KeyBinding Key="R" Modifiers="Ctrl+Shift" Command="{Binding Source={x:Static viewmodel:FileViewModel.Instance}, Path=ReportCommand}"/>
@@ -66,7 +68,7 @@
 
         <!-- Custom Window Chrome with Menu -->
         <panels:CustomWindowChrome Grid.Row="0"
-                                   IconSource="/Assets/CGM2.png"
+                                   IconSource="/Assets/CMG-Logo.ico"
                                    ChromeBackground="SaddleBrown"
                                      WindowTitle="{Binding WindowTitle}">
             <panels:CustomWindowChrome.ChromeMenuContent>

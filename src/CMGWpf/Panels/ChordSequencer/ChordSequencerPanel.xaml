@@ -1,0 +1,91 @@
+﻿<UserControl x:Class="CMGWpf.Panels.ChordSequencer.ChordSequencerPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CMGWpf.Panels.ChordSequencer"
+             xmlns:algorithmic="clr-namespace:CMGWpf.Panels.Algorithmic"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:services="clr-namespace:CMGWpf.Services"
+             xmlns:viewmodel="clr-namespace:CMGWpf.View"
+             xmlns:model="clr-namespace:CMGWpf.Model"
+             d:DataContext="{d:DesignInstance Type=viewmodel:GeneratorViewModel}"
+ 
+             mc:Ignorable="d" 
+            d:DesignHeight="600" d:DesignWidth="1500">
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+            <Label Content="SoundFont:"/>
+            <ComboBox ItemsSource="{Binding SoundFontFileNames}" SelectedValue="{Binding ChordSequencerSoundFontFileName, Mode=TwoWay}" ToolTip="Select a SoundFont file" />
+            <Label Content="Preset:"/>
+            <ComboBox ItemsSource="{Binding ChordSequencerPresetNames}" SelectedItem="{Binding ChordSequencerPresetName, Mode=TwoWay}" ToolTip="Select a preset from the chosen SoundFont" />
+            <Label Content="Attack?:"/>
+            <CheckBox Content="" IsChecked="{Binding ChordSequencerGenerator.AttackEnabled}" ToolTip="Enable or disable attack for the algorithmic generator" />
+            <Label Content="Noise:"/>
+            <Label Content="Seed:"/>
+            <TextBox TextWrapping="NoWrap" Text="{Binding ChordSequencerGenerator.NoiseSeed}" ToolTip="Enter the seed for the noise generator" />
+            <Button Content="New Seed" Background="Green" Foreground="White" Command="{Binding ChordSequencerNoiseSeedCommand}" CommandParameter="{Binding ChordSequencerGenerator}" ToolTip="Generate a new seed for the noise generator"/>
+            <Label Content="Level (+-10dB):"/>
+            <xctk:DoubleUpDown  Margin="5,0,0,0" Minimum="-10" Maximum="10" Increment="1" Value="{Binding ChordSequencerGenerator.NoiseAmplitude}" ToolTip="Set the amplitude level for the noise generator relative to the current volume"/>
+            <Label Content="Frequency (Hz):"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="1000" Increment="0.001" Value="{Binding ChordSequencerGenerator.NoiseFrequency}" ToolTip="Set the frequency (Hz) for the noise generator"/>
+            <Label Content="Reverb:" FontStyle="Italic"/>
+            <Label Content="Delay (msec)"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="1" Value="{Binding ChordSequencerGenerator.ReverbDelay}" ToolTip="Set the delay time (msec) for the reverb effect. Zero means no reverb"/>
+            <Label Content="Decay (1-10 dB)"/>
+            <xctk:IntegerUpDown Margin="5,0,0,0" Minimum="1" Maximum="10" Value="{Binding ChordSequencerGenerator.ReverbDecay}" ToolTip="Set the decay level for the reverb effect"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+            <Label Content="Tremolo:" FontStyle="Italic"/>
+            <Label Content="Speed (mHz)"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding ChordSequencerGenerator.Tremolo.Speed}" ToolTip="Set the speed for the tremolo effect"/>
+            <Label Content="Depth (dB)"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10" Increment="0.1" Value="{Binding ChordSequencerGenerator.Tremolo.Depth}" ToolTip="Set the depth for the tremolo effect"/>
+            <Label Content="Modulator"/>
+            <ComboBox ItemsSource="{Binding ModulatorTypes}" SelectedItem="{Binding ChordSequencerGenerator.Tremolo.WaveForm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True" ToolTip="Select the modulator waveform for the tremolo effect"/>
+            <Label Content="Vibrato:" FontStyle="Italic"/>
+            <Label Content="Speed (Mhz)"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="100000" Increment="1" Value="{Binding ChordSequencerGenerator.Vibrato.Speed}" ToolTip="Set the speed for the vibrato effect"/>
+            <Label Content="Depth (cents)"/>
+            <xctk:DoubleUpDown Margin="5,0,0,0" Minimum="0" Maximum="10000" Increment="0.1" Value="{Binding ChordSequencerGenerator.Vibrato.Depth}" ToolTip="Set the depth for the vibrato effect"/>
+            <Label Content="Modulator"/>
+            <ComboBox ItemsSource="{Binding ModulatorTypes}" SelectedItem="{Binding ChordSequencerGenerator.Vibrato.WaveForm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Select the modulator waveform for the vibrato effect"/>
+        </StackPanel>
+        <Border Grid.Row="4" Grid.ColumnSpan="2" Height="1" Background="Black"/>
+        <ScrollViewer Grid.Row="5" Grid.ColumnSpan="2"  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <StackPanel Grid.IsSharedSizeScope="True">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="AttributeNameColumn"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="AlgorithmColumn"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="Attribute"/>
+                    <Label Grid.Column="1" Content="Algorithm"/>
+                    <Label Grid.Column="2" Content="Parameters"/>
+                </Grid>
+                <Border BorderThickness="1" BorderBrush="LightGray" />
+                <local:ChordSequencerAttributePanel/>
+                <Border BorderThickness="1" BorderBrush="LightGray" />
+                <algorithmic:Attribute DataContext="{Binding ChordSequencerSpeedAttribute}"/>
+                <Border BorderThickness="1" BorderBrush="LightGray" />
+                <algorithmic:Attribute DataContext="{Binding ChordSequencerVolumeAttribute}"/>
+                <Border BorderThickness="1" BorderBrush="LightGray" />
+                <algorithmic:Attribute DataContext="{Binding ChordSequencerPanAttribute}"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

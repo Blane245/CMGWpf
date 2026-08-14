@@ -1,4 +1,4 @@
-﻿using CMGWpf.Panels.Database;
+﻿using CMGWpf.Panels.Tools;
 using CMGWpf.View;
 using System.Windows;
 

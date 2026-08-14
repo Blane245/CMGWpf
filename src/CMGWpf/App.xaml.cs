@@ -124,7 +124,7 @@ namespace CMGWpf
 
             // Show splash screen
             var splash = new SplashScreen();
-            splash.ShowSplash(3.5); // Display for 3.5 seconds
+            splash.ShowSplash(1.0); // Display for 3.5 seconds
 
             // Create and show main window after splash closes
             splash.Closed += (s, args) =>

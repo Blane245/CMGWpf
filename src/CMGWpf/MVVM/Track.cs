@@ -162,6 +162,7 @@ namespace CMGWpf.MVVM
             {
                 "Algorithmic" => new Panels.Algorithmic.AlgorithmicPanel(),
                 "Stochastic" => new Panels.Stochastic.StochasticPanel(),
+                "ChordSequencer" => new Panels.ChordSequencer.ChordSequencerPanel(),
                 _ => null
             };
             GeneratorDialog activeDialog = new()

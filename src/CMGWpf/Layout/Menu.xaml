@@ -41,7 +41,7 @@
                 <MenuItem Header="_Add Track" Command="{Binding AddTrackCommand}" InputGestureText="Ctrl+T" ToolTip="Add a new track to the CMG file."/>
                 <MenuItem Header="_Comment..." Command="{Binding EditCommentCommand}" ToolTip="Edit a CMG file comment." InputGestureText="Ctrl+Shift+C"/>
                 <MenuItem Header="_Preferences..." Command="{Binding Source={x:Static services:GlobalService.Instance}, Path=EditPreferencesCommand}" ToolTip="Edit CMG preferences." InputGestureText="Ctrl+P"/>
-                </MenuItem>
+            </MenuItem>
             <MenuItem Header="_Tools" ToolTip="Access CMG tools.">
                 <MenuItem Header="Ensemble Voice Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=EnsembleVoiceEditorCommand}"
                               ToolTip="Display the Ensemble Voice Editor."
@@ -50,6 +50,10 @@
                 <MenuItem Header="Note Sequence Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=NoteSequenceEditorCommand}"
                               ToolTip="Display the Note Sequence Editor."
                         InputGestureText="Ctrl+D"                              
+                              />
+                <MenuItem Header="Chord Sequence Editor" Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=ChordSequenceEditorCommand}"
+                              ToolTip="Display the Chord Sequence Editor."
+                        InputGestureText="Ctrl+Shift+C"
                               />
                 <MenuItem Header="_Generator and Calculator Tools..." Command="{Binding Source={x:Static viewmodel:ToolsViewModel.Instance}, Path=GeneratorAndCalculatorToolsCommand}"
                               ToolTip="Activate Generator and Calculator Tools Window"

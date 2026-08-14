@@ -36,6 +36,7 @@
             <RowDefinition Height="{Binding Source={x:Static services:SizeService.Instance}, Path=PlayHeight}"/>
         </Grid.RowDefinitions>
         <panels:CustomWindowChrome Grid.Row="0"
+                                   IconSource="/Assets/CMG-Logo.ico"
                                      WindowTitle="{Binding PlayTitle}"
                                      ChromeBackground="SaddleBrown">
         </panels:CustomWindowChrome>

@@ -35,6 +35,7 @@
             <!-- signal -->
         </Grid.RowDefinitions>
         <panels:CustomWindowChrome Grid.Row="0"
+                                   IconSource="/Assets/CMG-Logo.ico"
                                      WindowTitle="Explore Preset"
                                      ChromeBackground="BlueViolet">
         </panels:CustomWindowChrome>

@@ -39,7 +39,7 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <!-- Logo -->
-                    <Image Source="/Assets/CMG-Logo.png" 
+                    <Image Source="/Assets/CMG-Logo.ico" 
                            Width="128" Height="128" 
                            Margin="0,0,0,20"
                            HorizontalAlignment="Center"/>

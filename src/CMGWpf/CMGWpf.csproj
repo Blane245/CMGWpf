@@ -55,7 +55,6 @@
 	  <None Remove="..\..\docs\GeneralUser-GSwithgong.sf2" />
 	  <None Remove="..\..\docs\HowToOpenDatabaseMigration.md" />
 	  <None Remove="..\..\docs\Phase9-Cleanup-Complete.md" />
-	  <None Remove="..\..\docs\SQLiteMigration.md" />
 	  <None Remove="..\..\docs\UsersGuide.html" />
 	  <None Include="..\..\README.md" Link="README.md">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -63,6 +62,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Dialogs\Tools\ChordSequenceDialog.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Dialogs\Tools\EnsembleVoiceDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -75,10 +77,13 @@
     <Compile Update="Dialogs\Tools\VoiceEnsemblesList.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Panels\Database\BlankPanel.xaml.cs">
+    <Compile Update="Panels\ChordSequencer\ChordSequencerAttributePanel.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Panels\Database\EnsembleEditorPanel.xaml.cs">
+    <Compile Update="Panels\Tools\BlankPanel.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Panels\Tools\EnsembleEditorPanel.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Panels\Database\EnsemblePanel.xaml.cs">

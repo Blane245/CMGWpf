@@ -4,7 +4,7 @@ using CMGWpf.Panels;
 using CMGWpf.View;
 using CMGWpf.Types;
 using System.Windows;
-using CMGWpf.Panels.Database;
+using CMGWpf.Panels.Tools;
 
 namespace CMGWpf.MVVM 
 { 

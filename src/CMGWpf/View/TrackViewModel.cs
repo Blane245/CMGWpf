@@ -133,6 +133,9 @@ namespace CMGWpf.View
         private RelayCommand<Track>? _addAlgorithmicCommand;
         public RelayCommand<Track> AddAlgorithmicCommand =>
             _addAlgorithmicCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).AddGenerator(Model.Generators.GENERATORTYPE.Algorithmic));
+        private RelayCommand<Track>? _addChordSequencerCommand;
+        public RelayCommand<Track> AddChordSequencerCommand =>
+            _addChordSequencerCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).AddGenerator(Model.Generators.GENERATORTYPE.ChordSequencer));  
         private RelayCommand<Track>? _addStochasticCommand;
         public RelayCommand<Track> AddStochasticCommand =>
             _addStochasticCommand ??= new RelayCommand<Track>(execute => new TrackCommands(this).AddGenerator(Model.Generators.GENERATORTYPE.Stochastic));

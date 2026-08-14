@@ -1,0 +1,149 @@
+﻿<UserControl x:Class="CMGWpf.Panels.Tools.ChordSequenceEditorPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CMGWpf.Panels.Tools"
+             xmlns:panels="clr-namespace:CMGWpf.Panels"
+             xmlns:viewmodel="clr-namespace:CMGWpf.View"
+             d:DataContext="{d:DesignInstance Type=viewmodel:ChordSequenceView}"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             mc:Ignorable="d" MinWidth="900" MinHeight="800"
+             d:DesignHeight="450">
+    <Border BorderBrush="Black" BorderThickness="1">
+        <Grid>
+            <Grid.Resources>
+                <DataTemplate x:Key="DurationTemplate">
+                    <xctk:DoubleUpDown Value="{Binding Path=Duration, Mode=TwoWay}" 
+                                   Minimum="1" Maximum="20" Increment="0.015625"
+                                   ToolTip="Enter the duration of the chord, in 64th of a beat"/>
+                </DataTemplate>
+            </Grid.Resources>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="100"/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Content="{Binding ChordSequenceEditorTitle}" FontSize="16"/>
+            <StackPanel Orientation="Vertical" Grid.Row="1">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Name: "/>
+                    <TextBox Text="{Binding NewName, Mode=TwoWay}" ToolTip="Enter the name of the chord sequence" MinWidth="200"/>
+                    <Label Content="Is Major Chord Sequence? "/>
+                    <CheckBox IsChecked="{Binding IsMajor, Mode=TwoWay}" IsEnabled="{Binding IsMajorEnabled}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Default Duration (beats): "/>
+                    <xctk:DoubleUpDown Minimum="1" Maximum="20" Increment="0.015625" Value="{Binding DefaultDuration, Mode=TwoWay}"/>
+                    <Label Content="Default Inversion (0,1,2): "/>
+                    <xctk:IntegerUpDown Minimum="0" Maximum="2" Value="{Binding DefaultInversion, Mode=TwoWay}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Default Weight: "/>
+                    <ComboBox ItemsSource="{Binding WeightTypes}" SelectedItem="{Binding DefaultWeight, Mode=TwoWay}" Padding="5,0,0,0"  />
+                    <Label Content="Default Articulation: "/>
+                    <ComboBox ItemsSource="{Binding ArticulationTypes}" SelectedItem="{Binding DefaultArticulation, Mode=TwoWay}" Padding="5,0,0,0"  />
+                    <Label Content="Default Chord Binding: "/>
+                    <ComboBox ItemsSource="{Binding ChordBindingTypes}" SelectedItem="{Binding DefaultBinding, Mode=TwoWay}" Padding="5,0,0,0"  />
+                    <Label Content="Default Space: "/>
+                    <ComboBox ItemsSource="{Binding SpaceTypes}" SelectedItem="{Binding DefaultSpace, Mode=TwoWay}" Padding="5,0,0,0"  />
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <Button Command="{Binding AddChordCommand}" Margin="0" Padding="5,0,0,0" Width="110" HorizontalAlignment="Left">Add Chord</Button>
+                    <Label Content="Chords" Margin="5,0,0,0" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="500" Grid.Row="2">
+                <DataGrid x:Name="ChordSequenceDataGrid"
+                      ItemsSource="{Binding UIChordSequence.Items}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="True"
+                      CanUserReorderColumns="False"
+                      CanUserSortColumns="False"
+                      CanUserResizeColumns="False"
+                      Width="Auto" MaxHeight="500"
+                      Margin="5">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Chord Value" Binding="{Binding ChordValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <DataGridTemplateColumn Header="Duration">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <xctk:DoubleUpDown Minimum="0" Maximum="20" Increment="0.015625" Value="{Binding Duration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="Enter the duration of the chord, in 64th of a beat" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Inversion">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <xctk:IntegerUpDown Minimum="0" Maximum="2" Value="{Binding Inversion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Weight">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox
+                                        ItemsSource="{Binding DataContext.WeightTypes, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        SelectedValue="{Binding Effort.Weight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedValuePath="."
+                                        Padding="5,0,0,0"  />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Articulation">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox
+                                        ItemsSource="{Binding DataContext.ArticulationTypes, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        SelectedValue="{Binding Effort.Articulation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedValuePath="."
+                                        Padding="5,0,0,0"  />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Chord Binding">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox
+                                        ItemsSource="{Binding DataContext.ChordBindingTypes, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        SelectedValue="{Binding Effort.ChordBinding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedValuePath="."
+                                        Padding="5,0,0,0"  />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Space">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox
+                                        ItemsSource="{Binding DataContext.SpaceTypes, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        SelectedValue="{Binding Effort.Space, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedValuePath="."
+                                        Padding="5,0,0,0"  />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <!--
+                        <DataGridTemplateColumn Header="Play">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Play" Command="{Binding DataContext.PlayChord, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"
+                                            Width="40"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        -->
+                    </DataGrid.Columns>
+                </DataGrid>
+            </ScrollViewer>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="5,0,0,0" Grid.Row="3">
+                <Button Command="{Binding SubmitChordSequenceCommand}" Content="Submit" ToolTip="Submit the note sequence changes" Width="100"  HorizontalAlignment="Left"/>
+                <Button Command="{Binding CancelEditorCommand}" Content="Cancel" ToolTip="Cancel note sequence changes" Width="100" HorizontalAlignment="Left"/>
+            </StackPanel>
+            <panels:MessagePanel Grid.Row="4" Source="{Binding DataContext.Errors, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="0,5,0,5" MinHeight="150"/>
+        </Grid>
+    </Border>
+</UserControl>
