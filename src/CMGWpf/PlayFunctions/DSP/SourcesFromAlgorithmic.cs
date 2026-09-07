@@ -129,8 +129,8 @@ namespace CMGWpf.PlayFunctions.DSP
                             PlayViewModel.Instance.TimeMidiVoices.Add(new TimeMidiVoice
                             {
                                 Line = new TimeMidiLine { Start = new TimeMidiPoint { Time = time, Midi = note }, End = new TimeMidiPoint { Time = instrumentEndTime, Midi = note } },
-                                GeneratorName = algorithmic.Name,
-                                VoiceName = ""
+                                SoundFontName = algorithmic.SoundFontFileName,
+                                PresetName = algorithmic.PresetName
                             });
                             PlayViewModel.Instance.InstrumentSources.Add(source);
                         }
@@ -231,8 +231,8 @@ namespace CMGWpf.PlayFunctions.DSP
                                     Start = new TimeMidiPoint { Time = time, Midi = note },
                                     End = new TimeMidiPoint { Time = instrumentEndTime, Midi = note }
                                 },
-                                GeneratorName = algorithmic.Name,
-                                VoiceName = ""
+                                SoundFontName = algorithmic.SoundFontFileName,
+                                PresetName = algorithmic.PresetName,
                             });
                             PlayViewModel.Instance.InstrumentSources.Add(source);
                         }
@@ -244,12 +244,12 @@ namespace CMGWpf.PlayFunctions.DSP
 
             // add the generator name to the list of generator voices for scroll roll display
             // ConcurrentBag is thread-safe, no lock needed
-            GeneratorVoice currentGV = new()
+            SoundFontPreset currentSP = new()
             {
-                GeneratorName = algorithmic.Name,
-                VoiceName = ""
+                SoundFontName = algorithmic.SoundFontFileName,
+                PresetName = algorithmic.PresetName
             };
-            PlayViewModel.Instance.GeneratorVoices.Add(currentGV);
+            PlayViewModel.Instance.SoundFontPresets.Add(currentSP);
         }
     }
 }

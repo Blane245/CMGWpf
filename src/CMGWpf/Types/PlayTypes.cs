@@ -37,8 +37,8 @@ namespace CMGWpf.Types
         public class TimeMidiVoice
         {
             public TimeMidiLine Line { get; set; } = new TimeMidiLine();
-            public string GeneratorName { get; set; } = "";
-            public string VoiceName { get; set; } = "";
+            public string SoundFontName { get; set; } = "";
+            public string PresetName { get; set; } = "";
         }
         /// <summary>
         /// Contains the instrument name, its sample header, and the merged SoundFont generators that apply to the instrument
@@ -81,18 +81,18 @@ namespace CMGWpf.Types
         /// <summary>
         /// Represents Generator/Voice combination name.
         /// </summary>
-        public class GeneratorVoice
+        public class SoundFontPreset
         {
-            public string GeneratorName { get; set; } = "";
-            public string VoiceName { get; set; } = "";
+            public string SoundFontName { get; set; } = "";
+            public string PresetName { get; set; } = "";
         }
         /// <summary>
         /// 
         /// </summary>
         public class VoiceColor
         {
-            public string GeneratorName { get; set; } = "";
-            public string VoiceName { get; set; } = "";
+            public string SoundFontName { get; set; } = "";
+            public string PresetName { get; set; } = "";
             public Color Color { get; set; } = new Color();
             public Brush ColorBrush => new SolidColorBrush(Color);
         }

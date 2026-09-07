@@ -104,12 +104,12 @@ namespace CMGWpf.View
                 }
                 if (value.GetType() == typeof(ChordSequencer))
                 {
-                    _speedAttribute = null;
-                    _volumeAttribute = null;
-                    _panAttribute = null;
-                    OnPropertyChanged(nameof(SpeedAttribute));
-                    OnPropertyChanged(nameof(PanAttribute));
-                    OnPropertyChanged(nameof(ChordSequencerGenerator));
+                    _chordSequencerSpeedAttribute = null;
+                    _chordSequencerVolumeAttribute = null;
+                    _chordSequencerPanAttribute = null;
+                    OnPropertyChanged(nameof(ChordSequencerSpeedAttribute));
+                    OnPropertyChanged(nameof(ChordSequencerPanAttribute));
+                    OnPropertyChanged(nameof(ChordSequencerVolumeAttribute));
                     OnPropertyChanged(nameof(ChordSequencerGenerator));
                 }
             }
@@ -249,7 +249,7 @@ namespace CMGWpf.View
             {
                 "Algorithmic" => selected ? Brushes.Cyan : Brushes.LightCyan,
                 "Stochastic" => selected ? Brushes.Coral : Brushes.LightCoral,
-                "ChordSequencer" => selected ? Brushes.Pink : Brushes.LightPink,
+                "ChordSequencer" => selected ? Brushes.Goldenrod : Brushes.LightGoldenrodYellow,
                 _ => Brushes.White
             };
             _backgroundColor = brush;
@@ -285,23 +285,6 @@ namespace CMGWpf.View
                 generatorPanel = value;
                 OnPropertyChanged();
             }
-        }
-        private UserControl? algorithmPanel;
-        public UserControl? AlgorithmPanel
-        {
-            get => algorithmPanel;
-            set
-            {
-                algorithmPanel = value;
-                OnPropertyChanged();
-            }
-        }
-        private UserControl? stochasticPanel;
-
-        public UserControl? StochasticPanel
-        {
-            get { return stochasticPanel; }
-            set { stochasticPanel = value; }
         }
         public bool IsDirty { get => GlobalService.Instance.IsDirty; set { GlobalService.Instance.IsDirty = value; OnPropertyChanged(); } }
         public void NotifyGeneratorChanged(string? name = null)
@@ -1350,24 +1333,17 @@ namespace CMGWpf.View
         #endregion
         #region ChordSequencer specific properties and commands
         public ChordSequencer? ChordSequencerGenerator => UIgenerator as ChordSequencer;
-        public ObservableCollection<string> ChordSequenceNames
-        {
-            get
-            {
-                var sequences = ChordSequenceHelpers.List().Result;
-                return new ObservableCollection<string>(sequences.Select(sequence => sequence.Name).OrderBy(name => name));
-            }
-        }
+        public ObservableCollection<string> ChordSequenceNames => GlobalService.Instance.ChordSequencerNames;
         public string ChordSequenceName
         {
             get => ChordSequencerGenerator?.ChordSequenceName ?? "";
             set
             {
+                if (value.Trim() == "") return;
                 var chordSequence = ChordSequenceHelpers.Get(value).Result;
                 ChordSequencerGenerator?.ChordSequence = chordSequence?.Clone() ?? new ChordSequence();
                 ChordSequencerGenerator?.ChordSequenceName = value ?? "";
                 OnPropertyChanged();
-
             }
         }
         private string chordSequencerSoundFontFileName = "";
@@ -1489,7 +1465,7 @@ namespace CMGWpf.View
                         if (e.PropertyName == nameof(AttributeDescriptor.Algorithm) && ChordSequencerGenerator != null)
                         {
                             ChordSequencerGenerator.SpeedAlgorithm = _chordSequencerSpeedAttribute.Algorithm;
-                            OnPropertyChanged(nameof(AlgorithmicGenerator));
+                            OnPropertyChanged(nameof(ChordSequencerGenerator));
                         }
                     };
                 }
@@ -1583,7 +1559,10 @@ namespace CMGWpf.View
         public RelayCommand<object> ReloadChordSequencesCommand =>
             _reloadChordSequencesCommand ??= new RelayCommand<object>(execute =>
             {
+                GlobalService.Instance.LoadChordSequencerNamesAsync();
                 OnPropertyChanged(nameof(ChordSequenceNames));
+                ChordSequenceName = "";
+                OnPropertyChanged(nameof(ChordSequenceName));
             });
         private RelayCommand<object>? _showChordSequenceCommand;
         public RelayCommand<object> ShowChordSequenceCommand =>
@@ -1597,7 +1576,7 @@ namespace CMGWpf.View
                 foreach (var item in chordSequence.Items)
                 {
                     var noteName = Music.TranslateChordValueToChordName[item.ChordValue][key];
-                    noteName = noteName.Replace("__", (octave + 1).ToString()).Replace("_", octave.ToString()); // imbed the octave number into the chord name for display purposes
+                    noteName = noteName.Replace("__", (octave + 1).ToString()).Replace("_", octave.ToString()); // embed the octave number into the chord name for display purposes
                     // add inversion number
                     noteName += $" Beats: {item.Duration} Inversion: {item.Inversion} Weight: {item.Effort.Weight} Articulation: {item.Effort.Articulation} Binding: {item.Effort.ChordBinding} Space: {item.Effort.Space} ";
                     noteNames.Add(noteName);

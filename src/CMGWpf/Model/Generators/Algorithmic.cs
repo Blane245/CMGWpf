@@ -99,7 +99,7 @@ namespace CMGWpf.Model.Generators
             beatSequence = EuclideanRhythm.Get(BeatCount, MeasureLength, OffsetSequence);
             currentRhythmEntry = 0;
             Random = MathUtilities.StartFastRandom(NoiseSeed);
-            // Initialize all of the attribute algorithms
+            activeNotes = EuclideanRhythm.Get(NoteCount, 12, OffsetNotes);
             NoteAlgorithm.Initialize();
             AttackAlgorithm.Initialize();
             SpeedAlgorithm.Initialize();

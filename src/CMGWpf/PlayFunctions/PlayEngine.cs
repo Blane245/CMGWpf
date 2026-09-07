@@ -66,7 +66,7 @@ namespace CMGWpf.PlayFunctions
             PlayViewModel.Instance.PlayGenerators = ready.Generators;
             PlayViewModel.Instance.FinalSignal = new AudioBufferWrapper(new double[(int)Math.Ceiling(ready.Duration) * SampleRate]);
             PlayViewModel.Instance.TimeMidiVoices = [];
-            PlayViewModel.Instance.GeneratorVoices = [];
+            PlayViewModel.Instance.SoundFontPresets = [];
             PlayViewModel.Instance.InstrumentSources = [];
             PlayViewModel.Instance.CompletedGenerators = 0;
             Go(isPlay);
@@ -201,7 +201,7 @@ namespace CMGWpf.PlayFunctions
                     // convert the final signal from the generators from double to float and normalize
                     // prepare the palette for the sound roll
                     SoundRollBuilder.TimeMidiVoices = PlayViewModel.Instance.TimeMidiVoices;
-                    PlayViewModel.Instance.VoiceColors = SoundRollBuilder.DefineVoicePalette(PlayViewModel.Instance.GeneratorVoices);
+                    PlayViewModel.Instance.VoiceColors = SoundRollBuilder.DefineVoicePalette(PlayViewModel.Instance.SoundFontPresets);
                     // Initialize NAudio if we have audio data
                     if (PlayViewModel.Instance.AudioBuffer!.Length > 0)
                     {

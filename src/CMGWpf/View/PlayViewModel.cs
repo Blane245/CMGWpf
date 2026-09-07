@@ -38,8 +38,8 @@ namespace CMGWpf.View
         public ConcurrentBag<TimeMidiVoice> TimeMidiVoices { get { return timeMidiVoices; } set { timeMidiVoices = value; OnPropertyChanged(); } }
         private ConcurrentBag<InstrumentSource> instrumentSources = [];
         public ConcurrentBag<InstrumentSource> InstrumentSources { get { return instrumentSources; } set { instrumentSources = value; OnPropertyChanged(); } }
-        private ConcurrentBag<GeneratorVoice> generatorVoices = [];
-        public ConcurrentBag<GeneratorVoice> GeneratorVoices { get { return generatorVoices; } set { generatorVoices = value; OnPropertyChanged(); } }
+        private ConcurrentBag<SoundFontPreset> soundFontPresets = [];
+        public ConcurrentBag<SoundFontPreset> SoundFontPresets { get { return soundFontPresets; } set { soundFontPresets = value; OnPropertyChanged(); } }
         // lock used to synchronize changes to the final stereo buffer as the stereo buffer is built asynchronously by multiple threads.
         private object _playResultsLock = new();
         public object PlayResultsLock { get { return _playResultsLock; } set { _playResultsLock = value; OnPropertyChanged(); } }

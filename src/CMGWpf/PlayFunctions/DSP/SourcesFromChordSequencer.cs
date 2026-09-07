@@ -189,16 +189,16 @@ namespace CMGWpf.PlayFunctions.DSP
                                     Start = new TimeMidiPoint { Time = time + startTimes[i], Midi = chordPitches[i] },
                                     End = new TimeMidiPoint { Time = instrumentEndTime, Midi = chordPitches[i] }
                                 },
-                                GeneratorName = chordSequencer.Name,
-                                VoiceName = ""
+                                SoundFontName = chordSequencer.SoundFontFileName,
+                                PresetName = chordSequencer.PresetName
                             });
                             PlayViewModel.Instance.InstrumentSources.Add(source);
                             // add the generator name to the list of generator voices for scroll roll display
                             // ConcurrentBag is thread-safe, no lock needed
-                            PlayViewModel.Instance.GeneratorVoices.Add(new GeneratorVoice()
+                            PlayViewModel.Instance.SoundFontPresets.Add(new SoundFontPreset()
                             {
-                                GeneratorName = chordSequencer.Name,
-                                VoiceName = ""
+                                SoundFontName = chordSequencer.SoundFontFileName,
+                                PresetName = chordSequencer.PresetName
                             });
                         }
                     }

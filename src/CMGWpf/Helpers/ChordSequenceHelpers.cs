@@ -21,7 +21,7 @@ namespace CMGWpf.Helpers
             var chordSequence = await context.ChordSequences
                 .AsNoTracking()
                 .FirstOrDefaultAsync((e) => e.Name == name);
-            context.Entry(chordSequence!).State = EntityState.Detached;
+            if (chordSequence != null)context.Entry(chordSequence!).State = EntityState.Detached;
             return chordSequence;
         }
         public static async Task<bool> Delete(string name)

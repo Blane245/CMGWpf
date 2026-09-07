@@ -54,15 +54,15 @@ namespace CMGWpf.MVVM
                 {
                     DataContext = PlayViewModel.Instance,
                     Owner = dialog,
-                    Width = 300,
-                    Height = 500,
+                    Width = 500,
+                    Height = 250,
                     WindowStartupLocation = WindowStartupLocation.Manual
                 };
 
                 // Position it in the upper right corner of the screen containing the owner
                 var ownerHandle = new System.Windows.Interop.WindowInteropHelper(dialog).Handle;
                 var ownerScreen = System.Windows.Forms.Screen.FromHandle(ownerHandle);
-                double left = ownerScreen.WorkingArea.Right - 310;
+                double left = ownerScreen.WorkingArea.Width - 500;
                 double top = ownerScreen.WorkingArea.Top + 10;
                 vm.VoiceDialog.Left = left;
                 vm.VoiceDialog.Top = top;

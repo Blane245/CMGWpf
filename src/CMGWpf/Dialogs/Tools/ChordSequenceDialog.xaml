@@ -63,6 +63,11 @@
                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                           CommandParameter="{Binding PlacementTarget.SelectedItem, 
                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                    <MenuItem Header="Duplicate" 
+                                          Command="{Binding DataContext.DuplicateChordSequenceCommand, 
+                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                          CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                                         RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                     <MenuItem Header="Delete" 
                                           Command="{Binding DataContext.DeleteChordSequenceCommand, 
                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"

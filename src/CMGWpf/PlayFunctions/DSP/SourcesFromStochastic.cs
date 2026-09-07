@@ -69,10 +69,10 @@ namespace CMGWpf.PlayFunctions.DSP
                 // add the voice's soundfont and preset to the global presets list 
                 DebugLog.Write($"SourcesFromStochastic: Adding preset {voice.PresetName} from soundfont {voice.SoundFontFileName} to global presets list for voice {voice.Name}...");
                 // ConcurrentBag is thread-safe, no lock needed
-                PlayViewModel.Instance.GeneratorVoices.Add(new GeneratorVoice()
+                PlayViewModel.Instance.SoundFontPresets.Add(new SoundFontPreset()
                 {
-                    GeneratorName = generator.Name,
-                    VoiceName = voice.Name
+                    SoundFontName = voice.SoundFontFileName,
+                    PresetName = voice.PresetName
                 });
 
                 // create a stereo buffer to hold the voice's signal
@@ -266,8 +266,8 @@ namespace CMGWpf.PlayFunctions.DSP
                             Start = new TimeMidiPoint { Time = source.StartTime, Midi = (int)pitch1 },
                             End = new TimeMidiPoint { Time = source.StopTime, Midi = (int)pitch2 }
                         },
-                        GeneratorName = generator.Name,
-                        VoiceName = voice.Name,
+                        SoundFontName = voice.SoundFontFileName,
+                        PresetName = voice.PresetName,
                     });
 
                     // calculate the start index for the instrument sample in the cloud sample based on the current element start time (t1) and the cloud start time (time)

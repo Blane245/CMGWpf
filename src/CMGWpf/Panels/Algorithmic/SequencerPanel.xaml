@@ -45,7 +45,7 @@
             <Button Content="View Sequence" Command="{Binding DataContext.ViewSequenceCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding }" Background="Green" Foreground="White"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="1">
-            <xctk:DoubleUpDown Value="{Binding Transpose, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="{Binding Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}" Maximum="{Binding Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}" Increment="{Binding Increment, RelativeSource={RelativeSource AncestorType=UserControl}}" FormatString="{Binding ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+            <xctk:DoubleUpDown Value="{Binding Transpose, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="-50" Maximum="50" Increment="1" FormatString="{Binding ValueFormat, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="1">
             <CheckBox IsChecked="{Binding ReverseSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>

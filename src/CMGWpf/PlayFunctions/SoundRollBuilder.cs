@@ -143,25 +143,29 @@ namespace CMGWpf.PlayFunctions
 
         public static double NoteToY(double note) => (MaxNote - note) * PixelsPerNote;
         public static double TimeToX(double seconds) => seconds * PixelsPerSecond;
-        public static ObservableCollection<VoiceColor> DefineVoicePalette(ConcurrentBag<GeneratorVoice> generatorVoices)
+        public static ObservableCollection<VoiceColor> DefineVoicePalette(ConcurrentBag<SoundFontPreset> voices)
         {
-            int i = 0;
-            int count = generatorVoices.Count;
+            // count the unique colors needed for this palette
             ObservableCollection<VoiceColor> voiceColors = [];
-            foreach (GeneratorVoice generatorVoice in generatorVoices)
+            foreach (var voice in voices)
             {
-                // check if the generator/voice exists and then skip it if it does, otherwise add it with a new color
-                VoiceColor? found = Array.Find(voiceColors.ToArray(), ((p) => p.GeneratorName == generatorVoice.GeneratorName && p.VoiceName == generatorVoice.VoiceName));
+                VoiceColor? found = Array.Find(voiceColors.ToArray(), ((p) => p.SoundFontName == voice.SoundFontName && p.PresetName == voice.PresetName));
                 if (found != null) continue;
-                double hue = (double)i / count * 360.0;
-                Color color = HslToRgb(hue, 0.9, 0.5);
                 VoiceColor newOne = new()
                 {
-                    GeneratorName = generatorVoice.GeneratorName,
-                    VoiceName = generatorVoice.VoiceName,
-                    Color = color
+                    SoundFontName = voice.SoundFontName,
+                    PresetName = voice.PresetName,
+                    Color = Color.FromRgb(0, 0, 0)
                 };
                 voiceColors.Add(newOne);
+            }
+
+            // assign the colors evenly through the hue range
+            int i = 0;
+            foreach (VoiceColor vc in voiceColors)
+            {
+                double hue = ((double)i / voiceColors.Count) * 360.0;
+                vc.Color = HslToRgb(hue, 0.9, 0.5);
                 i++;
             }
             return voiceColors;
@@ -192,7 +196,7 @@ namespace CMGWpf.PlayFunctions
         {
             foreach (var _timeMidiVoice in TimeMidiVoices)
             {
-                Color color = voiceColors.FirstOrDefault((p) => p.GeneratorName == _timeMidiVoice.GeneratorName && p.VoiceName == _timeMidiVoice.VoiceName)!.Color;
+                Color color = voiceColors.FirstOrDefault((p) => p.SoundFontName == _timeMidiVoice.SoundFontName&& p.PresetName == _timeMidiVoice.PresetName)!.Color;
 
                 double x1 = TimeToX(_timeMidiVoice.Line.Start.Time);
                 double y1 = NoteToY(_timeMidiVoice.Line.Start.Midi);

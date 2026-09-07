@@ -16,6 +16,7 @@ namespace CMGWpf.Model.Generators
             {
                 chordSequenceName = value;
                 ChordSequence = ChordSequenceHelpers.Get(value).Result;
+                if (ChordSequence == null) chordSequenceName = "";
             } }
         public ChordSequence? ChordSequence { get; set; } = null;
         public SoundFont? SoundFont { get; set; } = null;
@@ -144,7 +145,7 @@ namespace CMGWpf.Model.Generators
             {
                 Algorithm a = d.Type;
                 XmlElement aElem = doc.CreateElement(d.Name);
-                elem.SetAttribute("algorithmType", a.ToString());
+                aElem.SetAttribute("algorithmType", a.ToString());
                 a.AppendXML(doc, aElem);
                 elem.AppendChild(aElem);
             }
@@ -209,7 +210,7 @@ namespace CMGWpf.Model.Generators
                 XmlElement? aElem = elem.GetElementsByTagName(d.Name).Cast<XmlElement?>().FirstOrDefault();
                 if (aElem != null)
                 {
-                    string typeString = XMLFunctions.GetAttributeString(aElem, "algorithmType", "None");
+                    string typeString = XMLFunctions.GetAttributeString(aElem, "algorithmType", "Constant");
                     Algorithm a = d.Type;
                     try
                     {

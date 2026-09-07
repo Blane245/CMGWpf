@@ -1,6 +1,7 @@
 ﻿using CMGWpf.Data;
 using CMGWpf.Dialogs;
 using CMGWpf.Helpers;
+using CMGWpf.Model;
 using CMGWpf.Model.Database;
 using CMGWpf.Panels.Tools;
 using CMGWpf.Types;
@@ -8,6 +9,7 @@ using CMGWpf.Utilities;
 using CMGWpf.View;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Xml.Linq;
 
 namespace CMGWpf.MVVM
 {
@@ -44,6 +46,25 @@ namespace CMGWpf.MVVM
             vm.ModifyMode = "Modify";
             vm.AllowedChords = GetAllowedChords(vm.UIChordSequence, vm.IsMajor);
             vm.Errors.Clear();
+        }
+        public async void DuplicateChordSequence(string name) 
+        {
+            var response1 = await ChordSequenceHelpers.Get(name);
+            if (response1 == null)
+            {
+                Messages.Add(vm.Errors, "Note Sequence not found", true);
+                return;
+            }
+            var newChordSequence = response1.Clone();
+            newChordSequence.Name = response1.Name + " - copy";
+            var response2 = await ChordSequenceHelpers.Add(newChordSequence);
+            if (!response2)
+            {
+                Messages.Add(vm.Errors, $"Cannot add Chord Sequence with name {newChordSequence.Name}", true);
+                ListChordSequences();
+                return;
+            }
+            ListChordSequences();
         }
         private ObservableCollection<string> GetAllowedChords(ChordSequence chordSequence, bool isMajor)
         {

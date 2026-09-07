@@ -53,17 +53,17 @@ namespace CMGWpf.Types
             {"i", new int[] { 0, 3, 7 } },
             {"ii", new int[] { 2, 5, 9 } },
             {"ii°", new int[] { 2, 5, 8 } },
-            {"III", new int[] { 4, 7, 11 } },
-            {"III+", new int[] { 4, 8, 11 } },
-            {"iii", new int[] { 4, 6, 11 } },
+            {"III", new int[] { 4, 8, 11 } },
+            {"III+", new int[] { 4, 8, 12 } },
+            {"iii", new int[] { 4, 7, 11 } },
             {"IV", new int[] { 5, 9, 12 } },
             {"iv", new int[] { 5, 8, 12 } },
             {"V", new int[] { 7, 11, 14 } },
             {"VI", new int[] { 9, 13, 16 } },
             {"vi", new int[] { 9, 12, 16 } },
             {"#vi°", new int[] {10, 14, 17 } },
-            {"VII", new int[] { 11, 15, 16 } },
-            {"vii°", new int[] { 11, 14, 17 } },
+            {"VII", new int[] { 11, 15, 18 } },
+            {"vii°", new int[] { 11, 14, 19 } },
             {"rest", new int[] { } }
         };
         public static Dictionary<int[], string> ChordsReverse = new Dictionary<int[], string>
@@ -72,17 +72,17 @@ namespace CMGWpf.Types
             { new int[] { 0, 3, 7 }, "i" },
             { new int[] { 2, 5, 9 }, "ii" },
             { new int[] { 2, 5, 8 }, "ii°" },
-            { new int[] { 4, 7, 11 }, "III" },
-            { new int [] { 4, 8, 11 }, "III+" },
-            { new int[] { 4, 6, 11 }, "iii" },
+            { new int[] { 4, 8, 11 }, "III" },
+            { new int [] { 4, 8, 12 }, "III+" },
+            { new int[] { 4, 7, 11 }, "iii" },
             { new int[] {  5, 9, 12 }, "IV" },
             { new int[] { 5, 8, 12 }, "iv" },
             { new int[] { 7, 11, 14 }, "V" },
             { new int[] { 9, 13, 16 }, "VI" },
             { new int[] { 9, 12, 16 }, "vi" },
             { new int[] { 10, 14, 17 }, "#vi°" },
-            { new int[] { 11, 15, 16 }, "VII" },
-            { new int[] { 11, 14, 17}, "vii°"},
+            { new int[] { 11, 15, 18 }, "VII" },
+            { new int[] { 11, 14, 19}, "vii°"},
             { new int[]{}, "rest"},
         };
         //public static Dictionary<string, int[]> Chords = new Dictionary<string, int[]>
@@ -765,18 +765,18 @@ namespace CMGWpf.Types
             {"II", new int[] { 2, 6, 9 }},
             {"ii", new int[] { 2, 5, 9 }},
             {"ii°", new int[] { 2, 5, 8 }},
-            {"III", new int[] { 4, 8, 11 }},
+            {"III", new int[] { 4, 7, 11 }},
             {"III+", new int[] { 4, 8, 12 }},
-            {"iii", new int[] { 4, 7, 11 }},
+            {"iii", new int[] { 4, 6, 11 }},
             {"IV", new int[] { 5, 9, 12 }},
             {"iv", new int[] { 5, 8, 12 }},
             {"V", new int[] { 7, 11, 14 }},
             {"v", new int[] { 7, 10, 14 }},
-            {"VI", new int[] { 9, 13, 16 }},
-            {"vi", new int[] { 9, 12, 16 }},
+            {"VI", new int[] { 9, 12, 16 }},
+            {"vi", new int[] { 9, 11, 16 }},
             {"#vi°", new int[] { 10, 13, 16 }},
-            {"VII", new int[] { 11, 15, 18 }},
-            {"vii°", new int[] { 11, 14, 17 }},
+            {"VII", new int[] { 11, 14, 17 }},
+            {"vii°", new int[] { 11, 13, 16 }},
             {"rest", new int[] { } }
         };
 
@@ -854,72 +854,6 @@ namespace CMGWpf.Types
 
     }
 
-    //    public class ChordType : INotifyPropertyChanged
-    //    {
-    //        public event PropertyChangedEventHandler? PropertyChanged;
-    //        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    //        {
-    //            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    //        }
-    //        public ChordType() { }
-
-    //        private string name = "";
-    //        public string Name { get => name; set { if (name != value) { name = value; OnPropertyChanged(); } } }
-
-    //        private string chordValue = ""; // I, i, etc.
-    //        public string ChordValue
-    //        {
-    //            get => chordValue;
-    //            set
-    //            {
-    //                if (chordValue != value)
-    //                { chordValue = value; OnPropertyChanged(); }
-    //            }
-    //        }
-
-    //        private string notes = ""; // list of notes numbers in the chord, comma delimited
-    //        public string Notes
-    //        {
-    //            get => notes; set { if (notes != value) { notes = value; OnPropertyChanged(); } }
-    //        }
-    //        private int inversion = 0;
-    //        public int Inversion
-    //        {
-    //            get => inversion; set
-    //            {
-    //                if (inversion != value) { inversion = value; OnPropertyChanged(); }
-    //            }
-    //        }
-    //        private double duration = 1.0; // beats
-    //        public double Duration { get => duration; set { if (duration != value) { duration = value; OnPropertyChanged(); } } }
-    //        private Music.EffortType effort = new Music.EffortType();
-    //        public Music.EffortType Effort { get => effort; set { if (effort != value) { effort = value; OnPropertyChanged(); } } }
-
-
-
-
-
-    //    };
-    //    public class ChordSequence : INotifyPropertyChanged
-    //    {
-    //        public event PropertyChangedEventHandler? PropertyChanged;
-    //        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    //        {
-    //            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    //        }
-    //        public ChordSequence() { }
-    //        public string SoundFontFileName { get; set { OnPropertyChanged(); } } = "";
-    //        public SoundFont? SoundFont { get; set { OnPropertyChanged(); } } = null;
-    //        public string? PresetName { get; set { OnPropertyChanged(); } } = null;
-    //        public Preset? Preset { get; set { OnPropertyChanged(); } } = null;
-    //        public double BPM { get; set { OnPropertyChanged(); } } = 60;
-    //        public string RootNote { get; set { OnPropertyChanged(); } } = "C";
-    //        public int RootOctave { get; set { OnPropertyChanged(); } } = 4;
-    //        public bool IsMajor { get; set { OnPropertyChanged(); } } = true;
-    //        public Music.EffortType Effort { get; set { OnPropertyChanged(); } } = new Music.EffortType();
-    //        public ObservableCollection<ChordType> Sequence { get; set { OnPropertyChanged(); } } = [];
-
-    //    };
 }
 
 

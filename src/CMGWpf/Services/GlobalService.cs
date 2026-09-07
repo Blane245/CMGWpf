@@ -24,6 +24,7 @@ namespace CMGWpf.Services
                     _instance = new GlobalService();
                     _instance.LoadEnsembleNamesAsync();
                     _instance.LoadNoteSequenceNamesAsync();
+                    _instance.LoadChordSequencerNamesAsync();
                     _instance.SoundFontFileLocation = Settings.Default.CMGSoundFontLocation;
                 }
                 return _instance;
@@ -139,6 +140,20 @@ namespace CMGWpf.Services
                 StatusMessages = [new Message { Text = $"Error loading ensemble names: {ex.Message}", Error = true }];
             }
         }
+        public async void LoadChordSequencerNamesAsync()
+        {
+            try
+            {
+                var sequences = await ChordSequenceHelpers.List();
+                ObservableCollection<string> names = new ObservableCollection<string>(sequences.Select(x => x.Name).OrderBy(name => name));
+                ChordSequencerNames = names;
+                StatusMessages.Add(new Message { Text = $"{names.Count} Chord Sequences loaded.", Error = names.Count == 0 });
+            }
+            catch (Exception ex)
+            {
+                StatusMessages = [new Message { Text = $"Error loading ensemble names: {ex.Message}", Error = true }];
+            }
+        }
         private async void LoadNoteSequenceNamesAsync()
         {
             try
@@ -202,6 +217,12 @@ namespace CMGWpf.Services
         {
             get => ensembleNames;
             set { ensembleNames = value; OnPropertyChanged(); }
+        }
+        private ObservableCollection<string> chordSequencerNames = [];
+        public ObservableCollection<string> ChordSequencerNames
+        {
+            get => chordSequencerNames;
+            set { chordSequencerNames = value; OnPropertyChanged(); }
         }
         private ObservableCollection<string> noteSequenceNames = [];
         public ObservableCollection<string> NoteSequenceNames { 

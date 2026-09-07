@@ -47,8 +47,6 @@ namespace CMGWpf.Dialogs
                 if (vm.Generator != null)
                 {
                     Generator g = vm.Generator;
-                    //vm.NewStartTime = g.StartTime; // this will change the UIGenerator.StopTime, which will have to be restored
-                    // the cloning occurring here will restore the UI generator stop time values
                     switch (vm.Generator.ToString())
                     {
                         case "Algorithmic":

@@ -13,3 +13,4 @@
 	Tuned up the DSP.
 # Version 5.0 
 	Added Chord sequencer generator
+	Modified the Voice Legend in the Play Dialog to show soundfont and preset names 

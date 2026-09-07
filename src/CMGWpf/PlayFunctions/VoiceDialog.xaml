@@ -29,8 +29,8 @@
                       AutoGenerateColumns="False"   
                       ItemsSource="{Binding VoiceColors}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Generator" Binding="{Binding GeneratorName}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Voice" Binding="{Binding VoiceName}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="SoundFont" Binding="{Binding SoundFontName}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Preset" Binding="{Binding PresetName}" IsReadOnly="True"/>
                     <DataGridTemplateColumn Header="Color" IsReadOnly="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

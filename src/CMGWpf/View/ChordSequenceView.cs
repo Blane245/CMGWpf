@@ -165,6 +165,9 @@ namespace CMGWpf.View
         private RelayCommand<ChordSequence>? _editChordSequenceCommand;
         public RelayCommand<ChordSequence> EditChordSequenceCommand =>
             _editChordSequenceCommand ??= new RelayCommand<ChordSequence>(chordSequence => new ChordSequenceCommands(this).EditChordSequence(chordSequence.Name));
+        private RelayCommand<ChordSequence>? _duplicateChordSequenceCommand;
+        public RelayCommand<ChordSequence> DuplicateChordSequenceCommand =>
+            _duplicateChordSequenceCommand ??= new RelayCommand<ChordSequence>(chordSequence => new ChordSequenceCommands(this).DuplicateChordSequence(chordSequence.Name));
         private RelayCommand<object?>? _submitChordSequenceCommand;
         public RelayCommand<object?> SubmitChordSequenceCommand =>
             _submitChordSequenceCommand ??= new RelayCommand<object?>(execute => new ChordSequenceCommands(this).SubmitChordSequence());
