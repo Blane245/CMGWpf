@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using static CMGWpf.Model.Generators.StochasticTypes;
 using static CMGWpf.Types.PlayTypes;
 
+// spell-checker: disable-next-line
 namespace CMGWpf.PlayFunctions.DSP
 {
     public static class StochasticConstants
@@ -37,7 +38,7 @@ namespace CMGWpf.PlayFunctions.DSP
             double generatorStopTime = generator.StopTime;
             int Nt = generator.NumberOfTimeCells;
             double Tc = generator.CompositionDuration;
-            ObservableCollection<Voice> voices = generator.Voices;
+            ObservableCollection<Voice> voices = generator.Ensemble.Voices;
             Composition composition = generator.Composition;
             PANOPTION panOption = generator.PanOption;
             PANALGORITHM panAlgorithm = generator.PanAlgorithm;

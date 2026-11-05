@@ -115,6 +115,8 @@ namespace CMGWpf.View
         public bool ShowVoices { get { return showVoices; } set { showVoices = value; OnPropertyChanged(); } }
         private VoiceDialog? voiceDialog;
         public VoiceDialog? VoiceDialog { get { return voiceDialog; } set { voiceDialog = value; OnPropertyChanged(); } }
+        private bool showVoicesInVideo = false;
+        public bool ShowVoicesInVideo { get { return showVoicesInVideo; } set { showVoicesInVideo = value; OnPropertyChanged(); } }
 
         private double[] signalLevels = [0, 0];
         public double[] SignalLevels
@@ -352,6 +354,9 @@ namespace CMGWpf.View
         private RelayCommand<Window>? _recordVideoCommand;
         public RelayCommand<Window> RecordVideoCommand =>
             _recordVideoCommand ??= new RelayCommand<Window>(window => new PlayCommands(this).RecordVideo(window), canExecute => !IsPlaying);
+        private RelayCommand<object>? _showVoicesInVideoCommand;
+        public RelayCommand<object> ShowVoicesInVideoCommand =>
+            _showVoicesInVideoCommand ??= new RelayCommand<object>(execute => { ShowVoicesInVideo = !ShowVoicesInVideo; OnPropertyChanged(nameof(ShowVoicesInVideo)); });
         #endregion
 
     }

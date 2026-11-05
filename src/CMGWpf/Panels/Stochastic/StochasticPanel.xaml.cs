@@ -55,7 +55,7 @@ namespace CMGWpf.Panels.Stochastic
             }
 
             // Add columns for each active voice
-            ObservableCollection<Voice> voices = viewModel.StochasticGenerator!.Voices;
+            ObservableCollection<Voice> voices = viewModel.StochasticGenerator!.Ensemble.Voices;
             ObservableCollection<Voice> activeVoices = [.. voices.Where(v => !v.Muted)];
             foreach ((var voice, var i) in activeVoices.Select((v, i) => (v, i)))
             {
@@ -137,7 +137,7 @@ namespace CMGWpf.Panels.Stochastic
 
             if (viewModel.StochasticGenerator == null) return;
 
-            var voices = viewModel.StochasticGenerator.Voices;
+            var voices = viewModel.StochasticGenerator.Ensemble.Voices;
             int newIndex = currentIndex + direction;
 
             // Validate new index

@@ -112,6 +112,10 @@
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                     ToolTip="Record video (audio + Sound Roll)"
                     Margin="5"/>
+            <CheckBox Command="{Binding ShowVoicesInVideoCommand}"
+                      Content="Show Voice Legend in Video"
+                      VerticalAlignment="Center"
+                      />
         </StackPanel>
         <Grid x:Name="SoundRollGrid" Grid.Row="2" Background="LightGray" Margin="10,0,0,0">
             <ScrollViewer x:Name="SoundRollScrollViewer"

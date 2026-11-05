@@ -671,7 +671,7 @@ namespace CMGWpf.PlayFunctions.Utilities
                             <th>Preset</th>
                                         </thead>
                         <tbody>
-                            {{string.Join("\n", stoch.Voices.Select(v =>
+                            {{string.Join("\n", stoch.Ensemble.Voices.Select(v =>
                             $"<tr><td>{v.Name}</td>" +
                             $"<td>{v.Description}</td>" +
                             $"<td>{(v.Muted ? "True" : "False")}</td>" +
@@ -689,18 +689,18 @@ namespace CMGWpf.PlayFunctions.Utilities
                 </div>
                 <div>
                 <strong>Composition</strong>
-                {{RenderStochasticDetailsCompositon(stoch)}}
+                {{RenderStochasticDetailsComposition(stoch)}}
                 </div>
                 """;
         }
-        private static string RenderStochasticDetailsCompositon(Stochastic stoch)
+        private static string RenderStochasticDetailsComposition(Stochastic stoch)
         {
             if (stoch.Composition.Length == 0)
                 return "<p>No composition details found.</p>";
 
             // build the header which has a time column and one column for each unmuted voice
             string header = "<thead><tr><th>Time (sec)</th>";
-            foreach (var voice in stoch.Voices.Where(v => !v.Muted))
+            foreach (var voice in stoch.Ensemble.Voices.Where(v => !v.Muted))
             {
                 header += $"<th>{voice.Name}</th>";
             }
@@ -713,7 +713,7 @@ namespace CMGWpf.PlayFunctions.Utilities
             {
                 int sum = 0;
                 body += $"<tr><td>{time:F2}</td>";
-                foreach ((var voice, var i) in stoch.Voices.Select((v, i) => (v, i)))
+                foreach ((var voice, var i) in stoch.Ensemble.Voices.Select((v, i) => (v, i)))
                 {
                     if (!voice.Muted)
                     {

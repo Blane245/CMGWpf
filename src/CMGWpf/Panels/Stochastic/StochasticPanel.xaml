@@ -1,7 +1,9 @@
 ﻿<UserControl x:Class="CMGWpf.Panels.Stochastic.StochasticPanel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:core="clr-namespace:System;assembly=mscorlib"
+             xmlns:types="clr-namespace:CMGWpf.Model.Generators"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:materialIcons="clr-namespace:Material.Icons.WPF;assembly=Material.Icons.WPF"
              xmlns:services="clr-namespace:CMGWpf.Services"
          xmlns:viewmodel="clr-namespace:CMGWpf.View"
@@ -9,8 +11,16 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CMGWpf.Panels.Stochastic"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="1200">
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <ObjectDataProvider x:Key="TimbreOptions"
+                            ObjectType="{x:Type core:Enum}"
+                            MethodName="GetValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="types:StochasticTypes+TIMBRE" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -41,9 +51,10 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                     <TextBox TextWrapping="NoWrap" Text="{Binding StochasticGenerator.CompositionSeed}" MinWidth="100" ToolTip="See used to generate the composition. Blank will use a new seed each time the composition is generated." />
                 </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Label Content="Reload and Build" HorizontalAlignment="Left" FontSize="16" FontWeight="Bold" />
-                <Button Content="Ensembles" Command="{Binding ReloadEnsembles}" Margin="5" Background="Green" Foreground="White" ToolTip="Reload the list of ensembles after a modification to the database"/>
-                    <Button Content="Voices" Command="{Binding ReloadVoices}" CommandParameter="{Binding StochasticGenerator}" Margin="5" Background="Green" Foreground="White" ToolTip="Reload voices of an ensemble after they have been modified"/>
+                <Label Content="Reload, Update, and Build" HorizontalAlignment="Left" FontSize="16" FontWeight="Bold" />
+                <Button Content="ReloadEnsembles" Command="{Binding ReloadEnsembles}" Margin="5" Background="Green" Foreground="White" ToolTip="Reload the list of ensembles after a modification to the database"/>
+                    <Button Content="Reload Voices" Command="{Binding ReloadVoices}" CommandParameter="{Binding StochasticGenerator}" Margin="5" Background="Green" Foreground="White" ToolTip="Reload voices of an ensemble after they have been modified"/>
+                    <Button Content="Update Voices" Command="{Binding UpdateVoices}" CommandParameter="{Binding StochasticGenerator}" Margin="5" Background="Green" Foreground="White" ToolTip="Reload voices of an ensemble after they have been modified"/>
                     <Button Content="Build Composition" Command="{Binding BuildComposition}" CommandParameter="{Binding StochasticGenerator}" Margin="5" Background="green" Foreground="White" ToolTip="Build the composition from using the composition parameters "/>
             </StackPanel>
                 <Border BorderBrush="Black" BorderThickness="1" Margin="5"/>
@@ -138,7 +149,7 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                     <Label Content="Voices" HorizontalAlignment="Center" FontSize="16" FontWeight="Bold" />
                     <!-- the voice data table showing the headers and voice properties -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
-                    <DataGrid ItemsSource="{Binding StochasticGenerator.Voices}" AutoGenerateColumns="False" CanUserAddRows="False" Margin="5">
+                    <DataGrid ItemsSource="{Binding StochasticGenerator.Ensemble.Voices}" AutoGenerateColumns="False" CanUserAddRows="False" Margin="5">
                         <DataGrid.Columns>
                             <DataGridCheckBoxColumn Header="Mute" Binding="{Binding Muted, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged }" IsReadOnly="False" ToolTipService.ToolTip="Mute the voice in the composition"/>
                             <DataGridTemplateColumn Header="Volume" ToolTipService.ToolTip="The volume of the voice [-10,+10] dB">
@@ -163,14 +174,35 @@ xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Timbre" Binding="{Binding Timbre}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Register Lo" Binding="{Binding RegisterLo}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Register Hi" Binding="{Binding RegisterHi}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="SoundFont" Binding="{Binding SoundFontFileName}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Preset" Binding="{Binding PresetName}" IsReadOnly="True"/>
-                        </DataGrid.Columns>
+                        <DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
+                        <DataGridComboBoxColumn Header="Timbre"
+                            ItemsSource="{Binding Source={StaticResource TimbreOptions}}"
+                            SelectedItemBinding="{Binding Timbre, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <DataGridTemplateColumn Header="Register Lo">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <xctk:DoubleUpDown Minimum="0" Maximum="127" Increment="1" Value="{Binding RegisterLo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="The lowest note in the voice's range"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Register Hi">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <xctk:DoubleUpDown Minimum="0" Maximum="127" Increment="1" Value="{Binding RegisterHi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="The highest note in the voice's range"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Duration">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <xctk:DoubleUpDown Minimum="0" Maximum="100" Increment=".01" Value="{Binding Duration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="The duration of the voice"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                            <!-- soundfont and preset changes are on hold since each voice may have a different soundfont and preset complicating the UI code -->
+                        <DataGridTextColumn Header="SoundFont" Binding="{Binding SoundFontFileName}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Preset" Binding="{Binding PresetName}" IsReadOnly="True"/>
+                    </DataGrid.Columns>
                     </DataGrid>
                 </ScrollViewer>
             <Border BorderBrush="Black" BorderThickness="1" Margin="5"/>

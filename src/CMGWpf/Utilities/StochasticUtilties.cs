@@ -15,7 +15,7 @@ namespace CMGWpf.Utilities
             generator.InitializeComposition();
             FastRandom rN = generator.CompositionRn;
             generator.CompositionRn = rN;
-            int nColumns = generator.Voices.Count;
+            int nColumns = generator.Ensemble.Voices.Count;
             int nRows = generator.NumberOfTimeCells;
             double lambda = generator.Lambda;
 

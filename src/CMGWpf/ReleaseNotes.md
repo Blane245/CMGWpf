@@ -13,4 +13,13 @@
 	Tuned up the DSP.
 # Version 5.0 
 	Added Chord sequencer generator
-	Modified the Voice Legend in the Play Dialog to show soundfont and preset names 
+	Modified the Voice Legend in the Play Dialog to show soundfont and preset names
+	Fixed video recording positioning problem
+	Fixed play dialog current position initialization. 
+# Version 5.0.1
+	Partially implemented voice editing in stochastic generator
+	Added voice legend option to video recording
+	Repaired editing bug in Chord Sequencer
+	Refactored Ensemble Voices
+	Added Soundfont loading error checks
+

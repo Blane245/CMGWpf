@@ -10,6 +10,7 @@ using NAudio.Lame;
 using NAudio.Wave;
 using System.IO;
 using System.Runtime.Versioning;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -178,6 +179,8 @@ namespace CMGWpf.MVVM
 
             try
             {
+                // rewind the audio and video and show the progress dialog
+                Rewind();
                 progressDialog.Show();
 
                 // Generate video asynchronously with progress and cancellation support
@@ -267,6 +270,7 @@ namespace CMGWpf.MVVM
                 progressDialog.SetStatus("Pre-rendering sound roll...");
 
                 RenderTargetBitmap? fullCanvasBitmap = null;
+                RenderTargetBitmap? voiceLegendBitmap = null;
                 int viewportWidth = 0;
                 int viewportHeight = 0;
 
@@ -290,6 +294,8 @@ namespace CMGWpf.MVVM
 
                         fullCanvasBitmap.Render(canvas);
                         fullCanvasBitmap.Freeze(); // Make the bitmap thread-safe for background processing
+
+                        voiceLegendBitmap = CreateVoiceLegendBitmap(viewportWidth);
                     }
                 }, System.Windows.Threading.DispatcherPriority.Normal);
 
@@ -310,16 +316,24 @@ namespace CMGWpf.MVVM
                         double timePosition = frameIndex / (double)frameRate;
                         double scrollOffset = SoundRollBuilder.TimeToX(timePosition);
 
-                        // Extract a viewport-sized rectangle from the pre-rendered bitmap
-                        byte[] framePng = ExtractFrameFromBitmap(
-                            fullCanvasBitmap, 
-                            (int)scrollOffset, 
-                            0, 
-                            viewportWidth, 
-                            viewportHeight);
+                            // Extract a viewport-sized rectangle from the pre-rendered bitmap
+                            byte[] framePng = ExtractFrameFromBitmap(
+                                fullCanvasBitmap,
+                                (int)scrollOffset,
+                                0,
+                                viewportWidth,
+                                viewportHeight);
+
+                        // add the voice legend to the frame is the user requests it
+                        if (vm.ShowVoicesInVideo)
+                        {
+                            if (voiceLegendBitmap != null)
+                            {
+                                framePng = AddVoiceLegend(framePng, voiceLegendBitmap, viewportWidth, viewportHeight);
+                            }
+                        }
 
                         frameData.Add(framePng);
-
                         // Update progress on UI thread periodically
                         if (frameIndex % 10 == 0)
                         {
@@ -407,6 +421,121 @@ namespace CMGWpf.MVVM
                 // Clean up temp directory with retry logic
                 await CleanupTempDirectoryAsync(tempDir);
             }
+        }
+
+        private RenderTargetBitmap? CreateVoiceLegendBitmap(int viewportWidth)
+        {
+            if (vm.VoiceColors.Count == 0 || viewportWidth < 40)
+                return null;
+
+            const double margin = 10;
+            const double legendWidth = 360;
+            const double headerHeight = 28;
+            const double rowHeight = 24;
+            double width = Math.Min(legendWidth, viewportWidth - (margin * 2));
+            double height = headerHeight + (rowHeight * vm.VoiceColors.Count) + margin;
+
+            DrawingVisual visual = new();
+            using (DrawingContext drawingContext = visual.RenderOpen())
+            {
+                drawingContext.DrawRectangle(
+                    new SolidColorBrush(Color.FromArgb(235, 255, 255, 255)),
+                    new Pen(Brushes.DimGray, 1),
+                    new Rect(0, 0, width, height));
+
+                DrawLegendText(drawingContext, "Voices", 10, 5, 14, Brushes.Black, true);
+
+                for (int i = 0; i < vm.VoiceColors.Count; i++)
+                {
+                    PlayTypes.VoiceColor voice = vm.VoiceColors[i];
+                    double y = headerHeight + (i * rowHeight);
+                    drawingContext.DrawRectangle(
+                        new SolidColorBrush(voice.Color),
+                        new Pen(Brushes.Black, 0.5),
+                        new Rect(10, y + 4, 42, 16));
+
+                    DrawLegendText(
+                        drawingContext,
+                        $"{voice.SoundFontName} - {voice.PresetName}",
+                        60,
+                        y + 3,
+                        11,
+                        Brushes.Black,
+                        false);
+                }
+            }
+
+            RenderTargetBitmap bitmap = new(
+                (int)Math.Ceiling(width),
+                (int)Math.Ceiling(height),
+                96,
+                96,
+                PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+            bitmap.Freeze();
+            return bitmap;
+        }
+
+        private static void DrawLegendText(
+            DrawingContext drawingContext,
+            string text,
+            double x,
+            double y,
+            double fontSize,
+            Brush foreground,
+            bool bold)
+        {
+            FormattedText formattedText = new(
+                text,
+                CultureInfo.InvariantCulture,
+                FlowDirection.LeftToRight,
+                new Typeface(bold ? "Segoe UI Semibold" : "Segoe UI"),
+                fontSize,
+                foreground,
+                96);
+            drawingContext.DrawText(formattedText, new Point(x, y));
+        }
+
+        private static byte[] AddVoiceLegend(
+            byte[] framePng,
+            RenderTargetBitmap voiceLegendBitmap,
+            int viewportWidth,
+            int viewportHeight)
+        {
+            BitmapImage frameBitmap = new();
+            using (MemoryStream stream = new(framePng))
+            {
+                frameBitmap.BeginInit();
+                frameBitmap.CacheOption = BitmapCacheOption.OnLoad;
+                frameBitmap.StreamSource = stream;
+                frameBitmap.EndInit();
+                frameBitmap.Freeze();
+            }
+
+            DrawingVisual visual = new();
+            using (DrawingContext drawingContext = visual.RenderOpen())
+            {
+                drawingContext.DrawImage(frameBitmap, new Rect(0, 0, viewportWidth, viewportHeight));
+
+                double left = Math.Max(0, viewportWidth - voiceLegendBitmap.PixelWidth - 10);
+                drawingContext.DrawImage(
+                    voiceLegendBitmap,
+                    new Rect(left, 10, voiceLegendBitmap.PixelWidth, voiceLegendBitmap.PixelHeight));
+            }
+
+            RenderTargetBitmap compositedBitmap = new(
+                viewportWidth,
+                viewportHeight,
+                96,
+                96,
+                PixelFormats.Pbgra32);
+            compositedBitmap.Render(visual);
+
+            PngBitmapEncoder encoder = new();
+            encoder.Frames.Add(BitmapFrame.Create(compositedBitmap));
+            using MemoryStream output = new();
+            encoder.Save(output);
+            return output.ToArray();
         }
 
         private static async Task CleanupTempDirectoryAsync(string tempDir)

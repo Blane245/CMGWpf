@@ -68,7 +68,7 @@ namespace CMGWpf.Model.Generators
         {
             public string Name { get; set; } = "";
             public string Description { get; set; } = "";
-            public string Voices { get; set; } = "";
+            public ObservableCollection<Voice> Voices { get; set; } = [];
         }
         public enum INTENSITY
         {
@@ -165,16 +165,18 @@ namespace CMGWpf.Model.Generators
         }
 
         // Composition parameters. Changes to these property causes the composition to be cleared. Note use of OnPropertyChanged
-        private Ensemble ensemble = new() { Name = "", Description = "", Voices = "" };
+        private Ensemble ensemble = new() { Name = "", Description = "", Voices = new ObservableCollection<Voice>() };
         public Ensemble Ensemble
         {
             get => ensemble;
             set
             {
-                if (value.Name != ensemble.Name || value.Voices != ensemble.Voices) { Composition = []; }
+                if (value.Name != ensemble.Name || value.Voices.Count != ensemble.Voices.Count) { Composition = []; }
                 ensemble = value;
             }
         } // the ensemble name, description, and voiceList. If name or voice list changes, clear the composition
+        // the voices in the ensemble. The voices are read from the database and augmented with generator specific data. The voices are used to determine the sound of the events in the composition. user can change the settings for each voice, such as whether it is muted or not, and the volume and velocity. If the number of voices changes, clear the composition.
+
         private double compositionDuration = 0;
         public double CompositionDuration
         {
@@ -192,12 +194,6 @@ namespace CMGWpf.Model.Generators
         private string compositionSeed = string.Empty;
         public string CompositionSeed { get => compositionSeed; set { if (value != compositionSeed) { Composition = []; compositionSeed = value; }; } } // the seed for the random number generator used to determine the timing of events in the composition. The seed is provided by the user and can be changed during the composition process. If it changes, clear the composition
         public FastRandom CompositionRn = MathUtilities.StartFastRandom(null); // the random number generator used to determine the timing of events in the composition. The random number generator is initialized with the composition seed provided by the user. If no seed is provided, the random number generator is initialized with a seed determined from the current time.
-        private ObservableCollection<Voice> voices = [];
-        public ObservableCollection<Voice> Voices
-        {
-            get => voices;
-            set { if (value.Count != voices.Count) { Composition = []; voices = value; } else voices = [.. value]; }
-        } // the voices in the ensemble. The voices are read from the database and augmented with generator specific data. The voices are used to determine the sound of the events in the composition. user can change the settings for each voice, such as whether it is muted or not, and the volume and velocity. If the number of voices changes, clear the composition.
         // Signal Processing parameters
         public bool Microtones { get; set; } = false; // whether microtones are allowed in the composition. 
         public string DynamicsSeed { get; set; } = String.Empty; // the seed for the random number generator used to determine the dynamics of events in the composition. 
@@ -219,14 +215,16 @@ namespace CMGWpf.Model.Generators
             if (!string.IsNullOrEmpty(CompositionSeed))
             {
                 CompositionRn = MathUtilities.StartFastRandom(CompositionSeed);
-            } else CompositionRn = MathUtilities.StartFastRandom(null);
+            }
+            else CompositionRn = MathUtilities.StartFastRandom(null);
         }
         public void InitializeDynamics()
         {
             if (!string.IsNullOrEmpty(DynamicsSeed))
             {
                 DynamicsRn = MathUtilities.StartFastRandom(DynamicsSeed);
-            } else DynamicsRn = MathUtilities.StartFastRandom(null);
+            }
+            else DynamicsRn = MathUtilities.StartFastRandom(null);
         }
 
         public double GetDeltaT() { return NumberOfTimeCells == 0 ? Double.PositiveInfinity : CompositionDuration / NumberOfTimeCells; }
@@ -240,7 +238,7 @@ namespace CMGWpf.Model.Generators
                     NumberOfTimeCells == g.NumberOfTimeCells &&
                     Lambda == g.Lambda &&
                     CompositionSeed == g.CompositionSeed &&
-                    Voices == g.Voices &&
+                    Ensemble.Voices == g.Ensemble.Voices &&
                     Microtones == g.Microtones &&
                     DynamicsSeed == g.DynamicsSeed &&
                     IntensityOption == g.IntensityOption &&
@@ -270,8 +268,8 @@ namespace CMGWpf.Model.Generators
             };
 
             // Deep copy the voices so changes don't affect the original
-            clone.Voices = [];
-            foreach (var voice in this.Voices)
+            clone.Ensemble.Voices = [];
+            foreach (var voice in this.Ensemble.Voices)
             {
                 var voiceCopy = new Voice
                 {
@@ -290,7 +288,7 @@ namespace CMGWpf.Model.Generators
                     Velocity = voice.Velocity,
                     Delta = voice.Delta
                 };
-                clone.Voices.Add(voiceCopy);
+                clone.Ensemble.Voices.Add(voiceCopy);
             }
 
             // Deep copy the composition array
@@ -340,25 +338,12 @@ namespace CMGWpf.Model.Generators
             elem.AppendChild(ensembleElem);
             ensembleElem.SetAttribute("name", Ensemble.Name);
             ensembleElem.SetAttribute("description", Ensemble.Description);
-            ensembleElem.SetAttribute("voices", Ensemble.Voices);
             XmlElement voicesElem = doc.CreateElement("voices");
             elem.AppendChild(voicesElem);
-            foreach (Voice voice in Voices)
+            foreach (Voice voice in Ensemble.Voices)
             {
                 XmlElement voiceElem = doc.CreateElement("voice");
-                voicesElem.AppendChild(voiceElem);
-                voiceElem.SetAttribute("name", voice.Name);
-                voiceElem.SetAttribute("description", voice.Description);
-                voiceElem.SetAttribute("soundFontFile", voice.SoundFontFileName);
-                voiceElem.SetAttribute("presetName", voice.PresetName);
-                voiceElem.SetAttribute("timbre", voice.Timbre.ToString());
-                voiceElem.SetAttribute("registerLo", voice.RegisterLo.ToString());
-                voiceElem.SetAttribute("registerHi", voice.RegisterHi.ToString());
-                voiceElem.SetAttribute("duration", voice.Duration.ToString());
-                voiceElem.SetAttribute("muted", voice.Muted.ToString());
-                voiceElem.SetAttribute("volume", voice.Volume.ToString());
-                voiceElem.SetAttribute("velocity", voice.Velocity.ToString());
-                voiceElem.SetAttribute("delta", voice.Delta.ToString());
+                voice.AppendXML(doc, voiceElem);
             }
             elem.SetAttribute("Tc", CompositionDuration.ToString());
             elem.SetAttribute("Nt", NumberOfTimeCells.ToString());
@@ -409,146 +394,85 @@ namespace CMGWpf.Model.Generators
                 {
                     Name = XMLFunctions.GetAttributeString(ensembleElem, "name", ""),
                     Description = XMLFunctions.GetAttributeString(ensembleElem, "description", ""),
-                    Voices = XMLFunctions.GetAttributeString(ensembleElem, "voices", "")
                 };
-                var delta = XMLFunctions.GetAttributeDouble(generatorElem, "delta", 2); // get as default based on old format
                 XmlElement? voicesElem = generatorElem.GetElementsByTagName("voices").Cast<XmlElement?>().FirstOrDefault();
                 if (voicesElem != null)
                 {
-                    var voiceList = new List<Voice>();
+                    var voiceList = new ObservableCollection<Voice>();
                     foreach (XmlElement voiceElem in voicesElem.GetElementsByTagName("voice"))
                     {
-                        Voice voice = new()
-                        {
-                            Name = XMLFunctions.GetAttributeString(voiceElem, "name", ""),
-                            Description = XMLFunctions.GetAttributeString(voiceElem, "description", ""),
-                            SoundFontFileName = XMLFunctions.GetAttributeString(voiceElem, "soundFontFile", ""),
-                            PresetName = XMLFunctions.GetAttributeString(voiceElem, "presetName", ""),
-                            Timbre = Enum.Parse<TIMBRE>(XMLFunctions.GetAttributeString(voiceElem, "timbre", "Sustained")),
-                            RegisterLo = XMLFunctions.GetAttributeDouble(voiceElem, "registerLo", 0),
-                            RegisterHi = XMLFunctions.GetAttributeDouble(voiceElem, "registerHi", 127),
-                            Duration = XMLFunctions.GetAttributeDouble(voiceElem, "duration", 1),
-                            Muted = XMLFunctions.GetAttributeBool(voiceElem, "muted", false),
-                            Volume = XMLFunctions.GetAttributeDouble(voiceElem, "volume", 0),
-                            Velocity = XMLFunctions.GetAttributeDouble(voiceElem, "velocity", 64),
-                            Delta = XMLFunctions.GetAttributeDouble(voiceElem, "delta", delta), // use old format default is missing
-                        };
-                        // Read the soundfont from the identified file, and find the preset in the soundfont. If the soundfont or preset cannot be found, then these fields should be cleared. This is because the soundfont and preset are used to generate the sound for the voice, and if they cannot be found, then the voice cannot be generated, so these fields should be cleared to reflect that.
-                        voice.SoundFont = SoundFontUtilities.GetSoundFont(voice.SoundFontFileName);
-                        if (voice.PresetName != "" && voice.SoundFont != null)
-                        {
-                            voice.Preset = voice.SoundFont.Presets.FirstOrDefault(p => SoundFontUtilities.BankPresetToName(p) == voice.PresetName);
-                        }
-                        else
-                        {
-                            voice.Preset = null;
-                            voice.PresetName = "";
-                        }
-
+                        Voice voice = Voice.LoadXML(voiceElem);
                         voiceList.Add(voice);
                     }
-                    Voices = [.. voiceList];
+                    Ensemble.Voices = voiceList;
                 }
-                else
-                {
-                    // Ensemble not found in DB or error occurred - clear ensemble
-                    Ensemble = new();
-                    Voices = [];
-                    Composition = [];
-                }
-
-                // Load composition parameters
-                CompositionDuration = XMLFunctions.GetAttributeDouble(generatorElem, "Tc", 0);
-                NumberOfTimeCells = XMLFunctions.GetAttributeInt(generatorElem, "Nt", 0);
-                Lambda = XMLFunctions.GetAttributeDouble(generatorElem, "lambda", 0);
-                CompositionSeed = XMLFunctions.GetAttributeString(generatorElem, "compositionSeed", "");
-                CompositionRn = MathUtilities.StartFastRandom(CompositionSeed);
-
-                // Load signal processing parameters
-                Microtones = XMLFunctions.GetAttributeBool(generatorElem, "microtones", false);
-                DynamicsSeed = XMLFunctions.GetAttributeString(generatorElem, "dynamicsSeed", "");
-                DynamicsRn = MathUtilities.StartFastRandom(DynamicsSeed);
-
-                // Load intensity parameters
-                XmlElement? intensityElem = generatorElem.GetElementsByTagName("intensity").Cast<XmlElement?>().FirstOrDefault();
-                if (intensityElem != null)
-                {
-                    IntensityOption = Enum.Parse<INTENSITYOPTION>(XMLFunctions.GetAttributeString(intensityElem, "intensityOption", "None"));
-                    IntensityTransitionOption = Enum.Parse<INTENSITYTRANSITIONOPTION>(XMLFunctions.GetAttributeString(intensityElem, "intensityTransitionOption", "None"));
-                    IntensityParameters = new IntensityParameters
-                    {
-                        CycleTime = XMLFunctions.GetAttributeDouble(intensityElem, "cycleTime", 0)
-                    };
-                }
-
-                // Load pan parameters
-                XmlElement? panElem = generatorElem.GetElementsByTagName("pan").Cast<XmlElement?>().FirstOrDefault();
-                if (panElem != null)
-                {
-                    PanOption = Enum.Parse<PANOPTION>(XMLFunctions.GetAttributeString(panElem, "panOption", "None"));
-                    PanAlgorithm = Enum.Parse<PANALGORITHM>(XMLFunctions.GetAttributeString(panElem, "panAlgorithm", "None"));
-                    PanParameters = new PanParameters
-                    {
-                        CycleTime = XMLFunctions.GetAttributeDouble(panElem, "cycleTime", 0)
-                    };
-                }
-                // Load reverb parameters
-                XmlElement? reverbElem = generatorElem.GetElementsByTagName("reverb").Cast<XmlElement?>().FirstOrDefault();
-                if (reverbElem != null)
-                {
-                    ReverbParameters = new ReverbParameters
-                    {
-                        Delay = XMLFunctions.GetAttributeDouble(reverbElem, "delay", 0),
-                        Decay = XMLFunctions.GetAttributeDouble(reverbElem, "decay", 0)
-                    };
-                }
+            }
+            else
+            {
+                // Ensemble not found in DB or error occurred - clear ensemble
+                Ensemble = new();
                 Composition = [];
-                string compositionString = XMLFunctions.GetAttributeString(generatorElem, "composition", "");
-                if (!string.IsNullOrEmpty(compositionString))
+            }
+
+            // Load composition parameters
+            CompositionDuration = XMLFunctions.GetAttributeDouble(generatorElem, "Tc", 0);
+            NumberOfTimeCells = XMLFunctions.GetAttributeInt(generatorElem, "Nt", 0);
+            Lambda = XMLFunctions.GetAttributeDouble(generatorElem, "lambda", 0);
+            CompositionSeed = XMLFunctions.GetAttributeString(generatorElem, "compositionSeed", "");
+            CompositionRn = MathUtilities.StartFastRandom(CompositionSeed);
+
+            // Load signal processing parameters
+            Microtones = XMLFunctions.GetAttributeBool(generatorElem, "microtones", false);
+            DynamicsSeed = XMLFunctions.GetAttributeString(generatorElem, "dynamicsSeed", "");
+            DynamicsRn = MathUtilities.StartFastRandom(DynamicsSeed);
+
+            // Load intensity parameters
+            XmlElement? intensityElem = generatorElem.GetElementsByTagName("intensity").Cast<XmlElement?>().FirstOrDefault();
+            if (intensityElem != null)
+            {
+                IntensityOption = Enum.Parse<INTENSITYOPTION>(XMLFunctions.GetAttributeString(intensityElem, "intensityOption", "None"));
+                IntensityTransitionOption = Enum.Parse<INTENSITYTRANSITIONOPTION>(XMLFunctions.GetAttributeString(intensityElem, "intensityTransitionOption", "None"));
+                IntensityParameters = new IntensityParameters
                 {
-                    string[] rows = compositionString.Split(';', StringSplitOptions.RemoveEmptyEntries);
-                    if (rows.Length == NumberOfTimeCells)
+                    CycleTime = XMLFunctions.GetAttributeDouble(intensityElem, "cycleTime", 0)
+                };
+            }
+
+            // Load pan parameters
+            XmlElement? panElem = generatorElem.GetElementsByTagName("pan").Cast<XmlElement?>().FirstOrDefault();
+            if (panElem != null)
+            {
+                PanOption = Enum.Parse<PANOPTION>(XMLFunctions.GetAttributeString(panElem, "panOption", "None"));
+                PanAlgorithm = Enum.Parse<PANALGORITHM>(XMLFunctions.GetAttributeString(panElem, "panAlgorithm", "None"));
+                PanParameters = new PanParameters
+                {
+                    CycleTime = XMLFunctions.GetAttributeDouble(panElem, "cycleTime", 0)
+                };
+            }
+            // Load reverb parameters
+            XmlElement? reverbElem = generatorElem.GetElementsByTagName("reverb").Cast<XmlElement?>().FirstOrDefault();
+            if (reverbElem != null)
+            {
+                ReverbParameters = new ReverbParameters
+                {
+                    Delay = XMLFunctions.GetAttributeDouble(reverbElem, "delay", 0),
+                    Decay = XMLFunctions.GetAttributeDouble(reverbElem, "decay", 0)
+                };
+            }
+            Composition = [];
+            string compositionString = XMLFunctions.GetAttributeString(generatorElem, "composition", "");
+            if (!string.IsNullOrEmpty(compositionString))
+            {
+                string[] rows = compositionString.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                Composition = new int[rows.Length][];
+                for (int i = 0; i < rows.Length; i++)
+                {
+                    string[] values = rows[i].Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    Composition[i] = new int[values.Length];
+                    for (int j = 0; j < values.Length; j++)
                     {
-                        // New format with semicolons separating rows
-                        Composition = new int[rows.Length][];
-                        for (int i = 0; i < rows.Length; i++)
-                        {
-                            string[] values = rows[i].Split(',', StringSplitOptions.RemoveEmptyEntries);
-                            Composition[i] = new int[values.Length];
-                            for (int j = 0; j < values.Length; j++)
-                            {
-                                if (int.TryParse(values[j], out int val))
-                                    Composition[i][j] = val;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Old format: flat comma-separated list that needs reshaping
-                        // Expected format: [time0_voice0, time0_voice1, ..., time1_voice0, time1_voice1, ...]
-                        string[] values = compositionString.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                        int numVoices = Voices.Count;
-                        if (numVoices > 0 && values.Length > 0)
-                        {
-                            int numTimeCells = values.Length / numVoices;
-                            Composition = new int[numTimeCells][];
-                            for (int i = 0; i < numTimeCells; i++)
-                            {
-                                Composition[i] = new int[numVoices];
-                                for (int j = 0; j < numVoices; j++)
-                                {
-                                    int index = i * numVoices + j;
-                                    if (index >= values.Length)
-                                    {
-                                        // incompatibility between number of voices, number of times, or both and the data in the file. Clear the composition and quit.
-                                        Composition = [];
-                                        return Task.CompletedTask;
-                                    }
-                                    if (index < values.Length && int.TryParse(values[index], out int val))
-                                        Composition[i][j] = val;
-                                }
-                            }
-                        }
+                        if (int.TryParse(values[j], out int val))
+                            Composition[i][j] = val;
                     }
                 }
             }
@@ -581,7 +505,7 @@ namespace CMGWpf.Model.Generators
                 errors.Add(new Message() { Text = "Number of time cells must be positive.", Error = true });
             if (Lambda <= 0)
                 errors.Add(new Message() { Text = "Events/Row must be positive.", Error = true });
-            if (Voices.Count == 0)
+            if (Ensemble.Voices.Count == 0)
                 errors.Add(new Message() { Text = "At least one voice is required.", Error = true });
             if (PanOption != PANOPTION.none && PanAlgorithm != PANALGORITHM.none && PanParameters.CycleTime <= 0)
                 errors.Add(new Message() { Text = "Pan cycle time must be positive.", Error = true });
@@ -589,10 +513,11 @@ namespace CMGWpf.Model.Generators
                 errors.Add(new Message() { Text = "Intensity cycle time must be positive.", Error = true });
             if (Composition.Length == 0)
                 errors.Add(new Message() { Text = "Composition must be generated.", Error = true });
-            foreach (var voice in Voices)
+            foreach (var voice in Ensemble.Voices)
             {
-                if (voice.Delta <= 0)
-                    errors.Add(new Message() { Text = $"Voice '{voice.Name}': Delta must be positive.", Error = true });
+                ObservableCollection<Message> voiceErrors = voice.Validate();
+                foreach (Message voiceError in voiceErrors)
+                    errors.Add(voiceError);
             }
             return errors;
         }

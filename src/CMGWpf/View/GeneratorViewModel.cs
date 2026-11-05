@@ -8,6 +8,7 @@ using CMGWpf.Services;
 using CMGWpf.SoundFont_2;
 using CMGWpf.Types;
 using CMGWpf.Utilities;
+using NAudio.SoundFont;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -600,14 +601,14 @@ namespace CMGWpf.View
                     if (AlgorithmicGenerator.SoundFont != null)
                     {
                         AlgorithmicPresetNames = new ObservableCollection<string>(AlgorithmicGenerator.SoundFont.Presets.Select(preset => SoundFontUtilities.BankPresetToName(preset)).OrderBy(name => name));
-                        AlgorithmicPresets = new(AlgorithmicGenerator.SoundFont.Presets);
+                        AlgorithmicPresets = new (AlgorithmicGenerator.SoundFont.Presets);
                     }
                 }
                 return algorithmicSoundFontFileName;
             }
             set
             {
-                SoundFont? SoundFont = SoundFontUtilities.GetSoundFont(value);
+                SoundFont_2.SoundFont? SoundFont = SoundFontUtilities.GetSoundFont(value);
                 if (SoundFont == null)
                 {
                     Messages.Clear(); Messages.Add(new Message { Text = $"Error loading SoundFont: {value}", Error = true });
@@ -627,14 +628,14 @@ namespace CMGWpf.View
                 OnPropertyChanged(nameof(AlgorithmicGenerator));
 
                 // get the presets for this soundFont and sort them in name order for the preset dropdown
-                algorithmicPresets = new(SoundFont.Presets);
+                algorithmicPresets = new ObservableCollection<SoundFont_2.Preset>(SoundFont.Presets);
                 algorithmicPresetNames = new ObservableCollection<string>(AlgorithmicPresets.Select(preset => SoundFontUtilities.BankPresetToName(preset)).OrderBy(name => name));
                 OnPropertyChanged(nameof(AlgorithmicPresets));
                 OnPropertyChanged(nameof(AlgorithmicPresetNames));
             }
         }
-        private ObservableCollection<Preset> algorithmicPresets = [];
-        public ObservableCollection<Preset> AlgorithmicPresets
+        private ObservableCollection<SoundFont_2.Preset> algorithmicPresets = [];
+        public ObservableCollection<SoundFont_2.Preset> AlgorithmicPresets
         {
             get { return algorithmicPresets; }
             set { algorithmicPresets = value; OnPropertyChanged(); }
@@ -671,7 +672,7 @@ namespace CMGWpf.View
                 algorithmicPresetName = value;
                 OnPropertyChanged();
                 // update the algorithmic generator with the new preset
-                Preset? preset = AlgorithmicPresets.FirstOrDefault(p => SoundFontUtilities.BankPresetToName(p) == value);
+                SoundFont_2.Preset? preset = AlgorithmicPresets.FirstOrDefault(p => SoundFontUtilities.BankPresetToName(p) == value);
                 if (preset != null && AlgorithmicGenerator != null)
                 {
                     AlgorithmicGenerator.Preset = preset;
@@ -963,6 +964,7 @@ namespace CMGWpf.View
         #region Stochastic Generator Specific Properties and Commands
         public ObservableCollection<string> EnsembleNames { get => GlobalService.Instance.EnsembleNames; set { GlobalService.Instance.EnsembleNames = value; OnPropertyChanged(); } }
         public ObservableCollection<string> NoteSequenceNames { get => GlobalService.Instance.NoteSequenceNames; set { GlobalService.Instance.NoteSequenceNames = value; OnPropertyChanged(); } }
+        public static ObservableCollection<StochasticTypes.TIMBRE> TimbreOptions => new(Enum.GetValues<StochasticTypes.TIMBRE>());
         private async Task LoadSequenceAsync(string sequenceName)
         {
             if (AlgorithmicGenerator?.NoteAlgorithm is not Sequencer sequencer) return;
@@ -1034,7 +1036,7 @@ namespace CMGWpf.View
                     StochasticGenerator.Ensemble.Name = ensemble.Name;
                     StochasticGenerator.Ensemble.Description = ensemble.Description;
                     // Convert database Voice to model Voice
-                    StochasticGenerator.Voices = new ObservableCollection<Model.Voice>(
+                    StochasticGenerator.Ensemble.Voices = new ObservableCollection<Model.Voice>(
                         ensemble.Voices.Select(dbVoice => new Model.Voice
                         {
                             Name = dbVoice.Name,
@@ -1055,7 +1057,7 @@ namespace CMGWpf.View
 
                     OnPropertyChanged(nameof(StochasticGenerator));
                     OnPropertyChanged(nameof(stochasticComposition));
-                    Messages.Clear(); Messages.Add(new Message { Text = $"Ensemble {ensemble.Name} read with {StochasticGenerator.Voices.Count} voices.", Error = false });
+                    Messages.Clear(); Messages.Add(new Message { Text = $"Ensemble {ensemble.Name} read with {StochasticGenerator.Ensemble.Voices.Count} voices.", Error = false });
                 }
             }
             catch (Exception ex)
@@ -1067,9 +1069,9 @@ namespace CMGWpf.View
 
         private void SubscribeToVoices()
         {
-            if (StochasticGenerator?.Voices != null)
+            if (StochasticGenerator?.Ensemble?.Voices != null)
             {
-                foreach (var voice in StochasticGenerator.Voices)
+                foreach (var voice in StochasticGenerator.Ensemble.Voices)
                 {
                     voice.PropertyChanged += Voice_PropertyChanged;
                 }
@@ -1078,9 +1080,9 @@ namespace CMGWpf.View
 
         private void UnsubscribeFromVoices()
         {
-            if (StochasticGenerator?.Voices != null)
+            if (StochasticGenerator?.Ensemble?.Voices != null)
             {
-                foreach (var voice in StochasticGenerator.Voices)
+                foreach (var voice in StochasticGenerator.Ensemble.Voices)
                 {
                     voice.PropertyChanged -= Voice_PropertyChanged;
                 }
@@ -1167,7 +1169,7 @@ namespace CMGWpf.View
         private ObservableCollection<StochasticCompositionRow> stochasticComposition = [];
         public ObservableCollection<StochasticCompositionRow> StochasticComposition
         {
-            // This property is used to display the stochastic composition in the stochastic generator dialog. It converts the 2D array of values in the stochastic generator composition into a collection of rows, where each row represents a time step and contains the values for each unmuted voice at that time step, as well as the sum of those values for that time step. This allows for easy data binding to a grid in the UI to display the composition in a readable format.
+            // This property is used to display the stochastic composition in the stochastic generator dialog. It converts the 2D array of values in the stochastic generator composition into a collection of rows, where each row represents a time step and contains the values for each not muted voice at that time step, as well as the sum of those values for that time step. This allows for easy data binding to a grid in the UI to display the composition in a readable format.
             get
             {
                 if (StochasticGenerator == null) return [];
@@ -1181,7 +1183,7 @@ namespace CMGWpf.View
                     int sum = 0;
                     for (int j = 0; j < StochasticGenerator.Composition[i].Length; j++)
                     {
-                        if (StochasticGenerator.Voices[j].Muted) continue;
+                        if (StochasticGenerator.Ensemble.Voices[j].Muted) continue;
                         values.Add(StochasticGenerator.Composition[i][j]);
                         sum += StochasticGenerator.Composition[i][j];
                     }
@@ -1200,7 +1202,7 @@ namespace CMGWpf.View
                 OnPropertyChanged();
             }
         }
-        // reload the voices for the currently selected ensemble from the database and update the stochastic generator with the new voices. This is to ensure that if the user changes the voices in an ensemble in the database while the stochastic generator dialog is open, the stochastic generator is updated in real time with the new voices for the currently selected ensemble. If a significant change has been made to the voices (like the number of them, then invalidate the composition since it may no longer be compatible with the new voices.
+        // reload the voices for the currently selected ensemble from the database and update the stochastic generator with the new voices. this is to ensure that if the user changes the voices in an ensemble in the database while the stochastic generator dialog is open, the stochastic generator is updated in real time with the new voices for the currently selected ensemble. If a significant change has been made to the voices (like the number of them, then invalidate the composition since it may no longer be compatible with the new voices.
         private RelayCommand<Stochastic>? _reloadVoices;
         public RelayCommand<Stochastic> ReloadVoices =>
             _reloadVoices ??= new RelayCommand<Stochastic>(generator =>
@@ -1225,7 +1227,7 @@ namespace CMGWpf.View
 
                 // Unsubscribe from old voices
                 UnsubscribeFromVoices();
-                StochasticGenerator.Voices.Clear();
+                StochasticGenerator.Ensemble.Voices.Clear();
                 var ensemble = await EnsembleHelpers.Get(g.Ensemble.Name);
                 if (ensemble == null) return;
                 var dBVoices = ensemble.Voices;
@@ -1236,25 +1238,28 @@ namespace CMGWpf.View
                 foreach (var dbVoice in dBVoices)
                 {
                     var soundFont = SoundFontUtilities.GetSoundFont(dbVoice.SoundFontFile);
-                    var preset = SoundFontUtilities.GetPreset(dbVoice.SoundFontFile, dbVoice.PresetName);
-                    Model.Voice voice = new Model.Voice
+                    if (soundFont != null)
                     {
-                        Name = dbVoice.Name,
-                        Description = dbVoice.Description,
-                        SoundFontFileName = dbVoice.SoundFontFile,
-                        PresetName = dbVoice.PresetName,
-                        Preset = preset,
-                        Timbre = dbVoice.Timbre,
-                        RegisterLo = dbVoice.RegisterLo,
-                        RegisterHi = dbVoice.RegisterHi,
-                        Duration = dbVoice.Duration,
-                        SoundFont = SoundFontUtilities.GetSoundFont(dbVoice.SoundFontFile),
-                        Muted = false,
-                        Volume = 0,
-                        Velocity = 63,
-                        Delta = 2,
-                    };
-                    StochasticGenerator.Voices.Add(voice);
+                        var preset = SoundFontUtilities.GetPreset(dbVoice.SoundFontFile, dbVoice.PresetName);
+                        Model.Voice voice = new Model.Voice
+                        {
+                            Name = dbVoice.Name,
+                            Description = dbVoice.Description,
+                            SoundFontFileName = dbVoice.SoundFontFile,
+                            PresetName = dbVoice.PresetName,
+                            Preset = preset,
+                            Timbre = dbVoice.Timbre,
+                            RegisterLo = dbVoice.RegisterLo,
+                            RegisterHi = dbVoice.RegisterHi,
+                            Duration = dbVoice.Duration,
+                            SoundFont = SoundFontUtilities.GetSoundFont(dbVoice.SoundFontFile),
+                            Muted = false,
+                            Volume = 0,
+                            Velocity = 63,
+                            Delta = 2,
+                        };
+                        StochasticGenerator.Ensemble.Voices.Add(voice);
+                    }
                 }
 
                 // Subscribe to new voices
@@ -1265,6 +1270,55 @@ namespace CMGWpf.View
             catch (Exception ex)
             {
                 Messages.Clear(); Messages.Add(new Message { Text = $"Error reloading voices: {ex.Message}", Error = true });
+            }
+        }
+        // update the voices for the currently selected ensemble back to the database after changes have been made.
+        private RelayCommand<Stochastic>? _updateVoices;
+        public RelayCommand<Stochastic> UpdateVoices =>
+            _updateVoices ??= new RelayCommand<Stochastic>(generator =>
+            {
+                if (generator is Stochastic g)
+                {
+                    if (g.Ensemble.Name == string.Empty)
+                    {
+                        Messages.Clear(); Messages.Add(new Message { Text = "Error: No ensemble selected.", Error = true });
+                        return;
+                    }
+                    _ = UpdateVoicesAsync();
+                }
+            });
+
+        private async Task UpdateVoicesAsync()
+        {
+            try
+            {
+                if (StochasticGenerator == null) return;
+                Stochastic g = StochasticGenerator;
+
+                // Save the voices to the database
+                var dbEnsemble = await EnsembleHelpers.Get(g.Ensemble.Name);
+                if (dbEnsemble == null) return;
+                dbEnsemble.Voices.Clear();
+                foreach (var voice in g.Ensemble.Voices)
+                {
+                    var dbVoice = new Model.Database.Voice() {
+                        Name = voice.Name,
+                        Description = voice.Description,
+                        SoundFontFile = voice.SoundFontFileName,
+                        PresetName = voice.PresetName,
+                        Timbre = voice.Timbre,
+                        RegisterLo = (float)voice.RegisterLo,
+                        RegisterHi = (float)voice.RegisterHi,
+                        Duration = (float)voice.Duration
+                    };
+                    dbEnsemble.Voices.Add(dbVoice);
+                }
+                await EnsembleHelpers.Modify(dbEnsemble, dbEnsemble.Name);
+                Messages.Add(new Message() { Text = $"Voices for ensemble {g.Ensemble.Name} updated in database.", Error = false });
+            }
+            catch (Exception ex)
+            {
+                Messages.Clear(); Messages.Add(new Message { Text = $"Error updating voices: {ex.Message}", Error = true });
             }
         }
 
@@ -1282,7 +1336,7 @@ namespace CMGWpf.View
                     {
                         messages.Add(new Message { Text = "Error: No ensemble selected.", Error = true });
                     }
-                    if (g.Voices == null || g.Voices.Count == 0)
+                    if (g.Ensemble.Voices == null || g.Ensemble.Voices.Count == 0)
                     {
                         messages.Add(new Message { Text = "Error: No voices in ensemble.", Error = true });
                     }
@@ -1357,14 +1411,14 @@ namespace CMGWpf.View
                     if (ChordSequencerGenerator.SoundFont != null)
                     {
                         ChordSequencerPresetNames = new ObservableCollection<string>(ChordSequencerGenerator.SoundFont.PresetArray.Select(preset => SoundFontUtilities.BankPresetToName(preset)).OrderBy(name => name));
-                        ChordSequencerPresets = new ObservableCollection<Preset>(ChordSequencerGenerator.SoundFont.Presets);
+                        ChordSequencerPresets = new ObservableCollection<SoundFont_2.Preset>(ChordSequencerGenerator.SoundFont.Presets);
                     }
                 }
                 return chordSequencerSoundFontFileName;
             }
             set
             {
-                SoundFont? SoundFont = SoundFontUtilities.GetSoundFont(value);
+                SoundFont_2.SoundFont? SoundFont = SoundFontUtilities.GetSoundFont(value);
                 if (SoundFont == null)
                 {
                     Messages.Clear(); Messages.Add(new Message { Text = $"Error loading SoundFont: {value}", Error = true });
@@ -1382,8 +1436,8 @@ namespace CMGWpf.View
                 ChordSequencerGenerator.SoundFontFileName = value;
                 OnPropertyChanged(nameof(ChordSequencerGenerator));
 
-                // get the presets for this soundFont and sort them in name order for the preset dropdown
-                ChordSequencerPresets = new ObservableCollection<Preset>(SoundFont.Presets);
+                // get the presets for this soundFont and sort them in name order for the preset drop down
+                ChordSequencerPresets = new ObservableCollection<SoundFont_2.Preset>(SoundFont.Presets.ToList());
                 ChordSequencerPresetNames = new ObservableCollection<string>(ChordSequencerPresets.Select(preset => SoundFontUtilities.BankPresetToName(preset)).OrderBy(name => name));
                 OnPropertyChanged(nameof(ChordSequencerPresets));
                 OnPropertyChanged(nameof(ChordSequencerPresetNames));
@@ -1392,8 +1446,8 @@ namespace CMGWpf.View
 
             }
         }
-        private ObservableCollection<Preset> chordSequencerPresets = [];
-        public ObservableCollection<Preset> ChordSequencerPresets
+        private ObservableCollection<SoundFont_2.Preset> chordSequencerPresets = [];
+        public ObservableCollection<SoundFont_2.Preset> ChordSequencerPresets
         {
             get { return chordSequencerPresets; }
             set { chordSequencerPresets = value; OnPropertyChanged(); }
@@ -1407,7 +1461,7 @@ namespace CMGWpf.View
             {
                 if (ChordSequencerGenerator != null && ChordSequencerGenerator.SoundFont != null)
                 {
-                    chordSequencerPresetNames = new ObservableCollection<string>(ChordSequencerGenerator.SoundFont.Presets.Select(preset => SoundFontUtilities.BankPresetToName(preset)).OrderBy(name => name));
+                    chordSequencerPresetNames = new ObservableCollection<string>(ChordSequencerGenerator.SoundFont.Presets.ToList().Select(preset => SoundFontUtilities.BankPresetToName(preset)).OrderBy(name => name));
                 }
                 return chordSequencerPresetNames;
             }
@@ -1430,7 +1484,7 @@ namespace CMGWpf.View
                 chordSequencerPresetName = value;
                 OnPropertyChanged();
                 // update the algorithmic generator with the new preset
-                Preset? preset = ChordSequencerPresets.FirstOrDefault(p => SoundFontUtilities.BankPresetToName(p) == value);
+                SoundFont_2.Preset? preset = ChordSequencerPresets.FirstOrDefault(p => SoundFontUtilities.BankPresetToName(p) == value);
                 if (preset != null && ChordSequencerGenerator != null)
                 {
                     ChordSequencerGenerator.Preset = preset;
@@ -1604,7 +1658,7 @@ namespace CMGWpf.View
 
             /// <summary>
             /// Gets the list of algorithm types available for this attribute.
-            /// Sequence is only available for the Note attribute.
+            /// Sequence is only available for the Note (pitch) attribute
             /// </summary>
             public ObservableCollection<ALGORITHMTYPE> AvailableAlgorithmTypes
             {

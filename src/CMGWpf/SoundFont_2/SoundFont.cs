@@ -145,24 +145,25 @@ namespace CMGWpf.SoundFont_2
                     {
                         throw new InvalidDataException($"The start position of the sample '{region.Sample.Name}' in the instrument '{instrument.Name}' is out of range.");
                     }
-                    if (!(0 <= region.SampleStartLoop && region.SampleStartLoop < sampleCount))
-                    {
-                        throw new InvalidDataException($"The loop start position of the sample '{region.Sample.Name}' in the instrument '{instrument.Name}' is out of range.");
-                    }
                     if (!(0 < region.SampleEnd && region.SampleEnd <= sampleCount))
                     {
                         throw new InvalidDataException($"The end position of the sample '{region.Sample.Name}' in the instrument '{instrument.Name}' is out of range.");
-                    }
-                    if (!(0 <= region.SampleEndLoop && region.SampleEndLoop <= sampleCount))
-                    {
-                        throw new InvalidDataException($"The loop end position of the sample '{region.Sample.Name}' in the instrument '{instrument.Name}' is out of range.");
                     }
 
                     switch (region.SampleModes)
                     {
                         case LoopMode.NoLoop:
+                            break;
                         case LoopMode.Continuous:
                         case LoopMode.LoopUntilNoteOff:
+                            if (!(0 <= region.SampleStartLoop && region.SampleStartLoop < sampleCount))
+                            {
+                                throw new InvalidDataException($"The loop start position of the sample '{region.Sample.Name}' in the instrument '{instrument.Name}' is out of range.");
+                            }
+                            if (!(0 <= region.SampleEndLoop && region.SampleEndLoop <= sampleCount))
+                            {
+                                throw new InvalidDataException($"The loop end position of the sample '{region.Sample.Name}' in the instrument '{instrument.Name}' is out of range.");
+                            }
                             break;
                         default:
                             throw new InvalidDataException($"The sample '{region.Sample.Name}' in the instrument '{instrument.Name}' has an invalid loop mode.");
